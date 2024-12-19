@@ -1,4 +1,4 @@
-# prospecitve-randomizer
+# prospective-randomizer
 Java server that assigns subject to matched experimental groups
 
 Experimental science seeks to infer causality by isolating the effect of an intervention,
