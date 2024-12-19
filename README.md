@@ -38,17 +38,20 @@ stage).
 The existance of these _bad_ experimental designs demonstrate that it is easy to do _worse_ than
 randomization in making groups similar and isolating intervention effects. But can we do _better_?
 
-The law of large numbers dictates that with sufficiently large group sizes, the mean of each group
-(on any possible feature) will approach the population mean, thus ensuring that groups will be similar.
-However, many studies in fields such as psychology, education, circadian biology, etc. suffer the triple
+The law of large numbers dictates that with sufficiently large group sizes, the mean (of whatever feature)
+of a randomly selected group
+will approach the population mean, thus ensuring that all randomly selected groups will be similar.
+In an ideal world all studies would have large N; however this ideal may be out of reach.
+Many studies in fields such as psychology, education, circadian biology, etc. suffer the triple
 challenges of stingier funding, more intensive research protocols per subject, and higher variance in
+both features and
 outcome measures. Economics have hampered researchers' ability to run large-N studies even when they have
-the patience and motivation to want to. At smaller N, sampling error becomes a large problem:
+the patience and motivation to want to. At smaller N, sampling error becomes a large problem.
 [math and numbers here]
 
-Sampling error is (relationship to) the variance in the population. Classically variance has been
+Sampling error is [relationship to] the variance in the population. Classically variance has been
 minimized by selecting subjects from a small population&mdash;only selecting students between 18 and 22 at
-_this_ university, for example. However, universities have become increasingly accessible to more
+a specific university, for example. However, universities have become increasingly accessible to more
 diverse backgrounds, and granting agencies have noticed and taken a dim view of studies only on narrow
 privileged populations, such as the all-male all-white elite university student cohort. Given the resource
 constraints on many studies and the desire to have broadly-applicable results, many studies apply very few
