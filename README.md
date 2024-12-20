@@ -127,6 +127,8 @@ only good if the specified group sizes are equal or nearly equal.
 The algorithm has been wrapped in two different network protocols. The original, simple interface is over
 a simple TCP/IP socket. All configuration must be done by manually editing the groups.txt and variables.xml
 files. Client task processes open a socket connection and issue simple one-letter commands to the server.
+The same executable offers command-line interaction, so that researchers may interact with the algorithm
+manually.
 
 A more modern approach is taken by the Spring Boot wrapper. This allows client tasks to communicate with the
 server using the HTTP protocol.

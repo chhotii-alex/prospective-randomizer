@@ -130,6 +130,7 @@ public class RandomizerServer {
 		SubjectFileDatabase database = new SubjectFileDatabase(subjectFile);
 		VariableSet variables = new VariableSet(variablesSpec);
 		Randomizer randomizer;
+		CommandInterface commander;
 		if (balancing) {
 			randomizer = new BalancingRandomizer(groupListFile, variables, database, listening, allowRevision);
 		}
@@ -137,6 +138,7 @@ public class RandomizerServer {
 			randomizer = new AlternatingRandomizer(groupListFile, variables, database, listening, allowRevision);
 		}
 		randomizer.setVerbosity(verbosity);
+		commander = new CommandInterface(randomizer);
 		
 		if (guiMode) {
 			
@@ -165,14 +167,14 @@ public class RandomizerServer {
 				if (verbosity >= 0) {
 					System.out.println("Created listener socket.");
 				}
-				ServerThread thread = new ServerThread(serverSocket, randomizer, listening, commandLineMode, verbosity);
+				ServerThread thread = new ServerThread(serverSocket, commander, listening, commandLineMode, verbosity);
 				thread.start();
 			}
 			if (commandLineMode) {
 				BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 				while (listening.getFlagValue()) {
 					String input = br.readLine();
-					String reply = randomizer.parseCommand(input);
+					String reply = commander.parseCommand(input);
 					System.out.println(reply);
 				}
 				if (serverSocket != null) {
@@ -189,16 +191,16 @@ public class RandomizerServer {
 	
 	private class ServerThread extends Thread {
 		StillGoingFlag listening;
-		Randomizer randomizer;
+	    CommandInterface commander;
 		ServerSocket serverSocket;
 		boolean isCommandLinePresent; 
 		int verbosity;
 		
-		public ServerThread(ServerSocket serverSocket, Randomizer randomizer, StillGoingFlag flag, boolean isCommandLinePresent, 
+		public ServerThread(ServerSocket serverSocket,  CommandInterface commander, StillGoingFlag flag, boolean isCommandLinePresent, 
 				int verbosity) {
 			this.serverSocket = serverSocket;
 			this.listening = flag;
-			this.randomizer = randomizer;
+			this.commander = commander;
 			this.isCommandLinePresent = isCommandLinePresent;
 			this.verbosity = verbosity;
 		}
@@ -212,7 +214,7 @@ public class RandomizerServer {
 						System.out.println("Just before waiting for next accept...");
 					}
 					listeningSocket = serverSocket.accept();
-					new ListeningSocketThread(listeningSocket, randomizer, verbosity).start();
+					new ListeningSocketThread(listeningSocket, commander, verbosity).start();
 				} catch (SocketException e) {
 					socketWasClosed = true;
 				} catch (IOException e) {
@@ -236,12 +238,12 @@ public class RandomizerServer {
 	
 	private class ListeningSocketThread extends Thread {
 		Socket socket;
-		Randomizer randomizer;
+	    CommandInterface commander;
 		int verbosity;
 		public ListeningSocketThread(Socket socket,
-				Randomizer randomizer, int verbosity) {
+				CommandInterface commander, int verbosity) {
 			this.socket = socket;
-			this.randomizer = randomizer;
+			this.commander = commander;
 			this.verbosity = verbosity;
 		}
 		public void run() {
@@ -256,7 +258,7 @@ public class RandomizerServer {
 					if (verbosity >= 0) {
 						System.out.println("Server received: " + inputLine);
 					}
-					String reply = randomizer.parseCommand(inputLine);
+					String reply = commander.parseCommand(inputLine);
 					out.println(reply);
 					if (verbosity >= 0) {
 						System.out.println("dealt with one message");
