@@ -1,4 +1,4 @@
-package org.sleepandcognition;
+package org.sleepandcognition.prosrand;
 
 public class StillGoingFlag {
 	private boolean flag;

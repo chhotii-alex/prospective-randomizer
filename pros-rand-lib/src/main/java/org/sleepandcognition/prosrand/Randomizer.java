@@ -1,4 +1,4 @@
-package org.sleepandcognition;
+package org.sleepandcognition.prosrand;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,59 +48,59 @@ public abstract class Randomizer {
     }
 
     protected synchronized boolean isCommitted(String sID) {
-	return checkID(sID) && subjectsByID.get(sID).isCommitted;
+    return checkID(sID) && subjectsByID.get(sID).isCommitted;
     }
 
     protected synchronized boolean isRemovable(String subjectID) {
-	return checkID(subjectID) && !(subjectsByID.get(subjectID).isCommitted);
+    return checkID(subjectID) && !(subjectsByID.get(subjectID).isCommitted);
     }
 
-    protected synchronized String putOrPlaceSubject(String subjectID, Hashtable<String, String> values, boolean putFlag) {
-	if (allowRevision) {
-	    if (isRemovable(subjectID)) {
-		removeSubject(subjectID);
-	    }
-	}
-	MultiDimSubject subject = new MultiDimSubject(subjectID);
-	for (Enumeration<String> e = values.keys(); e.hasMoreElements(); ) {
-	    String key = e.nextElement();
-	    String value = values.get(key);
-	    if (value.length() < 1) {
-		if (!variables.isMultiDimensional()) {
-		    throw new WTFException();
-		}
-		subject.addCharacteristics(variables.valuesFromKeyValuePair(null, key));
-	    }
-	    else {
-		subject.addCharacteristics(variables.valuesFromKeyValuePair(key, value));
-	    }
-	}
-	if (!variables.hasAllVariablesSet(subject.baselineCharacteristics)) {
-	    throw new WTFException("Missing data");
-	}
-	if (addNewSubject(subject)) {
-	    if (putFlag) {
-		return null;
-	    }
-	    else {
-		String groupID = getGroup(subjectID);
-		return groupID;
-	    }
-	}
-	else {
-	    throw new WTFException("duplicate subject?");
-	}
+    protected synchronized String putOrPlaceSubject(String subjectID, Hashtable<String, String> values, boolean putFlag) throws IOException {
+    if (allowRevision) {
+        if (isRemovable(subjectID)) {
+        removeSubject(subjectID);
+        }
+    }
+    MultiDimSubject subject = new MultiDimSubject(subjectID);
+    for (Enumeration<String> e = values.keys(); e.hasMoreElements(); ) {
+        String key = e.nextElement();
+        String value = values.get(key);
+        if (value.length() < 1) {
+        if (!variables.isMultiDimensional()) {
+            throw new InvalidDataException("no value for key");
+        }
+        subject.addCharacteristics(variables.valuesFromKeyValuePair(null, key));
+        }
+        else {
+        subject.addCharacteristics(variables.valuesFromKeyValuePair(key, value));
+        }
+    }
+    if (!variables.hasAllVariablesSet(subject.baselineCharacteristics)) {
+        throw new InvalidDataException("Missing data");
+    }
+    if (addNewSubject(subject)) {
+        if (putFlag) {
+            return null;
+        }
+        else {
+            String groupID = getGroup(subjectID);
+            return groupID;
+        }
+    }
+    else {
+        throw new InvalidDataException("duplicate subject?");
+    }
     }
 
-    protected synchronized void putSubject(String subjectID, Hashtable<String, String> values) {
-	putOrPlaceSubject(subjectID, true);
+    protected synchronized void putSubject(String subjectID, Hashtable<String, String> values) throws IOException {
+        putOrPlaceSubject(subjectID, values, true);
     }
 
-    protected synchronized void placeSubject(String subjectID, Hashtable<String, String> values) {
-	putOrPlaceSubject(subjectID, false);
+    protected synchronized void placeSubject(String subjectID, Hashtable<String, String> values) throws IOException {
+        putOrPlaceSubject(subjectID, values, false);
     }
 
-    protected synchronized boolean addSubject(MultiDimSubject subject) {
+    protected synchronized boolean addSubject(MultiDimSubject subject) throws IOException {
         if (subjectsByID.containsKey(subject.identifier)) {
             System.out.println("WARNING, there was an attempt to add duplicate subject ID " + subject.identifier);
             return false;

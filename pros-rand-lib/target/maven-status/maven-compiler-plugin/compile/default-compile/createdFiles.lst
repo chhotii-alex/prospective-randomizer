@@ -1,0 +1,15 @@
+org/sleepandcognition/prosrand/VariableSet$ContinuousVariableSetterGetter.class
+org/sleepandcognition/prosrand/VariableSet$CatagoricalVariableSetterGetter$CatagoricalVariableOption.class
+org/sleepandcognition/prosrand/SubjectDatabase.class
+org/sleepandcognition/prosrand/Randomizer.class
+org/sleepandcognition/prosrand/MeanVectorCalculator.class
+org/sleepandcognition/prosrand/InterventionGroup.class
+org/sleepandcognition/prosrand/AlternatingRandomizer.class
+org/sleepandcognition/prosrand/InvalidDataException.class
+org/sleepandcognition/prosrand/VariableSet.class
+org/sleepandcognition/prosrand/MeanVectorCalculator$MeanCalculator.class
+org/sleepandcognition/prosrand/StillGoingFlag.class
+org/sleepandcognition/prosrand/MultiDimSubject.class
+org/sleepandcognition/prosrand/VariableSet$VariableSetterGetter.class
+org/sleepandcognition/prosrand/App.class
+org/sleepandcognition/prosrand/VariableSet$CatagoricalVariableSetterGetter.class

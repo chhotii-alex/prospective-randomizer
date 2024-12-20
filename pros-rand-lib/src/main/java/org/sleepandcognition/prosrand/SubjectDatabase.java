@@ -1,4 +1,4 @@
-package org.sleepandcognition;
+package org.sleepandcognition.prosrand;
 
 import java.io.IOException;
 import java.util.ArrayList;
