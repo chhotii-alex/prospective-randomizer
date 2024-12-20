@@ -5,9 +5,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
-
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.xml.sax.SAXException;
 
 public abstract class Randomizer {
@@ -24,8 +22,13 @@ public abstract class Randomizer {
         return 5;
     }
 
-    public Randomizer(String groupListFile, VariableSet variables, 
-            SubjectDatabase db, StillGoingFlag listening, boolean allowRevision) throws SAXException, IOException, ParserConfigurationException {
+    public Randomizer(
+            String groupListFile,
+            VariableSet variables,
+            SubjectDatabase db,
+            StillGoingFlag listening,
+            boolean allowRevision)
+            throws SAXException, IOException, ParserConfigurationException {
         this.allowRevision = allowRevision;
         database = db;
         this.variables = variables;
@@ -40,56 +43,54 @@ public abstract class Randomizer {
     }
 
     protected synchronized void quit() {
-       controllersOffSwitch.clearFlag();
+        controllersOffSwitch.clearFlag();
     }
-    
+
     protected synchronized boolean checkID(String string) {
         return subjectsByID.containsKey(string);
     }
 
     protected synchronized boolean isCommitted(String sID) {
-    return checkID(sID) && subjectsByID.get(sID).isCommitted;
+        return checkID(sID) && subjectsByID.get(sID).isCommitted;
     }
 
     protected synchronized boolean isRemovable(String subjectID) {
-    return checkID(subjectID) && !(subjectsByID.get(subjectID).isCommitted);
+        return checkID(subjectID) && !(subjectsByID.get(subjectID).isCommitted);
     }
 
-    protected synchronized String putOrPlaceSubject(String subjectID, Hashtable<String, String> values, boolean putFlag) throws IOException {
-    if (allowRevision) {
-        if (isRemovable(subjectID)) {
-        removeSubject(subjectID);
+    protected synchronized String putOrPlaceSubject(String subjectID, Hashtable<String, String> values, boolean putFlag)
+            throws IOException {
+        if (allowRevision) {
+            if (isRemovable(subjectID)) {
+                removeSubject(subjectID);
+            }
         }
-    }
-    MultiDimSubject subject = new MultiDimSubject(subjectID);
-    for (Enumeration<String> e = values.keys(); e.hasMoreElements(); ) {
-        String key = e.nextElement();
-        String value = values.get(key);
-        if (value.length() < 1) {
-        if (!variables.isMultiDimensional()) {
-            throw new InvalidDataException("no value for key");
+        MultiDimSubject subject = new MultiDimSubject(subjectID);
+        for (Enumeration<String> e = values.keys(); e.hasMoreElements(); ) {
+            String key = e.nextElement();
+            String value = values.get(key);
+            if (value.length() < 1) {
+                if (!variables.isMultiDimensional()) {
+                    throw new InvalidDataException("no value for key");
+                }
+                subject.addCharacteristics(variables.valuesFromKeyValuePair(null, key));
+            } else {
+                subject.addCharacteristics(variables.valuesFromKeyValuePair(key, value));
+            }
         }
-        subject.addCharacteristics(variables.valuesFromKeyValuePair(null, key));
+        if (!variables.hasAllVariablesSet(subject.baselineCharacteristics)) {
+            throw new InvalidDataException("Missing data");
         }
-        else {
-        subject.addCharacteristics(variables.valuesFromKeyValuePair(key, value));
+        if (addNewSubject(subject)) {
+            if (putFlag) {
+                return null;
+            } else {
+                String groupID = getGroup(subjectID);
+                return groupID;
+            }
+        } else {
+            throw new InvalidDataException("duplicate subject?");
         }
-    }
-    if (!variables.hasAllVariablesSet(subject.baselineCharacteristics)) {
-        throw new InvalidDataException("Missing data");
-    }
-    if (addNewSubject(subject)) {
-        if (putFlag) {
-            return null;
-        }
-        else {
-            String groupID = getGroup(subjectID);
-            return groupID;
-        }
-    }
-    else {
-        throw new InvalidDataException("duplicate subject?");
-    }
     }
 
     protected synchronized void putSubject(String subjectID, Hashtable<String, String> values) throws IOException {
@@ -117,7 +118,7 @@ public abstract class Randomizer {
         database.WriteOutSubjects(subjectsByID, variables);
         return result;
     }
-    
+
     protected synchronized String getGroup(String subjectID) throws IOException {
         if (subjectsByID.containsKey(subjectID)) {
             MultiDimSubject subject = subjectsByID.get(subjectID);
@@ -139,16 +140,14 @@ public abstract class Randomizer {
                 }
             }
             return subject.myGroup.name;
-        }
-        else {
+        } else {
             return null;
         }
     }
 
     protected abstract void assignAnySubjectAGroup();
 
-    protected synchronized void assignSubjectToGroup(InterventionGroup aGroup,
-            MultiDimSubject multiDimSubject) {
+    protected synchronized void assignSubjectToGroup(InterventionGroup aGroup, MultiDimSubject multiDimSubject) {
         aGroup.addSubject(multiDimSubject);
         unassignedSubjects.remove(multiDimSubject);
         if (verbosity >= 0) {
@@ -167,7 +166,7 @@ public abstract class Randomizer {
             group.printSubjectReport();
         }
     }
-    
+
     public synchronized double maxDistanceBetweenGroups() {
         double max = 0.0;
         for (Enumeration<String> it1 = groups.keys(); it1.hasMoreElements(); ) {
@@ -180,8 +179,9 @@ public abstract class Randomizer {
                     double sum = 0.0;
                     for (Enumeration<String> e = meanVector2.keys(); e.hasMoreElements(); ) {
                         String dimKey = e.nextElement();
-                        double diff = meanVector1.get(dimKey).doubleValue()-meanVector2.get(dimKey).doubleValue();
-                        sum += diff*diff;
+                        double diff = meanVector1.get(dimKey).doubleValue()
+                                - meanVector2.get(dimKey).doubleValue();
+                        sum += diff * diff;
                     } // END for each dimension
                     double dist = Math.sqrt(sum);
                     if (dist > max) {
@@ -198,8 +198,7 @@ public abstract class Randomizer {
             subjectsByID.get(subjectID).isCommitted = true;
             database.WriteOutSubjects(subjectsByID, variables);
             return true;
-        }
-        else {
+        } else {
             return false;
         }
     }
