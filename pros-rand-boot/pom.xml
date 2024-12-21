@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.sleepandcognition</groupId>
-	<artifactId>pros_rand</artifactId>
+	<artifactId>pros-rand-boot</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>pros_rand</name>
+	<name>pros-rand-boot</name>
 	<description>Server implementing Prospective Randomization</description>
 	<url/>
 	<licenses>

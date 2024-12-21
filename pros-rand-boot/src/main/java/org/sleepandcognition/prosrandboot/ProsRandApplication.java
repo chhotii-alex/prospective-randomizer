@@ -1,4 +1,4 @@
-package org.sleepandcognition.pros_rand;
+package org.sleepandcognition.prosrandboot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

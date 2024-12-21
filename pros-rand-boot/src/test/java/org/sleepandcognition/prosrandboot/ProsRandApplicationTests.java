@@ -1,4 +1,4 @@
-package org.sleepandcognition.pros_rand;
+package org.sleepandcognition.prosrandboot;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
