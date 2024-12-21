@@ -120,7 +120,13 @@ covertly, and within milliseconds of the calculation of the pre-intervention fea
 
 We have written a Java implementation of the described algorithm. Setup requires identifying a computer that
 can run a Java server and be connected to via TCP/IP; this can be deployed in the cloud for multi-site
-studies, but may more cheaply be run on a local workstation. Configuration requires specifying what
+studies, but may more cheaply be run on a local workstation. A number of other issues would have to be addressed
+before rolling out a cloud deployment:
+* This implementation does not include any authentication mechanism and thus would have to be wrapped in an authentication layer (note, an on-campus deployment without adding an authentication layer is essentially "security through obscurity".)
+* Configuration of groups and variables, and records of subjects, are stored in local text files, rather than a real database, making these data more challenging to share across virtual hosts.
+* Care has to be taken that if subject identifiers can be linked to individuals that any leakage of data would not be a violation of subject privacy.
+  
+Configuration requires specifying what
 the groups are and what features are to be equalized across these groups. The algorithm's performance is
 only good if the specified group sizes are equal or nearly equal.
 
