@@ -139,6 +139,38 @@ manually.
 A more modern approach is taken by the Spring Boot wrapper. This allows client tasks to communicate with the
 server using the HTTP protocol.
 
+### Compiling and Running
+
+To obtain the project, install `git`, and execute this command:
+`git clone https://github.com/chhotii-alex/prospective-randomizer.git`
+
+Also install:
+* Java Development Kit (jdk) version 17.0 or above
+* Apache maven
+
+To build the command-line or simple socket implementation, enter these commands in your Terminal,
+shell, or PowerShell:
+
+```
+cd prospective-randomizer
+cd pros-rand-lib
+mvn package
+```
+
+Then it can be run with a command like this:
+`java -cp target/pros-rand-lib-1.0-SNAPSHOT.jar org.sleepandcognition.prosrand.RandomizerServer -g ../groups.txt -r ../variables.xml`
+
+To build the Spring Boot version which uses the HTTP protocol, enter the commands:
+```
+cd prospective-randomizer
+mvn install
+```
+
+It can then be started using this command:
+```
+mvn spring-boot:run -pl pros-rand-boot
+```
+
 Example code that demonstrates use of each networking protocol [here] [describe]
 
 ### Simple socket interface/ command line reference
