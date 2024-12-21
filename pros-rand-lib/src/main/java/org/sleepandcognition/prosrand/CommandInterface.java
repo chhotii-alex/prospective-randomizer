@@ -17,7 +17,7 @@ public class CommandInterface {
     public String parseCommand(String inputLine) throws IOException {
         if (inputLine.equalsIgnoreCase("HELLO RAND!")) {
             return String.format("HI CLIENT! v%d", Randomizer.RandomizerCommVersion());
-        } else if (inputLine.startsWith("QUIT")) {
+        } else if (inputLine.equalsIgnoreCase("QUIT")) {
             randomizer.quit();
             return "OK";
         } else if (inputLine.startsWith("#")) {
@@ -49,20 +49,22 @@ public class CommandInterface {
                     } else if (tokens.length == 1) {
                         values.put(tokens[0], "");
                     } else {
-                        System.out.println("Corrupt PUT line? " + inputLine);
+                        System.err.println("Corrupt PUT line? " + inputLine);
                         return "?";
                     }
                 }
                 if (wordsOnLine[0].equalsIgnoreCase("PUT")) {
                     randomizer.putSubject(subjectID, values);
+                    return "OK";
                 } else {
                     randomizer.placeSubject(subjectID, values);
+                    return randomizer.getGroup(subjectID);
                 }
             } else if (wordsOnLine[0].equalsIgnoreCase("GET")) {
                 String subjectID = wordsOnLine[1];
                 String groupID = randomizer.getGroup(subjectID);
                 if (groupID == null) {
-                    System.out.println("ERROR: client asked for a subject we know nothing about.");
+                    System.err.println("ERROR: client asked for a subject we know nothing about.");
                     return "?";
                 } else {
                     return groupID;

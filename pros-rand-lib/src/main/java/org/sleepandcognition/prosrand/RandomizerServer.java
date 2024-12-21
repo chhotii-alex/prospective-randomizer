@@ -184,8 +184,8 @@ public class RandomizerServer {
     }
 
     private static void printUsageSummary() {
-        // TODO Auto-generated method stub
-
+        System.out.println("Usage:");
+        System.exit(0);
     }
 
     private class ServerThread extends Thread {
