@@ -135,6 +135,134 @@ server using the HTTP protocol.
 
 Example code that demonstrates use of each networking protocol [here] [describe]
 
+### Simple socket interface/ command line reference
+
+Here are the commands that can be entered if Prospective Randomizer is running a command-line interface in a terminal window, or submitted via the socket connection if running in network mode. Commands are not case-sensitive. However, subject identifier are case sensitive; s1 and S1 would be regarded as different subjects. Any command starting with # is simply echoed, and has no effect.
+
+HELLO RAND! 
+Program responds "HI CLIENT!" Followed by a version identifier.
+
+PUT 
+PUT must be followed by the subject ID, then each of the variables with their values. For example:
+PUT S1 score=4.5 sex=F
+Variable name and value must be joined with just an equal sign, no spaces in between.
+There must be exactly one space before the subject ID, and before each variable name.
+This command tells prospective randomizer that this subject exists, with the given variable values, but does not immediately trigger the addition of the subject to a group. Thus, PR has the opportunity to gain more information about other subjects before adding this one to a group, which may affect the subject's group assignment.
+Program responds with "OK".
+
+GET
+GET followed by a subject ID (one space between the word GET and the subject ID) triggers the assignment of the subject to a group, if not already assigned.
+Program responds with the name of the group this subject was assigned to.
+
+PLACE
+Like PUT (see PUT command for syntax), immediately followed by GET.
+Program responds with the name of the group this subject was assigned to.
+
+ASSIGN
+Triggers assignment of all known subjects to groups if they haven't already.
+Program responds with "OK".
+
+Sample session transcript:
+```
+alex@dandelion pros-rand-lib % java -cp server.jar org.sleepandcognition.prosrand.RandomizerServer -g ../groups.txt -r ../variables.xml -c
+hello rand!
+HI CLIENT! v5
+put s1 score=9
+OK
+put s2 score=1
+OK
+get s1
+Assigned s1 to A
+Current group means:
+A: {score=9.0}
+B: null
+A
+get s2
+Assigned s2 to B
+Current group means:
+A: {score=9.0}
+B: {score=1.0}
+B
+place s3 score=8
+Mean of score, all subjects: 6.000000  Std dev of score: 3.559026
+Considering groups:
+A: 1    
+B: 1    
+Assigned s3 to B
+Current group means:
+A: {score=9.0}
+B: {score=4.5}
+B
+quit
+OK
+alex@dandelion pros-rand-lib % 
+```
+### Additional commands relevant if variable revisions are allowed
+
+If the program is started with the -x flag, one has the option to re-submit variable values for a subject, potentially altering the subject's group assignment, until the subject has been "committed".
+
+COMMIT
+COMMIT followed by a subject ID causes re-submission of variable values to be forbidden from that point in time onwards.
+Program responds with "OK".
+
+COMMITTED
+COMMITTED followed by a subject ID looks up whether the COMMIT command was issued for the given subject.
+Program responds "YES" or "NO".
+
+Sample session transcript with the revision option on:
+```
+alex@dandelion pros-rand-lib % java -cp server.jar org.sleepandcognition.prosrand.RandomizerServer -g ../groups.txt -r ../variables.xml -c -x
+place s1 score=1
+Assigned s1 to A
+Current group means:
+A: {score=1.0}
+B: null
+A
+place s2 score=9
+Assigned s2 to B
+Current group means:
+A: {score=1.0}
+B: {score=9.0}
+B
+place s3 score=8
+Mean of score, all subjects: 6.000000  Std dev of score: 3.559026
+Considering groups:
+A: 1    
+B: 1    
+Assigned s3 to A
+Current group means:
+A: {score=4.5}
+B: {score=9.0}
+A
+committed s3
+NO
+place s3 score=2
+Mean of score, all subjects: 5.000000  Std dev of score: 3.535534
+Considering groups:
+A: 1    
+B: 1    
+Assigned s3 to B
+Current group means:
+A: {score=4.5}
+B: {score=5.5}
+B
+get s3
+B
+commit s3
+OK
+place s3 score=9
+WARNING, there was an attempt to add duplicate subject ID s3
+Exception in thread "main" org.sleepandcognition.prosrand.InvalidDataException: duplicate subject?
+        at org.sleepandcognition.prosrand.Randomizer.putOrPlaceSubject(Randomizer.java:92)
+        at org.sleepandcognition.prosrand.Randomizer.placeSubject(Randomizer.java:101)
+        at org.sleepandcognition.prosrand.CommandInterface.parseCommand(CommandInterface.java:60)
+        at org.sleepandcognition.prosrand.RandomizerServer.run(RandomizerServer.java:176)
+alex@dandelion pros-rand-lib %  
+```
+_TODO: what whacko group means when re-assigning s3 here? Why?_
+_TODO: Catch exception so that duplicate is recoverable in command-line mode_
+
+
 ## Results
 
 simulation results
