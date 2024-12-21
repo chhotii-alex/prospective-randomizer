@@ -193,7 +193,7 @@ public abstract class Randomizer {
         return max;
     }
 
-    private boolean commitSubject(String subjectID) throws IOException {
+    protected boolean commitSubject(String subjectID) throws IOException {
         if (subjectsByID.containsKey(subjectID)) {
             subjectsByID.get(subjectID).isCommitted = true;
             database.WriteOutSubjects(subjectsByID, variables);
@@ -203,7 +203,7 @@ public abstract class Randomizer {
         }
     }
 
-    private void removeSubject(String subjectID) throws IOException {
+    protected void removeSubject(String subjectID) throws IOException {
         MultiDimSubject subj = subjectsByID.get(subjectID);
         subjectsByID.remove(subjectID);
         if (subj.myGroup != null) {
@@ -212,7 +212,7 @@ public abstract class Randomizer {
         database.WriteOutSubjects(subjectsByID, variables);
     }
 
-    private synchronized void assignAllSubjects() throws IOException {
+    protected synchronized void assignAllSubjects() throws IOException {
         boolean didAnyAssignments = false;
         while (unassignedSubjects.size() > 0) {
             assignAnySubjectAGroup();

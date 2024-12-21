@@ -1,10 +1,15 @@
 /Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/AlternatingRandomizer.java
 /Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/App.java
+/Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/BalancingRandomizer.java
+/Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/CommandInterface.java
 /Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/InterventionGroup.java
 /Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/InvalidDataException.java
 /Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/MeanVectorCalculator.java
 /Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/MultiDimSubject.java
 /Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/Randomizer.java
+/Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/RandomizerServer.java
+/Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/RandomizerSimulation.java
 /Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/StillGoingFlag.java
 /Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/SubjectDatabase.java
+/Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/SubjectFileDatabase.java
 /Users/alex/prospective-randomizer/pros-rand-lib/src/main/java/org/sleepandcognition/prosrand/VariableSet.java
