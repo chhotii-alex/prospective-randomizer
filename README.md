@@ -19,7 +19,7 @@ case-control study contrasting heart disease with healthy subjects, it is diffic
 the precise effect of one factor (such as exercise) given that the cases and controls are likely
 to differ on many other factors as well (diet, genetics, socio-economic status, etc.) It is for
 this reason that division of subjects into similar intervention and non-intervention groups is the
-canonnical method of experimentally establishing causality.
+canonical method of experimentally establishing causality.
 
 But how do we obtain similar groups? Classically the role of _randomization_ is stressed. Essentially,
 a coin is flipped; or subjects are alternatively assigned A-B-A-B, with the assumption that the
@@ -35,7 +35,7 @@ However, surely now in the
 or whim to group assignment (and given such corruption, anything is possible, including faking data at any
 stage).
 
-The existance of these _bad_ experimental designs demonstrate that it is easy to do _worse_ than
+The existence of these _bad_ experimental designs demonstrate that it is easy to do _worse_ than
 randomization in making groups similar and isolating intervention effects. But can we do _better_?
 
 The law of large numbers dictates that with sufficiently large group sizes, the mean (of whatever feature)
@@ -62,7 +62,7 @@ differences between groups.
 This can abolish the information-gaining value of a study. In Bayesian terms, we would hope that our
 confidence in a hypothesis would be updated by the results of an experiment according to the formula:
 
-probabilty(hypothesis given results)
+probability(hypothesis given results)
     = probability(results given hypothesis) x probability(hypothesis) / probability(results)
 
 If there is a difference between groups at baseline, the probability of a difference between groups
@@ -77,7 +77,7 @@ baseline difference.
 ## A new direction
 
 Ideally, to avoid confounding factors, one would have identical subjects in each experimental group. In
-some experiemnts this is nearly possible, by ordering a flat-pack of six-week-old male inbreed Wistar
+some experiments this is nearly possible, by ordering a flat-pack of six-week-old male inbreed Wistar
 lab rats from the same supplier, all kept in the same type of enclosure and fed the same type of chow
 their entire lives.
 
@@ -99,7 +99,7 @@ normalized (centered
 and scaled), by subtracting the current mean and dividing by the current standard deviation. A vector
 consisting of the mean normalized value of each feature is calculated for each group. The dot product of
 each group's vector and the vector of normalized features for the new subject is calculated, and the
-group with the least dot prodcut is selected (that is, negative with the largest magnitude).
+group with the least dot product is selected (that is, negative with the largest magnitude).
 
 A drawback of equalizing more than one feature is that the more features are used, the poorer the
 expected equalization on any one dimension.
@@ -112,7 +112,7 @@ I need to explain this?]
 While this approach could be applied manually (particularly if there is only one feature being equalized),
 it is better to computerize the algorithm and leave humans out of the group-assignment loop, thus avoiding
 both error and bias. In the realm of psychology, learning and memory, and education, many pre-intervention
-assessments are (or can be computerized). Having the computerized task contact a server implmenting the
+assessments are (or can be computerized). Having the computerized task contact a server implementing the
 group allocation algorithm allows for the group allocation to be done automatically,
 covertly, and within milliseconds of the calculation of the pre-intervention feature.
 
@@ -300,8 +300,8 @@ _TODO: what whacko group means when re-assigning s3 here? Why?_
 _TODO: Catch exception so that duplicate is recoverable in command-line mode_
 
 ### Limitations and future work
-* As mentioned above, the "database" of subjects is not implemented as a real database; it's implementated as a simple text file, which is re-written after every transaction. This is okay for small local deployments&mdash;the number of subjects enrolled per unit time is not likely to be fast enough to run into the perfomance limitations of this approach. It does mean that care has to be taken to move the subject.txt file from machine to machine if the server is moved from one host to another. Generally this is not an issue with a small local study. However, this may make cloud deployment tricky. If the application is containerized, the local file system may not persist across re-starts, and re-starts can happen for various reasons (software crashes, load balancing, etc.) Ideally, SubjectDatabase would be implemented as a real database such as MySQL or Postgres.
-* Likewise, relevant configuration of the study protocol such as groups and variables (features) would benefit from being persisted to a real database. Currently they are configured via local text files (for the socket/command-line implementation) or submitted at start-up from a web client (for the SpingBoot/API implementation) and then just held in memory. This is fragile in the face of any reboots, thus too fragile for cloud deployment.
+* As mentioned above, the "database" of subjects is not implemented as a real database; it's implemented as a simple text file, which is re-written after every transaction. This is okay for small local deployments&mdash;the number of subjects enrolled per unit time is not likely to be fast enough to run into the performance limitations of this approach. It does mean that care has to be taken to move the subject.txt file from machine to machine if the server is moved from one host to another. Generally this is not an issue with a small local study. However, this may make cloud deployment tricky. If the application is containerized, the local file system may not persist across re-starts, and re-starts can happen for various reasons (software crashes, load balancing, etc.) Ideally, SubjectDatabase would be implemented as a real database such as MySQL or Postgres.
+* Likewise, relevant configuration of the study protocol such as groups and variables (features) would benefit from being persisted to a real database. Currently they are configured via local text files (for the socket/command-line implementation) or submitted at start-up from a web client (for the Sping Boot/API implementation) and then just held in memory. This is fragile in the face of any reboots, thus too fragile for cloud deployment.
 
 ## Results
 
