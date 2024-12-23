@@ -1,23 +1,20 @@
 package org.sleepandcognition.prosrandboot;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.util.Hashtable;
-
 import javax.xml.parsers.ParserConfigurationException;
-
-import org.sleepandcognition.prosrand.ProtocolSpec;
-import org.sleepandcognition.prosrand.Randomizer;
 import org.sleepandcognition.prosrand.BalancingRandomizer;
-import org.sleepandcognition.prosrand.SubjectFileDatabase;
 import org.sleepandcognition.prosrand.InterventionGroup;
 import org.sleepandcognition.prosrand.MultiDimSubject;
+import org.sleepandcognition.prosrand.ProtocolSpec;
+import org.sleepandcognition.prosrand.Randomizer;
+import org.sleepandcognition.prosrand.SubjectFileDatabase;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.xml.sax.SAXException;
 
 @RestController
 public class RandomizerController {
@@ -33,14 +30,15 @@ public class RandomizerController {
     }
 
     @GetMapping("/version")
-    public Integer version(){
+    public Integer version() {
         return Randomizer.RandomizerCommVersion();
     }
 
     @PostMapping("/{protocolName}/start")
-    synchronized void startProtocol(@PathVariable String protocolName, @RequestBody ProtocolSpec spec) throws Exception {
+    synchronized void startProtocol(@PathVariable String protocolName, @RequestBody ProtocolSpec spec)
+            throws Exception {
         if (randomizers.containsKey(protocolName)) {
-            // already started; ignore 
+            // already started; ignore
             return;
         }
         String subjectFile = String.format("subjects_%s.txt", protocolName);
@@ -51,7 +49,9 @@ public class RandomizerController {
     }
 
     @PostMapping("/{protocolName}/subject/{id}")
-    void putSubject(@PathVariable String protocolName, @PathVariable String id, @RequestBody Hashtable<String, String> features) throws Exception {
+    void putSubject(
+            @PathVariable String protocolName, @PathVariable String id, @RequestBody Hashtable<String, String> features)
+            throws Exception {
         randomizers.get(protocolName).putOrPlaceSubject(id, features, true);
     }
 
@@ -61,7 +61,9 @@ public class RandomizerController {
     }
 
     @PostMapping("/{protocolName}/subject/{id}/group")
-    String placeSubject(@PathVariable String protocolName, @PathVariable String id, @RequestBody Hashtable<String, String> features) throws Exception {
+    String placeSubject(
+            @PathVariable String protocolName, @PathVariable String id, @RequestBody Hashtable<String, String> features)
+            throws Exception {
         String group = randomizers.get(protocolName).putOrPlaceSubject(id, features, false);
         return group;
     }
@@ -95,5 +97,4 @@ public class RandomizerController {
     void assignAll(@PathVariable String protocolName) throws Exception {
         randomizers.get(protocolName).assignAllSubjects();
     }
-
 }
