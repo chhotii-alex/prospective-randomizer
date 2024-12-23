@@ -36,14 +36,26 @@ def run_test(protocol_name = "foo",
     assert r.status_code == 200
     assert r.text == "This is the group randomization server."
 
+    # undefined endpoints should return 404
+    r = requests.get(make_url(True, "teapot"))
+    assert r.status_code == 404
+
     r = requests.get(make_url(False, "version"))
     assert r.status_code == 200
     assert r.text == "5"
 
+    # not found when not yet started
+    r = requests.post(make_url(True, 'subject/s01'),
+                      json={'weight': 50},
+                    )
+    print(r.status_code)
+    # TODO: this should be a 404, not 500
+    assert r.status_code != 200
+    
+    
     r = requests.post(make_url(True, 'start'),
                     json={"groupNames": groups, "variableSpec": variables, "allowRevision": False}
                     )
-    print(r.status_code)
     assert r.status_code == 200
 
 
@@ -77,6 +89,7 @@ def run_test(protocol_name = "foo",
     r = requests.get(make_url(True, 'groups'))
     assert r.status_code == 200
     returned_groups = r.json()
+    print(returned_groups)
     assert len(groups) == len(returned_groups)
     for g in groups:
         assert g in returned_groups
