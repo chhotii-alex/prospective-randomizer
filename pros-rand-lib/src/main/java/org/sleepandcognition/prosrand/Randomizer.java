@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
-
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -39,10 +37,7 @@ public abstract class Randomizer {
         readSubjects();
     }
 
-    public Randomizer(
-        ProtocolSpec spec,
-        SubjectDatabase db
-    )  throws IOException {
+    public Randomizer(ProtocolSpec spec, SubjectDatabase db) throws IOException {
         this.allowRevision = spec.allowRevision;
         database = db;
         variables = new VariableSet(spec.variableSpec);

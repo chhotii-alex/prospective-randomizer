@@ -18,10 +18,7 @@ public class BalancingRandomizer extends Randomizer {
         super(groupListFile, variables, db, listening, allowRevision);
     }
 
-    public BalancingRandomizer(
-        ProtocolSpec spec,
-        SubjectDatabase db
-    ) throws IOException {
+    public BalancingRandomizer(ProtocolSpec spec, SubjectDatabase db) throws IOException {
         super(spec, db);
     }
 

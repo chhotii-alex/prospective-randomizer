@@ -36,5 +36,4 @@ public class MultiDimSubject {
         }
         return myGroup.name;
     }
-
 }
