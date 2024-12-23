@@ -19,7 +19,7 @@ case-control study contrasting heart disease with healthy subjects, it is diffic
 the precise effect of one factor (such as exercise) given that the cases and controls are likely
 to differ on many other factors as well (diet, genetics, socio-economic status, etc.) It is for
 this reason that division of subjects into similar intervention and non-intervention groups is the
-canonnical method of experimentally establishing causality.
+canonical method of experimentally establishing causality.
 
 But how do we obtain similar groups? Classically the role of _randomization_ is stressed. Essentially,
 a coin is flipped; or subjects are alternatively assigned A-B-A-B, with the assumption that the
@@ -35,7 +35,7 @@ However, surely now in the
 or whim to group assignment (and given such corruption, anything is possible, including faking data at any
 stage).
 
-The existance of these _bad_ experimental designs demonstrate that it is easy to do _worse_ than
+The existence of these _bad_ experimental designs demonstrate that it is easy to do _worse_ than
 randomization in making groups similar and isolating intervention effects. But can we do _better_?
 
 The law of large numbers dictates that with sufficiently large group sizes, the mean (of whatever feature)
@@ -62,7 +62,7 @@ differences between groups.
 This can abolish the information-gaining value of a study. In Bayesian terms, we would hope that our
 confidence in a hypothesis would be updated by the results of an experiment according to the formula:
 
-probabilty(hypothesis given results)
+probability(hypothesis given results)
     = probability(results given hypothesis) x probability(hypothesis) / probability(results)
 
 If there is a difference between groups at baseline, the probability of a difference between groups
@@ -77,7 +77,7 @@ baseline difference.
 ## A new direction
 
 Ideally, to avoid confounding factors, one would have identical subjects in each experimental group. In
-some experiemnts this is nearly possible, by ordering a flat-pack of six-week-old male inbreed Wistar
+some experiments this is nearly possible, by ordering a flat-pack of six-week-old male inbreed Wistar
 lab rats from the same supplier, all kept in the same type of enclosure and fed the same type of chow
 their entire lives.
 
@@ -99,7 +99,7 @@ normalized (centered
 and scaled), by subtracting the current mean and dividing by the current standard deviation. A vector
 consisting of the mean normalized value of each feature is calculated for each group. The dot product of
 each group's vector and the vector of normalized features for the new subject is calculated, and the
-group with the least dot prodcut is selected (that is, negative with the largest magnitude).
+group with the least dot product is selected (that is, negative with the largest magnitude).
 
 A drawback of equalizing more than one feature is that the more features are used, the poorer the
 expected equalization on any one dimension.
@@ -112,7 +112,7 @@ I need to explain this?]
 While this approach could be applied manually (particularly if there is only one feature being equalized),
 it is better to computerize the algorithm and leave humans out of the group-assignment loop, thus avoiding
 both error and bias. In the realm of psychology, learning and memory, and education, many pre-intervention
-assessments are (or can be computerized). Having the computerized task contact a server implmenting the
+assessments are (or can be computerized). Having the computerized task contact a server implementing the
 group allocation algorithm allows for the group allocation to be done automatically,
 covertly, and within milliseconds of the calculation of the pre-intervention feature.
 
@@ -120,18 +120,188 @@ covertly, and within milliseconds of the calculation of the pre-intervention fea
 
 We have written a Java implementation of the described algorithm. Setup requires identifying a computer that
 can run a Java server and be connected to via TCP/IP; this can be deployed in the cloud for multi-site
-studies, but may more cheaply be run on a local workstation. Configuration requires specifying what
-the groups are and what features are to be equalized across these groups. The algorithm's performance is
-only good if the specified group sizes are equal or nearly equal.
+studies, but may more cheaply be run on a local workstation. A number of other issues would have to be addressed
+before rolling out a cloud deployment:
+* This implementation does not include any authentication mechanism and thus would have to be wrapped in an authentication layer (note, an on-campus deployment without adding an authentication layer is essentially "security through obscurity".)
+* Information about subjects (their ID's, features, and group assignments) are stored in local text files, rather than a real database, making these data more challenging to share across virtual hosts.
+* Care has to be taken that if subject identifiers can be linked to individuals that any leakage of data would not be a violation of subject privacy.
+  
+Configuration requires specifying what
+the groups are and what features are to be equalized across these groups. 
 
 The algorithm has been wrapped in two different network protocols. The original, simple interface is over
 a simple TCP/IP socket. All configuration must be done by manually editing the groups.txt and variables.xml
-files. Client task processes open a socket connection and issue simple one-letter commands to the server.
+files. Client task processes open a socket connection and issue simple one-word commands to the server.
+The same executable offers command-line interaction, so that researchers may interact with the algorithm
+manually.
 
 A more modern approach is taken by the Spring Boot wrapper. This allows client tasks to communicate with the
 server using the HTTP protocol.
 
+### Compiling and Running
+
+To obtain the project, install `git`, and execute this command:
+`git clone https://github.com/chhotii-alex/prospective-randomizer.git`
+
+Also install:
+* Java Development Kit (jdk) version 17.0 or above
+* Apache maven
+
+To build the command-line or simple socket implementation, enter these commands in your Terminal,
+shell, or PowerShell:
+
+```
+cd prospective-randomizer
+cd pros-rand-lib
+mvn package
+```
+
+Then it can be run with a command like this:
+`java -cp target/pros-rand-lib-1.0-SNAPSHOT.jar org.sleepandcognition.prosrand.RandomizerServer -g ../groups.txt -r ../variables.xml`
+
+To build the Spring Boot version which uses the HTTP protocol, enter the commands:
+```
+cd prospective-randomizer
+mvn install
+```
+
+It can then be started using this command:
+```
+mvn spring-boot:run -pl pros-rand-boot
+```
+
 Example code that demonstrates use of each networking protocol [here] [describe]
+
+### Simple socket interface/ command line reference
+
+Here are the commands that can be entered if Prospective Randomizer is running a command-line interface in a terminal window, or submitted via the socket connection if running in network mode. Commands are not case-sensitive. However, subject identifier are case sensitive; s1 and S1 would be regarded as different subjects. Any command starting with # is simply echoed, and has no effect.
+
+HELLO RAND!  
+Program responds "HI CLIENT!" Followed by a version identifier.
+
+PUT  
+PUT must be followed by the subject ID, then each of the variables with their values. For example:
+PUT S1 score=4.5 sex=F
+Variable name and value must be joined with just an equal sign, no spaces in between.
+There must be exactly one space before the subject ID, and before each variable name.
+This command tells prospective randomizer that this subject exists, with the given variable values, but does not immediately trigger the addition of the subject to a group. Thus, PR has the opportunity to gain more information about other subjects before adding this one to a group, which may affect the subject's group assignment.
+Program responds with "OK".
+
+GET  
+GET followed by a subject ID (one space between the word GET and the subject ID) triggers the assignment of the subject to a group, if not already assigned.
+Program responds with the name of the group this subject was assigned to.
+
+PLACE  
+Like PUT (see PUT command for syntax), immediately followed by GET.
+Program responds with the name of the group this subject was assigned to.
+
+ASSIGN  
+Triggers assignment of all known subjects to groups if they haven't already.
+Program responds with "OK".
+
+Sample session transcript:
+```
+alex@dandelion pros-rand-lib % java -cp server.jar org.sleepandcognition.prosrand.RandomizerServer -g ../groups.txt -r ../variables.xml -c
+hello rand!
+HI CLIENT! v5
+put s1 score=9
+OK
+put s2 score=1
+OK
+get s1
+Assigned s1 to A
+Current group means:
+A: {score=9.0}
+B: null
+A
+get s2
+Assigned s2 to B
+Current group means:
+A: {score=9.0}
+B: {score=1.0}
+B
+place s3 score=8
+Mean of score, all subjects: 6.000000  Std dev of score: 3.559026
+Considering groups:
+A: 1    
+B: 1    
+Assigned s3 to B
+Current group means:
+A: {score=9.0}
+B: {score=4.5}
+B
+quit
+OK
+alex@dandelion pros-rand-lib % 
+```
+### Additional commands relevant if variable revisions are allowed
+
+If the program is started with the -x flag, one has the option to re-submit variable values for a subject, potentially altering the subject's group assignment, until the subject has been "committed".
+
+COMMIT  
+COMMIT followed by a subject ID causes re-submission of variable values to be forbidden from that point in time onwards.
+Program responds with "OK".
+
+COMMITTED  
+COMMITTED followed by a subject ID looks up whether the COMMIT command was issued for the given subject.
+Program responds "YES" or "NO".
+
+Sample session transcript with the revision option on:
+```
+alex@dandelion pros-rand-lib % java -cp server.jar org.sleepandcognition.prosrand.RandomizerServer -g ../groups.txt -r ../variables.xml -c -x
+place s1 score=1
+Assigned s1 to A
+Current group means:
+A: {score=1.0}
+B: null
+A
+place s2 score=9
+Assigned s2 to B
+Current group means:
+A: {score=1.0}
+B: {score=9.0}
+B
+place s3 score=8
+Mean of score, all subjects: 6.000000  Std dev of score: 3.559026
+Considering groups:
+A: 1    
+B: 1    
+Assigned s3 to A
+Current group means:
+A: {score=4.5}
+B: {score=9.0}
+A
+committed s3
+NO
+place s3 score=2
+Mean of score, all subjects: 5.000000  Std dev of score: 3.535534
+Considering groups:
+A: 1    
+B: 1    
+Assigned s3 to B
+Current group means:
+A: {score=4.5}
+B: {score=5.5}
+B
+get s3
+B
+commit s3
+OK
+place s3 score=9
+WARNING, there was an attempt to add duplicate subject ID s3
+Exception in thread "main" org.sleepandcognition.prosrand.InvalidDataException: duplicate subject?
+        at org.sleepandcognition.prosrand.Randomizer.putOrPlaceSubject(Randomizer.java:92)
+        at org.sleepandcognition.prosrand.Randomizer.placeSubject(Randomizer.java:101)
+        at org.sleepandcognition.prosrand.CommandInterface.parseCommand(CommandInterface.java:60)
+        at org.sleepandcognition.prosrand.RandomizerServer.run(RandomizerServer.java:176)
+alex@dandelion pros-rand-lib %  
+```
+_TODO: what whacko group means when re-assigning s3 here? Why?_
+_TODO: Catch exception so that duplicate is recoverable in command-line mode_
+
+### Limitations and future work
+* As mentioned above, the "database" of subjects is not implemented as a real database; it's implemented as a simple text file, which is re-written after every transaction. This is okay for small local deployments&mdash;the number of subjects enrolled per unit time is not likely to be fast enough to run into the performance limitations of this approach. It does mean that care has to be taken to move the subject.txt file from machine to machine if the server is moved from one host to another. Generally this is not an issue with a small local study. However, this may make cloud deployment tricky. If the application is containerized, the local file system may not persist across re-starts, and re-starts can happen for various reasons (software crashes, load balancing, etc.) Ideally, SubjectDatabase would be implemented as a real database such as MySQL or Postgres.
+* Likewise, relevant configuration of the study protocol such as groups and variables (features) would benefit from being persisted to a real database. Currently they are configured via local text files (for the socket/command-line implementation) or submitted at start-up from a web client (for the Sping Boot/API implementation) and then just held in memory. This is fragile in the face of any reboots, thus too fragile for cloud deployment.
 
 ## Results
 
