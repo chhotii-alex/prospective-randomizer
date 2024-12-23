@@ -30,4 +30,11 @@ public class MultiDimSubject {
         return baselineCharacteristics;
     }
 
+    public String getGroupName() {
+        if (myGroup == null) {
+            return null;
+        }
+        return myGroup.name;
+    }
+
 }

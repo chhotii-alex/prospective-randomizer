@@ -1,8 +1,5 @@
 package org.sleepandcognition.prosrandboot;
 
-import java.util.List;
-
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,9 +15,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.sleepandcognition.prosrand.ProtocolSpec;
 import org.sleepandcognition.prosrand.Randomizer;
 import org.sleepandcognition.prosrand.BalancingRandomizer;
-import org.sleepandcognition.prosrand.StillGoingFlag;
 import org.sleepandcognition.prosrand.SubjectFileDatabase;
-import org.sleepandcognition.prosrand.VariableSet;
 import org.sleepandcognition.prosrand.InterventionGroup;
 import org.sleepandcognition.prosrand.MultiDimSubject;
 
@@ -48,7 +43,7 @@ public class RandomizerController {
             // already started; ignore 
             return;
         }
-        String subjectFile = String.format("%s_subjects.txt", protocolName);
+        String subjectFile = String.format("subjects_%s.txt", protocolName);
         SubjectFileDatabase database = new SubjectFileDatabase(subjectFile);
         Randomizer r = new BalancingRandomizer(spec, database);
         r.setVerbosity(100); // TODO: adjust
