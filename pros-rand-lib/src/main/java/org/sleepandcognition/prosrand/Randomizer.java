@@ -259,4 +259,20 @@ public abstract class Randomizer {
     public Hashtable<String, MultiDimSubject> getSubjects() {
         return subjectsByID;
     }
+
+    public boolean matchesSpecs(ProtocolSpec spec) {
+        if (!variables.matchesSpec(spec.variableSpec)) {
+            return false;
+        }
+        for (Iterator<String> it = spec.groupNames.iterator(); it.hasNext(); ) {
+            String groupName = it.next();
+            if (!groups.containsKey(groupName)) {
+                return false;
+            }
+        }
+        if (spec.groupNames.size() != groups.size()) {
+            return false;
+        }
+        return true;
+    }
 }

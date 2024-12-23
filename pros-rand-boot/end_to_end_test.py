@@ -58,6 +58,30 @@ def run_test(protocol_name = "foo",
                     )
     assert r.status_code == 200
 
+    # Requesting start of the exact same protocol again should be ok
+    r = requests.post(make_url(True, 'start'),
+                    json={"groupNames": groups, "variableSpec": variables, "allowRevision": False}
+                    )
+    assert r.status_code == 200
+
+    # But changing anything about the protocol details should result in 400 Bad Request
+    r = requests.post(make_url(True, 'start'),
+                    json={"groupNames": ['x', 'y'], "variableSpec": variables, "allowRevision": False}
+                    )
+    assert r.status_code == 400
+    r = requests.post(make_url(True, 'start'),
+                    json={"groupNames": groups, "variableSpec": ['froopiness', 'towel_hue'], "allowRevision": False}
+                    )
+    assert r.status_code == 400
+    r = requests.post(make_url(True, 'start'),
+                    json={"groupNames": groups + ['another'], "variableSpec": variables, "allowRevision": False}
+                    )
+    assert r.status_code == 400
+    r = requests.post(make_url(True, 'start'),
+                    json={"groupNames": groups, "variableSpec": variables + ['loft'], "allowRevision": False}
+                    )
+    assert r.status_code == 400
+    
 
     r = requests.post(make_url(True, 'subject/s01'),
                       json={'weight': 50},
@@ -129,6 +153,7 @@ def run_test(protocol_name = "foo",
 
 for protocol_name, groups in protocols.items():
     run_test(protocol_name, groups=groups)
+print()
 print("Success, done!")
 
     

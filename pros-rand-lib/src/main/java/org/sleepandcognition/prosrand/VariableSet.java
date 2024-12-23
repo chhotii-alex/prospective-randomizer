@@ -314,4 +314,17 @@ public class VariableSet {
             }
         }
     } // END class CategoricalVariableSetterGetter
+
+    public boolean matchesSpec(List<String> variableSpec) {
+        for (Iterator<String> it = variableSpec.iterator(); it.hasNext(); ) {
+            String name = it.next();
+            if (!variables.containsKey(name)) {
+                return false;
+            }
+        }
+        if (variableSpec.size() != variables.size()) {
+            return false;
+        }
+        return true;
+    }
 }

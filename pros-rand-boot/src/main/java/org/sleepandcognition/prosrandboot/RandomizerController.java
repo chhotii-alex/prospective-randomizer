@@ -9,11 +9,13 @@ import org.sleepandcognition.prosrand.MultiDimSubject;
 import org.sleepandcognition.prosrand.ProtocolSpec;
 import org.sleepandcognition.prosrand.Randomizer;
 import org.sleepandcognition.prosrand.SubjectFileDatabase;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import org.xml.sax.SAXException;
 
 @RestController
@@ -34,10 +36,22 @@ public class RandomizerController {
         return Randomizer.RandomizerCommVersion();
     }
 
+    protected Randomizer randomizerOfName(String protocolName) {
+        if (randomizers.containsKey(protocolName)) {
+            return randomizers.get(protocolName);
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+    }
+
     @PostMapping("/{protocolName}/start")
     synchronized void startProtocol(@PathVariable String protocolName, @RequestBody ProtocolSpec spec)
             throws Exception {
         if (randomizers.containsKey(protocolName)) {
+            if (!randomizerOfName(protocolName).matchesSpecs(spec)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            }
             // already started; ignore
             return;
         }
