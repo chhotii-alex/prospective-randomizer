@@ -139,19 +139,6 @@ public class InterventionGroup {
         }
     }
 
-    // TODO: refactor to eliminate; redundant with getMeanVector() below
-    public Hashtable<String, Double> meanVectorForVariables(VariableSet variables) {
-        Hashtable<String, Double> meanVector = new Hashtable<String, Double>();
-        if (subjects.size() > 0) {
-            for (Enumeration<String> vit = means.keyIterator(); vit.hasMoreElements(); ) {
-                String key = vit.nextElement();
-                meanVector.put(key, Double.valueOf(means.mean(key)));
-            }
-            return meanVector;
-        }
-        return null;
-    }
-
     public Hashtable<String, Double> getMeanVector() {
         Hashtable<String, Double> meanVector = new Hashtable<String, Double>();
         if (subjects.size() > 0) {

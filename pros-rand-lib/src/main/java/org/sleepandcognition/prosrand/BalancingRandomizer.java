@@ -104,7 +104,7 @@ public class BalancingRandomizer extends Randomizer {
             InterventionGroup aGroup = it.next();
             if (aGroup.scaledGroupSize()
                     == minimumScaledGroupSize) { // This group is in least-filled tier; consider adding to it
-                Hashtable<String, Double> vector = aGroup.meanVectorForVariables(variables);
+                Hashtable<String, Double> vector = aGroup.getMeanVector();
                 if (verbosity >= 0) {
                     System.out.println(aGroup.sizeString());
                 }

@@ -154,7 +154,7 @@ public abstract class Randomizer {
                         String key = it.nextElement();
                         System.out.print(String.format("%s: ", key));
                         InterventionGroup group = groups.get(key);
-                        System.out.println(group.meanVectorForVariables(variables));
+                        System.out.println(group.getMeanVector());
                     }
                 }
             }
@@ -190,11 +190,11 @@ public abstract class Randomizer {
         double max = 0.0;
         for (Enumeration<String> it1 = groups.keys(); it1.hasMoreElements(); ) {
             String key1 = it1.nextElement();
-            Hashtable<String, Double> meanVector1 = groups.get(key1).meanVectorForVariables(variables);
+            Hashtable<String, Double> meanVector1 = groups.get(key1).getMeanVector();
             for (Enumeration<String> it2 = groups.keys(); it2.hasMoreElements(); ) {
                 String key2 = it2.nextElement();
                 if (key1 != key2) {
-                    Hashtable<String, Double> meanVector2 = groups.get(key2).meanVectorForVariables(variables);
+                    Hashtable<String, Double> meanVector2 = groups.get(key2).getMeanVector();
                     double sum = 0.0;
                     for (Enumeration<String> e = meanVector2.keys(); e.hasMoreElements(); ) {
                         String dimKey = e.nextElement();
