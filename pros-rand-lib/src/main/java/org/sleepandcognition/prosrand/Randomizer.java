@@ -28,7 +28,7 @@ public abstract class Randomizer {
             SubjectDatabase db,
             StillGoingFlag listening,
             boolean allowRevision)
-            throws SAXException, IOException, ParserConfigurationException {
+            throws SAXException, IOException, ParserConfigurationException, InvalidDataException {
         this.allowRevision = allowRevision;
         database = db;
         this.variables = variables;
@@ -37,7 +37,7 @@ public abstract class Randomizer {
         readSubjects();
     }
 
-    public Randomizer(ProtocolSpec spec, SubjectDatabase db) throws IOException {
+    public Randomizer(ProtocolSpec spec, SubjectDatabase db) throws IOException, InvalidDataException {
         this.allowRevision = spec.allowRevision;
         database = db;
         variables = new VariableSet(spec.variableSpec);
@@ -49,7 +49,7 @@ public abstract class Randomizer {
         readSubjects();
     }
 
-    protected void readSubjects() throws IOException {
+    protected void readSubjects() throws IOException, InvalidDataException {
         ArrayList<MultiDimSubject> subjects = database.ReadSubjectsIntoGroups(variables, groups);
         subjectsByID = new Hashtable<String, MultiDimSubject>();
         unassignedSubjects = new ArrayList<MultiDimSubject>();
@@ -77,7 +77,7 @@ public abstract class Randomizer {
     }
 
     public synchronized String putOrPlaceSubject(String subjectID, Hashtable<String, String> values, boolean putFlag)
-            throws IOException {
+            throws IOException, InvalidDataException {
         if (allowRevision) {
             if (isRemovable(subjectID)) {
                 removeSubject(subjectID);
@@ -111,18 +111,17 @@ public abstract class Randomizer {
         }
     }
 
-    public synchronized void putSubject(String subjectID, Hashtable<String, String> values) throws IOException {
+    public synchronized void putSubject(String subjectID, Hashtable<String, String> values) throws IOException, InvalidDataException {
         putOrPlaceSubject(subjectID, values, true);
     }
 
-    public synchronized void placeSubject(String subjectID, Hashtable<String, String> values) throws IOException {
+    public synchronized void placeSubject(String subjectID, Hashtable<String, String> values) throws IOException, InvalidDataException {
         putOrPlaceSubject(subjectID, values, false);
     }
 
-    protected synchronized boolean addSubject(MultiDimSubject subject) throws IOException {
+    protected synchronized boolean addSubject(MultiDimSubject subject) throws IOException, InvalidDataException {
         if (subjectsByID.containsKey(subject.identifier)) {
-            System.out.println("WARNING, there was an attempt to add duplicate subject ID " + subject.identifier);
-            return false;
+            throw new InvalidDataException("Attempt to add duplicate subject ID ");
         }
         subjectsByID.put(subject.identifier, subject);
         if (subject.myGroup == null) {
@@ -131,7 +130,7 @@ public abstract class Randomizer {
         return true;
     }
 
-    public synchronized boolean addNewSubject(MultiDimSubject subject) throws IOException {
+    public synchronized boolean addNewSubject(MultiDimSubject subject) throws IOException, InvalidDataException {
         boolean result = addSubject(subject);
         database.WriteOutSubjects(subjectsByID, variables);
         return result;

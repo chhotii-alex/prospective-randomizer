@@ -14,11 +14,11 @@ public class BalancingRandomizer extends Randomizer {
             SubjectDatabase db,
             StillGoingFlag listening,
             boolean allowRevision)
-            throws SAXException, IOException, ParserConfigurationException {
+            throws SAXException, IOException, ParserConfigurationException, InvalidDataException {
         super(groupListFile, variables, db, listening, allowRevision);
     }
 
-    public BalancingRandomizer(ProtocolSpec spec, SubjectDatabase db) throws IOException {
+    public BalancingRandomizer(ProtocolSpec spec, SubjectDatabase db) throws IOException, InvalidDataException {
         super(spec, db);
     }
 
@@ -31,7 +31,7 @@ public class BalancingRandomizer extends Randomizer {
         return means;
     }
 
-    protected synchronized boolean addSubject(MultiDimSubject subject) throws IOException {
+    protected synchronized boolean addSubject(MultiDimSubject subject) throws IOException, InvalidDataException {
         if (super.addSubject(subject)) {
             /* Keep track of statistics on all subjects encountered: */
             for (Enumeration<String> vit = subject.baselineCharacteristics.keys(); vit.hasMoreElements(); ) {

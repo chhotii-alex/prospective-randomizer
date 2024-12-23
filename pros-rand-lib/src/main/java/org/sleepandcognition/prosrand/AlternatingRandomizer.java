@@ -16,7 +16,7 @@ public class AlternatingRandomizer extends Randomizer {
             SubjectDatabase db,
             StillGoingFlag listening,
             boolean allowRevision)
-            throws SAXException, IOException, ParserConfigurationException {
+            throws SAXException, IOException, ParserConfigurationException, InvalidDataException {
         super(groupListFile, variables, db, listening, allowRevision);
         groupNamesInOrder = new ArrayList<String>();
         groupNamesInOrder.addAll(groups.keySet());

@@ -32,10 +32,16 @@ public class RandomizerServer {
      */
     public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException {
         RandomizerServer app = new RandomizerServer();
-        app.run(args);
+        try {
+            app.run(args);
+        }
+        catch (InvalidDataException e) {
+            // If bad data chokes start-up... debug with stack trace
+            e.printStackTrace();
+        }
     }
 
-    protected void run(String[] args) throws SAXException, ParserConfigurationException, IOException {
+    protected void run(String[] args) throws SAXException, ParserConfigurationException, IOException, InvalidDataException {
         boolean commandLineMode = false;
         boolean networkMode = false;
         boolean guiMode = false;

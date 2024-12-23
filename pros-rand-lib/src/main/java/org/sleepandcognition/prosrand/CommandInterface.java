@@ -54,11 +54,21 @@ public class CommandInterface {
                     }
                 }
                 if (wordsOnLine[0].equalsIgnoreCase("PUT")) {
-                    randomizer.putSubject(subjectID, values);
-                    return "OK";
+                    try {
+                        randomizer.putSubject(subjectID, values);
+                        return "OK";
+                    }
+                    catch (InvalidDataException e) {
+                        return "?";
+                    }
                 } else {
-                    randomizer.placeSubject(subjectID, values);
-                    return randomizer.getGroup(subjectID);
+                    try {
+                        randomizer.placeSubject(subjectID, values);
+                        return randomizer.getGroup(subjectID);
+                    }
+                    catch (InvalidDataException e) {
+                        return "?";
+                    } 
                 }
             } else if (wordsOnLine[0].equalsIgnoreCase("GET")) {
                 String subjectID = wordsOnLine[1];

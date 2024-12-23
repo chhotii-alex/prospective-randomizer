@@ -1,6 +1,6 @@
 package org.sleepandcognition.prosrand;
 
-public class InvalidDataException extends RuntimeException {
+public class InvalidDataException extends Exception {
     public InvalidDataException(String message) {
         super(message);
     }
