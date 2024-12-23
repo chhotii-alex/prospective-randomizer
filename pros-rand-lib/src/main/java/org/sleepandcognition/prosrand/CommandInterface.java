@@ -57,18 +57,16 @@ public class CommandInterface {
                     try {
                         randomizer.putSubject(subjectID, values);
                         return "OK";
-                    }
-                    catch (InvalidDataException e) {
+                    } catch (InvalidDataException e) {
                         return "?";
                     }
                 } else {
                     try {
                         randomizer.placeSubject(subjectID, values);
                         return randomizer.getGroup(subjectID);
-                    }
-                    catch (InvalidDataException e) {
+                    } catch (InvalidDataException e) {
                         return "?";
-                    } 
+                    }
                 }
             } else if (wordsOnLine[0].equalsIgnoreCase("GET")) {
                 String subjectID = wordsOnLine[1];

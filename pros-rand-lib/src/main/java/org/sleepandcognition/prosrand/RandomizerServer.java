@@ -34,14 +34,14 @@ public class RandomizerServer {
         RandomizerServer app = new RandomizerServer();
         try {
             app.run(args);
-        }
-        catch (InvalidDataException e) {
+        } catch (InvalidDataException e) {
             // If bad data chokes start-up... debug with stack trace
             e.printStackTrace();
         }
     }
 
-    protected void run(String[] args) throws SAXException, ParserConfigurationException, IOException, InvalidDataException {
+    protected void run(String[] args)
+            throws SAXException, ParserConfigurationException, IOException, InvalidDataException {
         boolean commandLineMode = false;
         boolean networkMode = false;
         boolean guiMode = false;

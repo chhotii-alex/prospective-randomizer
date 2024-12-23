@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class ProsRandApplication {
     /*
      * Some development notes:
-     * Maintain consistent source code formatting using the maven "spotless" plug-in. 
+     * Maintain consistent source code formatting using the maven "spotless" plug-in.
      * This is configured for each of the modules (but not for the aggregated project,
      * as that has no code). To invoke, cd into the directory of whatever module has
      * been edited, then invoke mvn, i.e.:

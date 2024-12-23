@@ -39,8 +39,7 @@ public class RandomizerController {
     protected Randomizer randomizerOfName(String protocolName) {
         if (randomizers.containsKey(protocolName)) {
             return randomizers.get(protocolName);
-        }
-        else {
+        } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
     }

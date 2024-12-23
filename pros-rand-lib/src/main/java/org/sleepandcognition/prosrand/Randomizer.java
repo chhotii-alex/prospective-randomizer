@@ -111,11 +111,13 @@ public abstract class Randomizer {
         }
     }
 
-    public synchronized void putSubject(String subjectID, Hashtable<String, String> values) throws IOException, InvalidDataException {
+    public synchronized void putSubject(String subjectID, Hashtable<String, String> values)
+            throws IOException, InvalidDataException {
         putOrPlaceSubject(subjectID, values, true);
     }
 
-    public synchronized void placeSubject(String subjectID, Hashtable<String, String> values) throws IOException, InvalidDataException {
+    public synchronized void placeSubject(String subjectID, Hashtable<String, String> values)
+            throws IOException, InvalidDataException {
         putOrPlaceSubject(subjectID, values, false);
     }
 
