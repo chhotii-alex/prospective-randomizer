@@ -23,7 +23,7 @@ import org.xml.sax.SAXException;
  * * Continuous numeric variables (such as weight)
  * * Discrete numeric variables (such as number of years of education completed)
  * * Ordinal variables. These are coded as integers. However, this may be problematic.
- * * Catagorical variables. These each have a list of possible (string) values. For example, "sex" may have the
+ * * Categorical variables. These each have a list of possible (string) values. For example, "sex" may have the
  * possible values 'male', 'female', and 'unknown'. These are handled by converting into an array of variables, one for
  * each category, i.e. 'is_male_sex', 'is_female_sex', and 'is_unknown_sex', each of which will have the value 0 or 1.
  */
@@ -51,10 +51,10 @@ public class VariableSet {
                 attrNode = attrs.getNamedItem("type");
                 String type = attrNode.getNodeValue();
                 VariableSetterGetter getter = null;
-                if (type.equals("continuous")) {
+                if (type.equalsIgnoreCase("continuous")) {
                     getter = new ContinuousVariableSetterGetter(name);
-                } else if (type.equals("catagorical")) {
-                    getter = new CatagoricalVariableSetterGetter(name);
+                } else if (type.equalsIgnoreCase("categorical")) {
+                    getter = new CategoricalVariableSetterGetter(name);
                 }
                 getter.readOptionsFromXML(node);
                 variables.put(name, getter);
@@ -208,12 +208,12 @@ public class VariableSet {
         }
     }
 
-    private class CatagoricalVariableSetterGetter extends VariableSetterGetter {
-        ArrayList<CatagoricalVariableOption> options;
+    private class CategoricalVariableSetterGetter extends VariableSetterGetter {
+        ArrayList<CategoricalVariableOption> options;
 
-        public CatagoricalVariableSetterGetter(String name) {
+        public CategoricalVariableSetterGetter(String name) {
             super(name);
-            options = new ArrayList<CatagoricalVariableOption>();
+            options = new ArrayList<CategoricalVariableOption>();
         }
 
         public String getTypeName() {
@@ -236,15 +236,15 @@ public class VariableSet {
                     if (attrNode != null) {
                         weight = Integer.parseInt(attrNode.getNodeValue());
                     }
-                    options.add(new CatagoricalVariableOption(name, weight));
+                    options.add(new CategoricalVariableOption(name, weight));
                 }
             }
         } // END readOptionsFromXML
 
         Hashtable<String, Double> valuesFromKeyValuePair(String value) {
             Hashtable<String, Double> val = new Hashtable<String, Double>();
-            for (Iterator<CatagoricalVariableOption> it = options.iterator(); it.hasNext(); ) {
-                CatagoricalVariableOption option = it.next();
+            for (Iterator<CategoricalVariableOption> it = options.iterator(); it.hasNext(); ) {
+                CategoricalVariableOption option = it.next();
                 Double optionValue = new Double(0);
                 if (value.equals(option.toString())) {
                     optionValue = new Double(1);
@@ -256,8 +256,8 @@ public class VariableSet {
         }
 
         public boolean hasValues(Hashtable<String, Double> values) {
-            for (Iterator<CatagoricalVariableOption> it = options.iterator(); it.hasNext(); ) {
-                CatagoricalVariableOption option = it.next();
+            for (Iterator<CategoricalVariableOption> it = options.iterator(); it.hasNext(); ) {
+                CategoricalVariableOption option = it.next();
                 String optionKey = String.format("%s_is%s", key, option);
                 if (!values.containsKey(optionKey)) {
                     return false;
@@ -267,8 +267,8 @@ public class VariableSet {
         }
 
         public String keyValuePairFromValues(Hashtable<String, Double> values) {
-            for (Iterator<CatagoricalVariableOption> it = options.iterator(); it.hasNext(); ) {
-                CatagoricalVariableOption option = it.next();
+            for (Iterator<CategoricalVariableOption> it = options.iterator(); it.hasNext(); ) {
+                CategoricalVariableOption option = it.next();
                 String optionKey = String.format("%s_is%s", key, option);
                 if (values.get(optionKey).doubleValue() > 0) {
                     return String.format("%s=%s", key, option);
@@ -281,14 +281,14 @@ public class VariableSet {
 
         public String randomValueString(Random random) {
             int demonimator = 0;
-            for (Iterator<CatagoricalVariableOption> it = options.iterator(); it.hasNext(); ) {
-                CatagoricalVariableOption option = it.next();
+            for (Iterator<CategoricalVariableOption> it = options.iterator(); it.hasNext(); ) {
+                CategoricalVariableOption option = it.next();
                 demonimator += option.probabilityWeight;
             }
             int r = random.nextInt(demonimator);
-            CatagoricalVariableOption chosenOption = null;
-            for (Iterator<CatagoricalVariableOption> it = options.iterator(); it.hasNext() && chosenOption == null; ) {
-                CatagoricalVariableOption option = it.next();
+            CategoricalVariableOption chosenOption = null;
+            for (Iterator<CategoricalVariableOption> it = options.iterator(); it.hasNext() && chosenOption == null; ) {
+                CategoricalVariableOption option = it.next();
                 for (int j = 0; j < option.probabilityWeight && chosenOption == null; ++j) {
                     if (r == 0) {
                         chosenOption = option;
@@ -300,11 +300,11 @@ public class VariableSet {
             return String.format("%s=%s", key, chosenOption);
         }
 
-        private class CatagoricalVariableOption {
+        private class CategoricalVariableOption {
             String name;
             int probabilityWeight;
 
-            public CatagoricalVariableOption(String name, int probabilityWeight) {
+            public CategoricalVariableOption(String name, int probabilityWeight) {
                 this.name = name;
                 this.probabilityWeight = probabilityWeight;
             }
@@ -313,5 +313,5 @@ public class VariableSet {
                 return name;
             }
         }
-    } // END class CatagoricalVariableSetterGetter
+    } // END class CategoricalVariableSetterGetter
 }
