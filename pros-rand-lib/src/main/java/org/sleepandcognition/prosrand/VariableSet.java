@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -65,6 +66,18 @@ public class VariableSet {
         }
     }
 
+    public VariableSet(List<String> variableSpec) {
+        variables = new Hashtable<String, VariableSetterGetter>();
+        for (Iterator<String> it = variableSpec.iterator(); it.hasNext(); ) {
+            String name = it.next();
+            VariableSetterGetter getter = new ContinuousVariableSetterGetter(name);
+            variables.put(name, getter);
+        }
+        if (variableSpec.size() > 1) {
+            multiDimensional = true;
+        }
+    }
+
     public Hashtable<String, Double> valuesFromKeyValuePair(String key, String value) {
         VariableSetterGetter getter;
         if (key == null) {
@@ -77,6 +90,16 @@ public class VariableSet {
             getter = variables.get(key);
         }
         return getter.valuesFromKeyValuePair(value);
+    }
+
+    public Hashtable<String, String> getVariables() {
+        Hashtable<String, String> vars = new Hashtable<String, String>();
+        for (Enumeration<String> e = variables.keys(); e.hasMoreElements(); ) {
+            String key = e.nextElement();
+            VariableSetterGetter getter = variables.get(key);
+            vars.put(key, getter.getTypeName());
+        }
+        return vars;
     }
 
     public String keyValueEncodingFromValues(Hashtable<String, Double> values) {
@@ -115,12 +138,14 @@ public class VariableSet {
         return multiDimensional;
     }
 
-    private class VariableSetterGetter {
+    private abstract class VariableSetterGetter {
         String key;
 
         public VariableSetterGetter(String name) {
             key = name;
         }
+
+        public abstract String getTypeName();
 
         Hashtable<String, Double> valuesFromKeyValuePair(String value) {
             Hashtable<String, Double> val = new Hashtable<String, Double>();
@@ -159,6 +184,10 @@ public class VariableSet {
             simulationStdDev = 1.0;
         }
 
+        public String getTypeName() {
+            return "continuous";
+        }
+
         public void readOptionsFromXML(Node node) {
             org.w3c.dom.NamedNodeMap attrs = node.getAttributes();
             org.w3c.dom.Node attrNode;
@@ -185,6 +214,10 @@ public class VariableSet {
         public CatagoricalVariableSetterGetter(String name) {
             super(name);
             options = new ArrayList<CatagoricalVariableOption>();
+        }
+
+        public String getTypeName() {
+            return "categorical";
         }
 
         public void readOptionsFromXML(Node node) {

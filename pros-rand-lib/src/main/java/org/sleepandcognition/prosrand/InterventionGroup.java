@@ -117,11 +117,16 @@ public class InterventionGroup {
             return Integer.MAX_VALUE;
         }
         int s = (int) Math.floor(currentGroupSize() / relativeGroupSize);
+        System.out.println(String.format("Scaled group size of %s: %d", name, s));
         return s;
     }
 
     public boolean isEmpty() {
         return ((relativeGroupSize > 0.0) && (subjects.size() < 1));
+    }
+
+    public ArrayList<MultiDimSubject> getSubjects() {
+        return subjects;
     }
 
     public void addSubject(MultiDimSubject subject) {
@@ -134,7 +139,20 @@ public class InterventionGroup {
         }
     }
 
+    // TODO: refactor to eliminate; redundant with getMeanVector() below
     public Hashtable<String, Double> meanVectorForVariables(VariableSet variables) {
+        Hashtable<String, Double> meanVector = new Hashtable<String, Double>();
+        if (subjects.size() > 0) {
+            for (Enumeration<String> vit = means.keyIterator(); vit.hasMoreElements(); ) {
+                String key = vit.nextElement();
+                meanVector.put(key, Double.valueOf(means.mean(key)));
+            }
+            return meanVector;
+        }
+        return null;
+    }
+
+    public Hashtable<String, Double> getMeanVector() {
         Hashtable<String, Double> meanVector = new Hashtable<String, Double>();
         if (subjects.size() > 0) {
             for (Enumeration<String> vit = means.keyIterator(); vit.hasMoreElements(); ) {

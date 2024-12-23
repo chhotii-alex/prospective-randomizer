@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
+
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -18,7 +20,7 @@ public abstract class Randomizer {
     int verbosity;
     boolean allowRevision;
 
-    static int RandomizerCommVersion() {
+    public static int RandomizerCommVersion() {
         return 5;
     }
 
@@ -33,32 +35,53 @@ public abstract class Randomizer {
         database = db;
         this.variables = variables;
         groups = InterventionGroup.ReadGroups(groupListFile);
+        controllersOffSwitch = listening;
+        readSubjects();
+    }
+
+    public Randomizer(
+        ProtocolSpec spec,
+        SubjectDatabase db
+    )  throws IOException {
+        this.allowRevision = spec.allowRevision;
+        database = db;
+        variables = new VariableSet(spec.variableSpec);
+        groups = new Hashtable<String, InterventionGroup>();
+        for (Iterator<String> it = spec.groupNames.iterator(); it.hasNext(); ) {
+            String groupName = it.next();
+            groups.put(groupName, new InterventionGroup(groupName));
+        }
+        readSubjects();
+    }
+
+    protected void readSubjects() throws IOException {
         ArrayList<MultiDimSubject> subjects = database.ReadSubjectsIntoGroups(variables, groups);
         subjectsByID = new Hashtable<String, MultiDimSubject>();
         unassignedSubjects = new ArrayList<MultiDimSubject>();
         for (Iterator<MultiDimSubject> it = subjects.iterator(); it.hasNext(); ) {
             addSubject(it.next());
         }
-        controllersOffSwitch = listening;
     }
 
-    protected synchronized void quit() {
-        controllersOffSwitch.clearFlag();
+    public synchronized void quit() {
+        if (controllersOffSwitch != null) {
+            controllersOffSwitch.clearFlag();
+        }
     }
 
-    protected synchronized boolean checkID(String string) {
+    public synchronized boolean checkID(String string) {
         return subjectsByID.containsKey(string);
     }
 
-    protected synchronized boolean isCommitted(String sID) {
+    public synchronized boolean isCommitted(String sID) {
         return checkID(sID) && subjectsByID.get(sID).isCommitted;
     }
 
-    protected synchronized boolean isRemovable(String subjectID) {
+    public synchronized boolean isRemovable(String subjectID) {
         return checkID(subjectID) && !(subjectsByID.get(subjectID).isCommitted);
     }
 
-    protected synchronized String putOrPlaceSubject(String subjectID, Hashtable<String, String> values, boolean putFlag)
+    public synchronized String putOrPlaceSubject(String subjectID, Hashtable<String, String> values, boolean putFlag)
             throws IOException {
         if (allowRevision) {
             if (isRemovable(subjectID)) {
@@ -93,11 +116,11 @@ public abstract class Randomizer {
         }
     }
 
-    protected synchronized void putSubject(String subjectID, Hashtable<String, String> values) throws IOException {
+    public synchronized void putSubject(String subjectID, Hashtable<String, String> values) throws IOException {
         putOrPlaceSubject(subjectID, values, true);
     }
 
-    protected synchronized void placeSubject(String subjectID, Hashtable<String, String> values) throws IOException {
+    public synchronized void placeSubject(String subjectID, Hashtable<String, String> values) throws IOException {
         putOrPlaceSubject(subjectID, values, false);
     }
 
@@ -113,13 +136,13 @@ public abstract class Randomizer {
         return true;
     }
 
-    protected synchronized boolean addNewSubject(MultiDimSubject subject) throws IOException {
+    public synchronized boolean addNewSubject(MultiDimSubject subject) throws IOException {
         boolean result = addSubject(subject);
         database.WriteOutSubjects(subjectsByID, variables);
         return result;
     }
 
-    protected synchronized String getGroup(String subjectID) throws IOException {
+    public synchronized String getGroup(String subjectID) throws IOException {
         if (subjectsByID.containsKey(subjectID)) {
             MultiDimSubject subject = subjectsByID.get(subjectID);
             boolean didAnyAssignments = false;
@@ -147,7 +170,7 @@ public abstract class Randomizer {
 
     protected abstract void assignAnySubjectAGroup();
 
-    protected synchronized void assignSubjectToGroup(InterventionGroup aGroup, MultiDimSubject multiDimSubject) {
+    public synchronized void assignSubjectToGroup(InterventionGroup aGroup, MultiDimSubject multiDimSubject) {
         aGroup.addSubject(multiDimSubject);
         unassignedSubjects.remove(multiDimSubject);
         if (verbosity >= 0) {
@@ -193,7 +216,7 @@ public abstract class Randomizer {
         return max;
     }
 
-    protected boolean commitSubject(String subjectID) throws IOException {
+    public boolean commitSubject(String subjectID) throws IOException {
         if (subjectsByID.containsKey(subjectID)) {
             subjectsByID.get(subjectID).isCommitted = true;
             database.WriteOutSubjects(subjectsByID, variables);
@@ -203,7 +226,11 @@ public abstract class Randomizer {
         }
     }
 
-    protected void removeSubject(String subjectID) throws IOException {
+    public void removeSubject(String subjectID) throws IOException {
+        // TODO this is really broken
+        // Not recognized that subjects with the same ID are the same subject
+        // subj.myGroup should be set to null
+        // How to elicit bug: -x mode, POST same subject ID with features twice
         MultiDimSubject subj = subjectsByID.get(subjectID);
         subjectsByID.remove(subjectID);
         if (subj.myGroup != null) {
@@ -212,7 +239,7 @@ public abstract class Randomizer {
         database.WriteOutSubjects(subjectsByID, variables);
     }
 
-    protected synchronized void assignAllSubjects() throws IOException {
+    public synchronized void assignAllSubjects() throws IOException {
         boolean didAnyAssignments = false;
         while (unassignedSubjects.size() > 0) {
             assignAnySubjectAGroup();
@@ -225,5 +252,17 @@ public abstract class Randomizer {
 
     public void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
+    }
+
+    public Hashtable<String, InterventionGroup> getGroups() {
+        return groups;
+    }
+
+    public VariableSet getVariables() {
+        return variables;
+    }
+
+    public Hashtable<String, MultiDimSubject> getSubjects() {
+        return subjectsByID;
     }
 }

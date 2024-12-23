@@ -21,4 +21,13 @@ public class MultiDimSubject {
     public void setGroup(InterventionGroup interventionGroup) {
         myGroup = interventionGroup;
     }
+
+    public String getId() {
+        return identifier;
+    }
+
+    public Hashtable<String, Double> getFeatures() {
+        return baselineCharacteristics;
+    }
+
 }

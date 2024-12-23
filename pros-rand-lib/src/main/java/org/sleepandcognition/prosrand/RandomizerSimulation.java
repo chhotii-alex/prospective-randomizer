@@ -1,15 +1,8 @@
 package org.sleepandcognition.prosrand;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Random;
-import javax.xml.parsers.ParserConfigurationException;
-import org.xml.sax.SAXException;
-
 public class RandomizerSimulation {
 
-    /* 
+    /*
     DEAD code; will probably implement a different simulation framework;
     public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException {
         String variablesSpec = "variables.xml";

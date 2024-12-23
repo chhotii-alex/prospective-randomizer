@@ -81,7 +81,7 @@ public class CommandInterface {
                 randomizer.assignAllSubjects();
                 return "OK";
             }
-        } 
+        }
         return "?";
     }
 }

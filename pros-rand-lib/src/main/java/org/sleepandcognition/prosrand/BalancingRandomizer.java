@@ -18,6 +18,13 @@ public class BalancingRandomizer extends Randomizer {
         super(groupListFile, variables, db, listening, allowRevision);
     }
 
+    public BalancingRandomizer(
+        ProtocolSpec spec,
+        SubjectDatabase db
+    ) throws IOException {
+        super(spec, db);
+    }
+
     private MeanVectorCalculator means;
 
     protected synchronized MeanVectorCalculator getMeans() {
@@ -63,6 +70,7 @@ public class BalancingRandomizer extends Randomizer {
         for (Iterator<InterventionGroup> it = groups.values().iterator(); it.hasNext(); ) {
             InterventionGroup aGroup = it.next();
             if (aGroup.isEmpty()) {
+                System.out.println("Found empty group, will assign to that one");
                 // Find the most normal subject so far
                 double shortestVector = Double.MAX_VALUE;
                 MultiDimSubject winningSubject = null;
