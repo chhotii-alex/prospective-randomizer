@@ -123,16 +123,15 @@ can run a Java server and be connected to via TCP/IP; this can be deployed in th
 studies, but may more cheaply be run on a local workstation. A number of other issues would have to be addressed
 before rolling out a cloud deployment:
 * This implementation does not include any authentication mechanism and thus would have to be wrapped in an authentication layer (note, an on-campus deployment without adding an authentication layer is essentially "security through obscurity".)
-* Configuration of groups and variables, and records of subjects, are stored in local text files, rather than a real database, making these data more challenging to share across virtual hosts.
+* Information about subjects (their ID's, features, and group assignments) are stored in local text files, rather than a real database, making these data more challenging to share across virtual hosts.
 * Care has to be taken that if subject identifiers can be linked to individuals that any leakage of data would not be a violation of subject privacy.
   
 Configuration requires specifying what
-the groups are and what features are to be equalized across these groups. The algorithm's performance is
-only good if the specified group sizes are equal or nearly equal.
+the groups are and what features are to be equalized across these groups. 
 
 The algorithm has been wrapped in two different network protocols. The original, simple interface is over
 a simple TCP/IP socket. All configuration must be done by manually editing the groups.txt and variables.xml
-files. Client task processes open a socket connection and issue simple one-letter commands to the server.
+files. Client task processes open a socket connection and issue simple one-word commands to the server.
 The same executable offers command-line interaction, so that researchers may interact with the algorithm
 manually.
 
@@ -300,6 +299,9 @@ alex@dandelion pros-rand-lib %
 _TODO: what whacko group means when re-assigning s3 here? Why?_
 _TODO: Catch exception so that duplicate is recoverable in command-line mode_
 
+### Limitations and future work
+* As mentioned above, the "database" of subjects is not implemented as a real database; it's implementated as a simple text file, which is re-written after every transaction. This is okay for small local deployments&mdash;the number of subjects enrolled per unit time is not likely to be fast enough to run into the perfomance limitations of this approach. It does mean that care has to be taken to move the subject.txt file from machine to machine if the server is moved from one host to another. Generally this is not an issue with a small local study. However, this may make cloud deployment tricky. If the application is containerized, the local file system may not persist across re-starts, and re-starts can happen for various reasons (software crashes, load balancing, etc.) Ideally, SubjectDatabase would be implemented as a real database such as MySQL or Postgres.
+* Likewise, relevant configuration of the study protocol such as groups and variables (features) would benefit from being persisted to a real database. Currently they are configured via local text files (for the socket/command-line implementation) or submitted at start-up from a web client (for the SpingBoot/API implementation) and then just held in memory. This is fragile in the face of any reboots, thus too fragile for cloud deployment.
 
 ## Results
 
