@@ -357,6 +357,55 @@ Attempt to add duplicate subject ID
 ```
 _TODO: what whacko group means when re-assigning s3 here? Why?_
 
+## HTTP Interface
+
+Rather than using a bare TCP/IP socket, for new work, it is recommended that the HTTP protocol is used to communicate
+with the Prospective Randomizer server. The SpringBoot implementation, in `pros-rand-boot`, offers the style of HTTP protocol often (inaccuratedly) referred to as a RESTful API: each command is implemented as an endpoint or path, and the response, if any, is
+JSON-formatted. Complete detailed specifications of each endpoint is available via the server's SwaggerUI interface,
+available via (for example) `http://localhost:8080/swagger-ui/index.html`. API endpoints are roughly equivalent to
+the CLI or socket commands listed above. However, there are a couple of interesting improvements.
+
+The Spring Boot implementation allows you to run multiple protocols (each with their own list of groups and their own
+set of variables) on the same server independently. The groups and variables (along with a name used to identify
+the protocol) are specified in an intial POST message that tells the server to start the protocol. That protocol
+name must be used in every future protocol-specific communication with the server.
+
+Endpoints:
+
+GET /version returns the software's version identifier
+
+POST /{protocolName}/start The request body must be a JSON object with two keys: 'groupNames' and 'variableSpec'. 
+The value for 'groupNames' must be an array of strings, giving the group names. The value for 'variableSpec' must be
+and array of strings, giving feature names. Each feature is assumed to be numeric continuous. The given protocol is
+started.
+
+POST /{protocolName}/subject/{id} The request body must be a JSON object with key-value pairs giving the feature
+values for the subject whose id appears in the path.
+
+POST /{protocolName}/subject/{id}/group The request body must be a JSON object with key-value pairs giving the feature
+values for the subject whose id appears in the path. This furthermore causes the given subject to be assigned to a 
+group and the response gives the name of that group. 
+
+GET /{protocolName}/subject/{id}/group This causes the given subject to be assigned to a group, if needed, and the
+response gives the name of that group. The subject's feature values must have already been submitted via one of the
+POST messages listed above.
+
+POST /{protocolName}/assignall Response body should be empty. This triggers assigning all unassigned subjects to 
+groups.
+
+POST /{protocolName}/subject/{id}/commit Response body should be empty. This causes the given subject to be 
+"committed"&mdash;that is, any attempt to submit new feature values for the given subject will be forbidden.
+
+GET /{protocolName}/subject/{id}/committed returns true or false depending on whether the given subject has been
+committed.
+
+GET /{protocolName}/subjects returns information about the given protocol's subjects
+
+GET /{protocolName}/variables returns information about the given protocol's variables or feature labels
+
+GET /{protocolName}/groups returns information about the given protocol's groups
+
+
 ## Limitations and future work
 * As mentioned above, the "database" of subjects is not implemented as a real database; it's implemented as a simple text file, which is re-written after every transaction. This is okay for small local deployments&mdash;the number of subjects enrolled per unit time is not likely to be fast enough to run into the performance limitations of this approach. It does mean that care has to be taken to move the subject.txt file from machine to machine if the server is moved from one host to another. Generally this is not an issue with a small local study. However, this may make cloud deployment tricky. If the application is containerized, the local file system may not persist across re-starts, and re-starts can happen for various reasons (software crashes, load balancing, etc.) Ideally, SubjectDatabase would be implemented as a real database such as MySQL or Postgres.
 * Likewise, relevant configuration of the study protocol such as groups and variables (features) would benefit from being persisted to a real database. Currently they are configured via local text files (for the socket/command-line implementation) or submitted at start-up from a web client (for the Sping Boot/API implementation) and then just held in memory. This is fragile in the face of any reboots, thus too fragile for cloud deployment.
