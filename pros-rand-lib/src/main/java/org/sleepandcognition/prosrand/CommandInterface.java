@@ -58,6 +58,7 @@ public class CommandInterface {
                         randomizer.putSubject(subjectID, values);
                         return "OK";
                     } catch (InvalidDataException e) {
+                        System.err.println(e.getMessage());
                         return "?";
                     }
                 } else {
@@ -65,6 +66,7 @@ public class CommandInterface {
                         randomizer.placeSubject(subjectID, values);
                         return randomizer.getGroup(subjectID);
                     } catch (InvalidDataException e) {
+                        System.err.println(e.getMessage());
                         return "?";
                     }
                 }

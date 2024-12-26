@@ -1,5 +1,16 @@
-# prospective-randomizer
-Java server that assigns subject to matched experimental groups
+# <h1> <i>prospective-randomizer</i>:
+Java server that assigns subject to matched experimental groups </h1>
+
+- [Introduction](#introduction)
+ - [A new direction](#a-new-direction)
+- [Implementation](#implementation)
+ - [Compiling and Running](#compiling-and-running)
+ - [Simple socket interface](#simple-socket-interface)
+ - [Updatable Variables Mode](#updatable-variables-mode)
+ - [Limitations and future work](#limitations-and-future-work)
+- [Results](#results)
+
+# Introduction
 
 Experimental science seeks to infer causality by isolating the effect of an intervention,
 uncontaminated by confounding factors.
@@ -116,7 +127,7 @@ assessments are (or can be computerized). Having the computerized task contact a
 group allocation algorithm allows for the group allocation to be done automatically,
 covertly, and within milliseconds of the calculation of the pre-intervention feature.
 
-## Implementation
+# Implementation
 
 We have written a Java implementation of the described algorithm. Setup requires identifying a computer that
 can run a Java server and be connected to via TCP/IP; this can be deployed in the cloud for multi-site
@@ -138,7 +149,7 @@ manually.
 A more modern approach is taken by the Spring Boot wrapper. This allows client tasks to communicate with the
 server using the HTTP protocol.
 
-### Compiling and Running
+## Compiling and Running
 
 To obtain the project, install `git`, and execute this command:
 `git clone https://github.com/chhotii-alex/prospective-randomizer.git`
@@ -159,6 +170,8 @@ mvn package
 Then it can be run with a command like this:
 `java -cp target/pros-rand-lib-1.0-SNAPSHOT.jar org.sleepandcognition.prosrand.RandomizerServer -g ../groups.txt -r ../variables.xml`
 
+You may rename `target/pros-rand-lib-1.0-SNAPSHOT.jar` to `server.jar` and copy it to wherever it is needed.
+
 To build the Spring Boot version which uses the HTTP protocol, enter the commands:
 ```
 cd prospective-randomizer
@@ -172,9 +185,12 @@ mvn spring-boot:run -pl pros-rand-boot
 
 Example code that demonstrates use of each networking protocol [here] [describe]
 
-### Simple socket interface/ command line reference
+## Simple socket interface
 
-Here are the commands that can be entered if Prospective Randomizer is running a command-line interface in a terminal window, or submitted via the socket connection if running in network mode. Commands are not case-sensitive. However, subject identifier are case sensitive; s1 and S1 would be regarded as different subjects. Any command starting with # is simply echoed, and has no effect.
+Here are the commands that can be entered if Prospective Randomizer is running a command-line interface in a terminal window, or submitted via the socket connection
+if running in network mode. Commands are not case-sensitive. However, subject identifier are case sensitive; s1 and S1 would be regarded as different subjects.
+
+Any command starting with # is simply echoed, and has no effect.
 
 HELLO RAND!  
 Program responds "HI CLIENT!" Followed by a version identifier.
@@ -184,7 +200,8 @@ PUT must be followed by the subject ID, then each of the variables with their va
 PUT S1 score=4.5 sex=F
 Variable name and value must be joined with just an equal sign, no spaces in between.
 There must be exactly one space before the subject ID, and before each variable name.
-This command tells prospective randomizer that this subject exists, with the given variable values, but does not immediately trigger the addition of the subject to a group. Thus, PR has the opportunity to gain more information about other subjects before adding this one to a group, which may affect the subject's group assignment.
+This command tells prospective randomizer that this subject exists, with the given variable values, but does not immediately trigger the addition of the subject to a group.
+Thus, PR has the opportunity to gain more information about other subjects before adding this one to a group, which may affect the subject's group assignment.
 Program responds with "OK".
 
 GET  
@@ -199,15 +216,31 @@ ASSIGN
 Triggers assignment of all known subjects to groups if they haven't already.
 Program responds with "OK".
 
-Sample session transcript:
+### Sample session transcripts
+
+In these transciprts, any line of text entered by the user starts with a lowercase letter, whereas texts of text emitted by the program Begin With UPPERCASE.
+
+Here we have renamed the `.jar` file that's built in `pros-rand-lib\target` to `server.jar`.
+It can be run  in command-line mode in your shell. Here we start it, and greet it to check that it's reporting the version we expect:
+
 ```
 alex@dandelion pros-rand-lib % java -cp server.jar org.sleepandcognition.prosrand.RandomizerServer -g ../groups.txt -r ../variables.xml -c
 hello rand!
 HI CLIENT! v5
+```
+
+Here we submit the scores for two subjects, but do not ask that they are immediately added to groups, so that later data can be taken into account
+for optimal group assignment: 
+
+```
 put s1 score=9
 OK
 put s2 score=1
 OK
+```
+
+Now, when we  need group assignments for these subjects:
+```
 get s1
 Assigned s1 to A
 Current group means:
@@ -220,6 +253,10 @@ Current group means:
 A: {score=9.0}
 B: {score=1.0}
 B
+```
+
+Here we demonstrate submitting the feature value(s) for a subject and asking for their group assignment in one atomic operation:
+```
 place s3 score=8
 Mean of score, all subjects: 6.000000  Std dev of score: 3.559026
 Considering groups:
@@ -230,13 +267,28 @@ Current group means:
 A: {score=9.0}
 B: {score=4.5}
 B
+```
+
+Here we attempt to submit a new value for the same subject ID as above. As the program is not in the mode whereby it allows updates, this is refused:
+```
+place s3 score=4
+Attempt to add duplicate subject ID 
+?
+```
+
+Quit gracefully, and then we have our shell prompt back:
+```
 quit
 OK
 alex@dandelion pros-rand-lib % 
 ```
-### Additional commands relevant if variable revisions are allowed
+## Updatable Variables Mode
 
-If the program is started with the -x flag, one has the option to re-submit variable values for a subject, potentially altering the subject's group assignment, until the subject has been "committed".
+If the program is started with the -x flag, one has the option to re-submit variable values for a subject, potentially altering the subject's group assignment,
+until the subject has been "committed". Note that such a group assignment change can be effected even after the group assignment is taken and used; so be sure
+to "COMMIT" a subject at the point in time when the subject starts to proceed down one arm or the other of the study in the real world!
+
+Relevant commands:
 
 COMMIT  
 COMMIT followed by a subject ID causes re-submission of variable values to be forbidden from that point in time onwards.
@@ -247,8 +299,14 @@ COMMITTED followed by a subject ID looks up whether the COMMIT command was issue
 Program responds "YES" or "NO".
 
 Sample session transcript with the revision option on:
+
+Command line is the same, except that we add the `-x` option to the command:
 ```
 alex@dandelion pros-rand-lib % java -cp server.jar org.sleepandcognition.prosrand.RandomizerServer -g ../groups.txt -r ../variables.xml -c -x
+```
+
+Now we add some subjects as usual&mdash;submitting their feature values and getting their group assignments:
+```
 place s1 score=1
 Assigned s1 to A
 Current group means:
@@ -271,6 +329,10 @@ Current group means:
 A: {score=4.5}
 B: {score=9.0}
 A
+```
+
+Since subject s3 is not yet committed (which we can find out with the COMMIT command), submitting a new score is allowed, and actually changes the group assignment:
+```
 committed s3
 NO
 place s3 score=2
@@ -285,25 +347,23 @@ B: {score=5.5}
 B
 get s3
 B
+```
+
+We can then lock down s3's group assignment, once they have become a participant in that group:
+```
 commit s3
 OK
 place s3 score=9
-WARNING, there was an attempt to add duplicate subject ID s3
-Exception in thread "main" org.sleepandcognition.prosrand.InvalidDataException: duplicate subject?
-        at org.sleepandcognition.prosrand.Randomizer.putOrPlaceSubject(Randomizer.java:92)
-        at org.sleepandcognition.prosrand.Randomizer.placeSubject(Randomizer.java:101)
-        at org.sleepandcognition.prosrand.CommandInterface.parseCommand(CommandInterface.java:60)
-        at org.sleepandcognition.prosrand.RandomizerServer.run(RandomizerServer.java:176)
-alex@dandelion pros-rand-lib %  
+Attempt to add duplicate subject ID
+?
 ```
 _TODO: what whacko group means when re-assigning s3 here? Why?_
-_TODO: Catch exception so that duplicate is recoverable in command-line mode_
 
-### Limitations and future work
+## Limitations and future work
 * As mentioned above, the "database" of subjects is not implemented as a real database; it's implemented as a simple text file, which is re-written after every transaction. This is okay for small local deployments&mdash;the number of subjects enrolled per unit time is not likely to be fast enough to run into the performance limitations of this approach. It does mean that care has to be taken to move the subject.txt file from machine to machine if the server is moved from one host to another. Generally this is not an issue with a small local study. However, this may make cloud deployment tricky. If the application is containerized, the local file system may not persist across re-starts, and re-starts can happen for various reasons (software crashes, load balancing, etc.) Ideally, SubjectDatabase would be implemented as a real database such as MySQL or Postgres.
 * Likewise, relevant configuration of the study protocol such as groups and variables (features) would benefit from being persisted to a real database. Currently they are configured via local text files (for the socket/command-line implementation) or submitted at start-up from a web client (for the Sping Boot/API implementation) and then just held in memory. This is fragile in the face of any reboots, thus too fragile for cloud deployment.
 
-## Results
+# Results
 
 simulation results
 
@@ -311,7 +371,7 @@ discuss Barsky's study
 
 my thesis?
 
-## Conclusion
+# Conclusion
 
 
 

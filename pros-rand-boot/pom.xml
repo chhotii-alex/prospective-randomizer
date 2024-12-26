@@ -48,10 +48,15 @@
 		</dependency>
 
 		<dependency>
-	        <groupId>com.diffplug.spotless</groupId>
-      		<artifactId>spotless-maven-plugin</artifactId>
-      		<version>2.43.0</version>
-    	</dependency>
+	          <groupId>com.diffplug.spotless</groupId>
+      		  <artifactId>spotless-maven-plugin</artifactId>
+      		  <version>2.43.0</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.springdoc</groupId>
+		  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+		  <version>2.2.0</version>
+		</dependency>
 
 	</dependencies>
 
