@@ -1,13 +1,12 @@
-# <h1> <i>prospective-randomizer</i>:
-Java server that assigns subject to matched experimental groups </h1>
+# <h1> <i>prospective-randomizer</i>: Java server that assigns subject to matched experimental groups </h1>
 
 - [Introduction](#introduction)
- - [A new direction](#a-new-direction)
+  - [A new direction](#a-new-direction)
 - [Implementation](#implementation)
- - [Compiling and Running](#compiling-and-running)
- - [Simple socket interface](#simple-socket-interface)
- - [Updatable Variables Mode](#updatable-variables-mode)
- - [Limitations and future work](#limitations-and-future-work)
+  - [Compiling and Running](#compiling-and-running)
+  - [Simple socket interface](#simple-socket-interface)
+  - [Updatable Variables Mode](#updatable-variables-mode)
+  - [Limitations and future work](#limitations-and-future-work)
 - [Results](#results)
 
 # Introduction
@@ -15,12 +14,11 @@ Java server that assigns subject to matched experimental groups </h1>
 Experimental science seeks to infer causality by isolating the effect of an intervention,
 uncontaminated by confounding factors.
 
-Standard teaching on experimental design is, to quote Munnangi and Boktor 2024
-[https://pubmed.ncbi.nlm.nih.gov/29262004/]:
-"Randomized... control trials (RCT) are considered the gold standard of study design...
-Randomization in RCT avoids confounding and minimizes selection bias.
-This enables the researcher to have similar experimental and control groups,
-thereby enabling them to isolate the effect of an intervention."
+Standard teaching on experimental design is, to quote [Munnangi and Boktor 2024](https://pubmed.ncbi.nlm.nih.gov/29262004/):
+> Randomized... control trials (RCT) are considered the gold standard of study design...
+> Randomization in RCT avoids confounding and minimizes selection bias.
+> This enables the researcher to have similar experimental and control groups,
+> thereby enabling them to isolate the effect of an intervention.
 
 But is it in fact the _randomization_ that obtains all these advantages? Randomization as compared
 to what?
