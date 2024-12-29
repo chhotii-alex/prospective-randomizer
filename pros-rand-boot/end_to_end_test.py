@@ -5,9 +5,17 @@ from pathlib import Path
 homedir = Path(".")
 
 protocols = {
-    "foo" : ['A', 'B'],
-    "bar" : ['C', 'D', 'E']
+    "foo" : {
+        'groupNames':['A', 'B'],
+        'variableSpec': ['weight'],
+        'allowRevision': False,
+    },
+    "bar" : {
+        'groupNames':['C', 'D', 'E'],
+        'variableSpec': ['score'],
+        'allowRevision': True,
     }
+}
 
 require_restart = True
 if require_restart:
@@ -21,9 +29,9 @@ if require_restart:
     time.sleep(0.25)
     reply = input("Please hit the Enter key when you see 'Started ProsRandApplication' in the console.")
 
-def run_test(protocol_name = "foo",
-             groups = ["C", "D"],
-             variables = ["weight"]):
+def run_test(protocol_name,
+             protocol_spec):
+    
     def make_url(protocol_specific, endpart):
         url = 'http://localhost:8080/'
         if protocol_specific:
@@ -46,53 +54,67 @@ def run_test(protocol_name = "foo",
 
     # not found when not yet started
     r = requests.post(make_url(True, 'subject/s01'),
-                      json={'weight': 50},
+                      json={protocol_spec['variableSpec'][0]: 50},
                     )
-    print(r.status_code)
-    # TODO: this should be a 404, not 500
-    assert r.status_code != 200
+    assert r.status_code == 404
     
     
     r = requests.post(make_url(True, 'start'),
-                    json={"groupNames": groups, "variableSpec": variables, "allowRevision": False}
-                    )
+                      json=protocol_spec)
+    print(protocol_spec)
+    print(r.status_code)
     assert r.status_code == 200
 
     # Requesting start of the exact same protocol again should be ok
     r = requests.post(make_url(True, 'start'),
-                    json={"groupNames": groups, "variableSpec": variables, "allowRevision": False}
-                    )
+                      json=protocol_spec)
     assert r.status_code == 200
 
     # But changing anything about the protocol details should result in 400 Bad Request
     r = requests.post(make_url(True, 'start'),
-                    json={"groupNames": ['x', 'y'], "variableSpec": variables, "allowRevision": False}
+                    json={"groupNames": ['x', 'y'],
+                          "variableSpec": protocol_spec['variableSpec'],
+                          "allowRevision": protocol_spec['allowRevision']}
                     )
     assert r.status_code == 400
     r = requests.post(make_url(True, 'start'),
-                    json={"groupNames": groups, "variableSpec": ['froopiness', 'towel_hue'], "allowRevision": False}
+                    json={"groupNames": protocol_spec['groupNames'],
+                          "variableSpec": ['froopiness', 'towel_hue'],
+                          "allowRevision": protocol_spec['allowRevision']}
                     )
     assert r.status_code == 400
     r = requests.post(make_url(True, 'start'),
-                    json={"groupNames": groups + ['another'], "variableSpec": variables, "allowRevision": False}
+                    json={"groupNames": protocol_spec['groupNames'] + ['another'],
+                          "variableSpec": protocol_spec['variableSpec'],
+                          "allowRevision": protocol_spec['allowRevision']}
                     )
     assert r.status_code == 400
     r = requests.post(make_url(True, 'start'),
-                    json={"groupNames": groups, "variableSpec": variables + ['loft'], "allowRevision": False}
+                    json={"groupNames": protocol_spec['groupNames'] + ['another'],
+                          "variableSpec": protocol_spec['variableSpec'] + ['loft'],
+                          "allowRevision": protocol_spec['allowRevision']}
                     )
     assert r.status_code == 400
     
 
     r = requests.post(make_url(True, 'subject/s01'),
-                      json={'weight': 50},
+                      json={protocol_spec['variableSpec'][0]: 50},
                     )
     assert r.status_code == 200
+
+    r = requests.post(make_url(True, 'subject/s01'),
+                      json={protocol_spec['variableSpec'][0]: 100},
+                    )
+    if protocol_spec['allowRevision']:
+        assert r.status_code == 200
+    else:
+        assert r.status_code == 400
 
     r = requests.get(make_url(True, 'subject/s01/group'))
     assert r.status_code == 200
 
     r = requests.post(make_url(True, 'subject/s02/group'),
-                      json={'weight': 150},
+                      json={protocol_spec['variableSpec'][0]: 150},
                      )
     assert r.status_code == 200
 
@@ -114,15 +136,15 @@ def run_test(protocol_name = "foo",
     assert r.status_code == 200
     returned_groups = r.json()
     print(returned_groups)
-    assert len(groups) == len(returned_groups)
-    for g in groups:
+    assert len(protocol_spec['groupNames']) == len(returned_groups)
+    for g in protocol_spec['groupNames']:
         assert g in returned_groups
 
     r = requests.get(make_url(True, 'variables'))
     assert r.status_code == 200
     returned_vars = r.json()
-    assert len(variables) == len(returned_vars)
-    for g in variables:
+    assert len(protocol_spec['variableSpec']) == len(returned_vars)
+    for g in protocol_spec['variableSpec']:
         assert g in returned_vars
 
     r = requests.get(make_url(True, 'subjects'))
@@ -131,12 +153,12 @@ def run_test(protocol_name = "foo",
     # TODO inspect these results
 
     r = requests.post(make_url(True, 'subject/s03'),
-                      json={'weight': 75},
+                      json={protocol_spec['variableSpec'][0]: 75},
                     )
     assert r.status_code == 200
 
     r = requests.post(make_url(True, 'subject/s04'),
-                      json={'weight': 60},
+                      json={protocol_spec['variableSpec'][0]: 60},
                     )
     assert r.status_code == 200
 
@@ -149,10 +171,10 @@ def run_test(protocol_name = "foo",
     assert r.status_code == 200
     for s in r.json().values():
         assert "groupName" in s
-        assert s["groupName"] in groups
+        assert s["groupName"] in protocol_spec['groupNames']
 
-for protocol_name, groups in protocols.items():
-    run_test(protocol_name, groups=groups)
+for protocol_name, protocol_spec in protocols.items():
+    run_test(protocol_name, protocol_spec)
 print()
 print("Success, done!")
 

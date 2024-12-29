@@ -5,6 +5,7 @@ import java.util.Hashtable;
 import javax.xml.parsers.ParserConfigurationException;
 import org.sleepandcognition.prosrand.BalancingRandomizer;
 import org.sleepandcognition.prosrand.InterventionGroup;
+import org.sleepandcognition.prosrand.InvalidDataException;
 import org.sleepandcognition.prosrand.MultiDimSubject;
 import org.sleepandcognition.prosrand.ProtocolSpec;
 import org.sleepandcognition.prosrand.Randomizer;
@@ -65,49 +66,58 @@ public class RandomizerController {
     void putSubject(
             @PathVariable String protocolName, @PathVariable String id, @RequestBody Hashtable<String, String> features)
             throws Exception {
-        randomizers.get(protocolName).putOrPlaceSubject(id, features, true);
+        try {
+            randomizerOfName(protocolName).putOrPlaceSubject(id, features, true);
+        } catch (InvalidDataException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/{protocolName}/subject/{id}/group")
     String getGroup(@PathVariable String protocolName, @PathVariable String id) throws Exception {
-        return randomizers.get(protocolName).getGroup(id);
+        return randomizerOfName(protocolName).getGroup(id);
     }
 
     @PostMapping("/{protocolName}/subject/{id}/group")
     String placeSubject(
-            @PathVariable String protocolName, @PathVariable String id, @RequestBody Hashtable<String, String> features)
-            throws Exception {
-        String group = randomizers.get(protocolName).putOrPlaceSubject(id, features, false);
-        return group;
+            @PathVariable String protocolName,
+            @PathVariable String id,
+            @RequestBody Hashtable<String, String> features) throws Exception {
+        try {
+            String group = randomizerOfName(protocolName).putOrPlaceSubject(id, features, false);
+            return group;
+        } catch (InvalidDataException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/{protocolName}/subject/{id}/commit")
     boolean commitSubject(@PathVariable String protocolName, @PathVariable String id) throws Exception {
-        return randomizers.get(protocolName).commitSubject(id);
+        return randomizerOfName(protocolName).commitSubject(id);
     }
 
     @GetMapping("/{protocolName}/subject/{id}/committed")
     boolean isSubjectCommitted(@PathVariable String protocolName, @PathVariable String id) {
-        return randomizers.get(protocolName).isCommitted(id);
+        return randomizerOfName(protocolName).isCommitted(id);
     }
 
     @GetMapping("/{protocolName}/groups")
     Hashtable<String, InterventionGroup> getAllGroups(@PathVariable String protocolName) {
-        return randomizers.get(protocolName).getGroups();
+        return randomizerOfName(protocolName).getGroups();
     }
 
     @GetMapping("/{protocolName}/variables")
     Hashtable<String, String> getVariables(@PathVariable String protocolName) {
-        return randomizers.get(protocolName).getVariables().getVariables();
+        return randomizerOfName(protocolName).getVariables().getVariables();
     }
 
     @GetMapping("/{protocolName}/subjects")
     Hashtable<String, MultiDimSubject> getSubjects(@PathVariable String protocolName) {
-        return randomizers.get(protocolName).getSubjects();
+        return randomizerOfName(protocolName).getSubjects();
     }
 
     @PostMapping("/{protocolName}/assignall")
     void assignAll(@PathVariable String protocolName) throws Exception {
-        randomizers.get(protocolName).assignAllSubjects();
+        randomizerOfName(protocolName).assignAllSubjects();
     }
 }
