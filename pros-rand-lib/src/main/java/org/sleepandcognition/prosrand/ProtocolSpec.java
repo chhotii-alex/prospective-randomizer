@@ -22,12 +22,12 @@ public class ProtocolSpec {
     public List<String> getVariableSpec() {
         return variableSpec;
     }
-    
+
     public void setAllowRevision(boolean flag) {
         allowRevision = flag;
     }
 
     public boolean getAllowRevision() {
         return allowRevision;
-    } 
+    }
 }

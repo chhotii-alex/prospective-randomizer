@@ -69,6 +69,7 @@ public class BalancingRandomizer extends Randomizer {
             if (aGroup.isEmpty()) {
                 System.out.println("Found empty group, will assign to that one");
                 // Find the most normal subject so far
+                // TODO: revisit in simulations: would least normal subject work better?
                 double shortestVector = Double.MAX_VALUE;
                 MultiDimSubject winningSubject = null;
                 for (Iterator<MultiDimSubject> subjIt = unassignedSubjects.iterator(); subjIt.hasNext(); ) {

@@ -97,18 +97,30 @@ perhaps hope to match groups, at least in their means on selected features. Howe
 added to the study one at a time (or a few at a time), it is difficult to accurately anticipate the mean
 of the subjects who will enroll.
 
-An algorithm to add subjects to groups one at a time to keep the mean of one feature approximately the
+A simple algorithm to add subjects to groups one at a time to keep the mean of one feature approximately the
 same between groups: Compare the feature value for each new subject to the mean of all subjects so far;
 if that value is less than the overall mean, add the subject to the group with the highest mean, and
-if the value is greater, add to the lowest-mean group.
+if the value is greater, add to the lowest-mean group. This has the complication that the number of subjects
+in each group can become quite unequal with an unlucky sequence of subjects. Consider how things go with
+in-order assignment of subjects with these values: 5, 6, 9, 1, 13, 2, which winds up with one group having
+5 members and the other only one. [Show this?] A compromise solution is to constrain the algorithm to only
+add subjects to groups with the least number of subjects already added. Feature values still play a role,
+as there may be more than one group tied for having the least subjects. Feature values can be given an
+even stronger role if subjects do not need to be added to groups immediately&mdash;that is, if there is some
+temporal delay in the protocol between aquiring any given subject's feature value and submitting that to the
+algorithm, and acting upon the decision as to which group that subject is in. If values for several subjects
+are buffered, even if one group is in the least-filled tier, an optimal decision can be made between the
+several subjects as to which subject to assign to that group for optimal group balance. This is done by
+swapping roles in the simple algorithm's desciption: compare the feature mean of the group to the overall
+mean; if it is lower, choose the highest-value subject available, and vice versa.
 
 It may be difficult to anticipate what one feature is most important to try to equalize. Fortunately, this
 algorithm easily generalizes to multiple dimensions. The feature values in each dimension should be
 normalized (centered
 and scaled), by subtracting the current mean and dividing by the current standard deviation. A vector
 consisting of the mean normalized value of each feature is calculated for each group. The dot product of
-each group's vector and the vector of normalized features for the new subject is calculated, and the
-group with the least dot product is selected (that is, negative with the largest magnitude).
+each least-filled group's vector and the vector of normalized features for each new subject is calculated, and the
+group-subject pairing with the least dot product is selected (that is, negative with the largest magnitude).
 
 A drawback of equalizing more than one feature is that the more features are used, the poorer the
 expected equalization on any one dimension.
@@ -116,7 +128,9 @@ expected equalization on any one dimension.
 [maybe work through an example with pictures with arrows]
 
 Non-numeric (i.e. categorical) features can be converted to numeric by encoding as one-hot features. [Do
-I need to explain this?]
+I need to explain this?] A concern with this approach is that a single feature then potentially becomes
+several feature, and thus makes several contributions to the dot product of the feature vectors. This will
+give the categorical feature greater importance than other features, unless [... TODO: do I do weighting?]
 
 While this approach could be applied manually (particularly if there is only one feature being equalized),
 it is better to computerize the algorithm and leave humans out of the group-assignment loop, thus avoiding
@@ -131,8 +145,10 @@ We have written a Java implementation of the described algorithm. Setup requires
 can run a Java server and be connected to via TCP/IP; this can be deployed in the cloud for multi-site
 studies, but may more cheaply be run on a local workstation. A number of other issues would have to be addressed
 before rolling out a cloud deployment:
-* This implementation does not include any authentication mechanism and thus would have to be wrapped in an authentication layer (note, an on-campus deployment without adding an authentication layer is essentially "security through obscurity".)
-* Information about subjects (their ID's, features, and group assignments) are stored in local text files, rather than a real database, making these data more challenging to share across virtual hosts.
+* This implementation does not include any authentication mechanism and thus would have to be wrapped in an
+authentication layer (note, an on-campus deployment without adding an authentication layer is essentially "security through obscurity".)
+* Information about subjects (their ID's, features, and group assignments) are stored in local text files, rather than a real database,
+making these data more challenging to share across virtual hosts.
 * Care has to be taken that if subject identifiers can be linked to individuals that any leakage of data would not be a violation of subject privacy.
   
 Configuration requires specifying what

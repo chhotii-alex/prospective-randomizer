@@ -44,7 +44,6 @@ public class RandomizerServer {
             throws SAXException, ParserConfigurationException, IOException, InvalidDataException {
         boolean commandLineMode = false;
         boolean networkMode = false;
-        boolean guiMode = false;
         int portNumber = 1996;
         String variablesSpec = "variables.xml";
         String groupListFile = "groups.txt";
@@ -74,9 +73,6 @@ public class RandomizerServer {
                             break;
                         case 'c':
                             commandLineMode = true;
-                            break;
-                        case 'i':
-                            guiMode = true;
                             break;
                         case 'n':
                             networkMode = true;
@@ -122,13 +118,9 @@ public class RandomizerServer {
             System.out.println("source code version: $Name:  $");
         }
 
-        if (!(commandLineMode || networkMode || guiMode)) {
+        if (!(commandLineMode || networkMode)) {
             commandLineMode = true;
             networkMode = true;
-        }
-
-        if (guiMode) {
-            // run dialog to let user specify files, etc.
         }
 
         StillGoingFlag listening = new StillGoingFlag();
@@ -144,47 +136,43 @@ public class RandomizerServer {
         randomizer.setVerbosity(verbosity);
         commander = new CommandInterface(randomizer);
 
-        if (guiMode) {
-
-        } else {
-            ServerSocket serverSocket = null;
-            if (networkMode) {
-                if (verbosity >= 0) {
-                    System.out.println("Just before creating listener socket...");
-                }
-                try {
-                    serverSocket = new ServerSocket(portNumber);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    System.err.println("Could not listen on port " + portNumber);
-                    System.err.println(
-                            "This could be because an existing instance of RandomizerServer is running on this machine.");
-                    System.err.println(
-                            "On Mac or Linux, use the ps command (probably with some flags) to hunt down previous instances");
-                    System.err.println("of this process, and use kill -9 to kill them.");
-                    System.err.println(
-                            "On Windows, use ctl-alt=del to get a list of processes, and look for and stop javaw.");
-                    System.err.println("Or, on any platform, just reboot!");
-                    System.err.println("Then try again.");
-                    System.out.println("ATTENTION: PROSPECTIVE RANDOMIZER NOT RUNNING!!!!!");
-                    System.exit(-1);
-                }
-                if (verbosity >= 0) {
-                    System.out.println("Created listener socket.");
-                }
-                ServerThread thread = new ServerThread(serverSocket, commander, listening, commandLineMode, verbosity);
-                thread.start();
+        ServerSocket serverSocket = null;
+        if (networkMode) {
+            if (verbosity >= 0) {
+                System.out.println("Just before creating listener socket...");
             }
-            if (commandLineMode) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-                while (listening.getFlagValue()) {
-                    String input = br.readLine();
-                    String reply = commander.parseCommand(input);
-                    System.out.println(reply);
-                }
-                if (serverSocket != null) {
-                    serverSocket.close();
-                }
+            try {
+                serverSocket = new ServerSocket(portNumber);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.err.println("Could not listen on port " + portNumber);
+                System.err.println(
+                        "This could be because an existing instance of RandomizerServer is running on this machine.");
+                System.err.println(
+                        "On Mac or Linux, use the ps command (probably with some flags) to hunt down previous instances");
+                System.err.println("of this process, and use kill -9 to kill them.");
+                System.err.println(
+                        "On Windows, use ctl-alt=del to get a list of processes, and look for and stop javaw.");
+                System.err.println("Or, on any platform, just reboot!");
+                System.err.println("Then try again.");
+                System.out.println("ATTENTION: PROSPECTIVE RANDOMIZER NOT RUNNING!!!!!");
+                System.exit(-1);
+            }
+            if (verbosity >= 0) {
+                System.out.println("Created listener socket.");
+            }
+            ServerThread thread = new ServerThread(serverSocket, commander, listening, commandLineMode, verbosity);
+            thread.start();
+        }
+        if (commandLineMode) {
+            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            while (listening.getFlagValue()) {
+                String input = br.readLine();
+                String reply = commander.parseCommand(input);
+                System.out.println(reply);
+            }
+            if (serverSocket != null) {
+                serverSocket.close();
             }
         }
     }

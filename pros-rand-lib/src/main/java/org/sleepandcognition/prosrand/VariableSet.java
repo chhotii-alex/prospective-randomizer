@@ -150,7 +150,6 @@ public class VariableSet {
             }
             return String.format("%s=%f", key, value.doubleValue());
         }
-
     }
 
     private class ContinuousVariableSetterGetter extends VariableSetterGetter {

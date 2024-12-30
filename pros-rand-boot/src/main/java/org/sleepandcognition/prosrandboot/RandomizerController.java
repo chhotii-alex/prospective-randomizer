@@ -80,9 +80,8 @@ public class RandomizerController {
 
     @PostMapping("/{protocolName}/subject/{id}/group")
     String placeSubject(
-            @PathVariable String protocolName,
-            @PathVariable String id,
-            @RequestBody Hashtable<String, String> features) throws Exception {
+            @PathVariable String protocolName, @PathVariable String id, @RequestBody Hashtable<String, String> features)
+            throws Exception {
         try {
             String group = randomizerOfName(protocolName).putOrPlaceSubject(id, features, false);
             return group;

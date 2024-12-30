@@ -1,3 +1,8 @@
+# TODO:
+# * test more than one variable
+# * test categorical variable
+# * test alternating randomizer (-a)
+
 from pathlib import Path
 import subprocess
 
