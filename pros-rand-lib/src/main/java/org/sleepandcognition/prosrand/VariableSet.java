@@ -7,7 +7,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
@@ -18,14 +17,9 @@ import org.xml.sax.SAXException;
 /* Subjects have one or more variables which will be used as baseline characteristics
  * that we are concerned about balancing among groups.
  * Each characteristic, each variable that we are concerned about, has a name (a string with no white space).
- * The value of each variable must be converted into a number.
- * Variables come in several types:
- * * Continuous numeric variables (such as weight)
- * * Discrete numeric variables (such as number of years of education completed)
- * * Ordinal variables. These are coded as integers. However, this may be problematic.
- * * Categorical variables. These each have a list of possible (string) values. For example, "sex" may have the
- * possible values 'male', 'female', and 'unknown'. These are handled by converting into an array of variables, one for
- * each category, i.e. 'is_male_sex', 'is_female_sex', and 'is_unknown_sex', each of which will have the value 0 or 1.
+ * Variables are either numeric or categorical ("factors" with levels, in R terminology).
+ * For the purpose of calculating feature vectors, all features must be numeric; for categorical variables, this
+ * is handled with one-hot encoding.
  */
 
 public class VariableSet {
@@ -124,16 +118,6 @@ public class VariableSet {
         return true;
     }
 
-    public String randomValuesString(Random r) {
-        String result = "";
-        for (Enumeration<String> e = variables.keys(); e.hasMoreElements(); ) {
-            String key = e.nextElement();
-            VariableSetterGetter getter = variables.get(key);
-            result = result + getter.randomValueString(r) + " ";
-        }
-        return result;
-    }
-
     boolean isMultiDimensional() {
         return multiDimensional;
     }
@@ -167,44 +151,15 @@ public class VariableSet {
             return String.format("%s=%f", key, value.doubleValue());
         }
 
-        /* This is purely for simulation, to test/experiment, rather than real-world use of the algorithm. */
-        public String randomValueString(Random random) {
-            double val = random.nextGaussian();
-            return String.format("%s=%f", key, val);
-        }
     }
 
     private class ContinuousVariableSetterGetter extends VariableSetterGetter {
-        double simulationMean;
-        double simulationStdDev;
-
         public ContinuousVariableSetterGetter(String name) {
             super(name);
-            simulationMean = 0.0;
-            simulationStdDev = 1.0;
         }
 
         public String getTypeName() {
             return "continuous";
-        }
-
-        public void readOptionsFromXML(Node node) {
-            org.w3c.dom.NamedNodeMap attrs = node.getAttributes();
-            org.w3c.dom.Node attrNode;
-            attrNode = attrs.getNamedItem("mean");
-            if (attrNode != null) {
-                simulationMean = Double.parseDouble(attrNode.getNodeValue());
-            }
-            attrNode = attrs.getNamedItem("stdev");
-            if (attrNode != null) {
-                simulationStdDev = Double.parseDouble(attrNode.getNodeValue());
-            }
-        }
-
-        /* This is purely for simulation, to test/experiment, rather than real-world use of the algorithm. */
-        public String randomValueString(Random random) {
-            double val = simulationMean + random.nextGaussian() * simulationStdDev;
-            return String.format("%s=%f", key, val);
         }
     }
 
@@ -279,34 +234,11 @@ public class VariableSet {
             return "";
         }
 
-        public String randomValueString(Random random) {
-            int demonimator = 0;
-            for (Iterator<CategoricalVariableOption> it = options.iterator(); it.hasNext(); ) {
-                CategoricalVariableOption option = it.next();
-                demonimator += option.probabilityWeight;
-            }
-            int r = random.nextInt(demonimator);
-            CategoricalVariableOption chosenOption = null;
-            for (Iterator<CategoricalVariableOption> it = options.iterator(); it.hasNext() && chosenOption == null; ) {
-                CategoricalVariableOption option = it.next();
-                for (int j = 0; j < option.probabilityWeight && chosenOption == null; ++j) {
-                    if (r == 0) {
-                        chosenOption = option;
-                        break;
-                    }
-                    --r;
-                }
-            }
-            return String.format("%s=%s", key, chosenOption);
-        }
-
         private class CategoricalVariableOption {
             String name;
-            int probabilityWeight;
 
             public CategoricalVariableOption(String name, int probabilityWeight) {
                 this.name = name;
-                this.probabilityWeight = probabilityWeight;
             }
 
             public String toString() {
