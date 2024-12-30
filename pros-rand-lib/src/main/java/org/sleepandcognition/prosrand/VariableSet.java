@@ -185,12 +185,7 @@ public class VariableSet {
                     attrs = child.getAttributes();
                     attrNode = attrs.getNamedItem("name");
                     String name = attrNode.getNodeValue();
-                    int weight = 1;
-                    attrNode = attrs.getNamedItem("num");
-                    if (attrNode != null) {
-                        weight = Integer.parseInt(attrNode.getNodeValue());
-                    }
-                    options.add(new CategoricalVariableOption(name, weight));
+                    options.add(new CategoricalVariableOption(name));
                 }
             }
         } // END readOptionsFromXML
@@ -236,7 +231,7 @@ public class VariableSet {
         private class CategoricalVariableOption {
             String name;
 
-            public CategoricalVariableOption(String name, int probabilityWeight) {
+            public CategoricalVariableOption(String name) {
                 this.name = name;
             }
 

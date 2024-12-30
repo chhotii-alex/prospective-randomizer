@@ -1,10 +1,8 @@
-# TODO:
-# * test more than one variable
-# * test categorical variable
-# * test alternating randomizer (-a)
-
 from pathlib import Path
 import subprocess
+import random
+
+random.seed(42)
 
 # Functions for communicating with command-line process
 # (thanks to Stack Overflow https://stackoverflow.com/questions/19880190/interactive-input-output-using-python)
@@ -40,20 +38,35 @@ def terminate(process):
 homedir = Path(".")
 
 protocols = {
-    "foo" : {
+    "simpletest" : {
+        'groupNames': ['C', 'D', 'E'],
+        'variables': {'score': None},
+        'allowRevision': True,
+    },
+    "multidim" : {
         'groupNames': ['A', 'B'],
-        'variables': ['weight'],
+        'variables': {'weight': None, 'snark':None},
         'allowRevision': False,
     },
-    "bar" : {
+    "withcategorical" : {
         'groupNames': ['C', 'D', 'E'],
-        'variables': ['score'],
+        'variables': {'state': ['Montana', 'Wyoming', 'Colorodo']},
         'allowRevision': True,
     }
 }
 
+def make_put_command(put_or_place, subject, variables):
+    command = '%s %s ' % (put_or_place, subject)
+    for var in variables:
+        choices = variables[var]
+        if choices is None:
+            command += "%s=%f " % (var, random.uniform(1, 99))
+        else:
+            command += "%s=%s " % (var, random.choice(choices))
+    return command
+
 def run_test(protocol_name,
-             protocol_spec):
+             protocol_spec, do_alternating):
     
     subject_file_path = homedir / ("subjects_%s.txt" % protocol_name)
     subject_file_path.unlink(missing_ok=True)
@@ -63,13 +76,22 @@ def run_test(protocol_name,
     with open('variables_%s.xml' % protocol_name, 'w') as f:
         print( '<Variables>', file=f)
         for varName in protocol_spec['variables']:
-            print('  <Variable name="%s" type="continuous" />' % varName, file=f)
+            choices = protocol_spec['variables'][varName]
+            if choices is None:
+                print('  <Variable name="%s" type="continuous" />' % varName, file=f)
+            else:
+                print('  <Variable name="%s" type="categorical" >' % varName, file=f)
+                for choice in choices:
+                    print('    <Choice name="%s" />' % choice, file=f)
+                print('  </Variable>', file=f)
         print( '</Variables>', file=f)
 
     command = "java -cp server.jar org.sleepandcognition.prosrand.RandomizerServer  "
     command += "-s %s -g groups_%s.txt -r variables_%s.xml -c " % (subject_file_path, protocol_name, protocol_name)
     if protocol_spec['allowRevision']:
         command += " -x"
+    if do_alternating:
+        command += ' -a'
 
     print(command)
     process = start(command)
@@ -83,10 +105,10 @@ def run_test(protocol_name,
     write(process, "HELLO RAND!")
     assert (read(process) == "HI CLIENT! v5")
 
-    write(process, "put s01 %s=9" % protocol_spec['variables'][0])
+    write(process, make_put_command('put', 's01', protocol_spec['variables']))
     assert (read(process) == "OK")
 
-    write(process, "put s01 %s=100" % protocol_spec['variables'][0])
+    write(process, make_put_command('put', 's01', protocol_spec['variables']))
     if protocol_spec['allowRevision']:
         assert (read(process) == "OK")
     else:
@@ -102,7 +124,7 @@ def run_test(protocol_name,
         response = read(process)
     response = read(process)
 
-    write(process, "place s02 %s=150" % protocol_spec['variables'][0])
+    write(process, make_put_command('place', 's02', protocol_spec['variables']))
     while True:
         response = read(process)
         if "group means" in response:
@@ -125,7 +147,7 @@ def run_test(protocol_name,
     write(process, "committed s01")
     assert (read(process) == "NO")
 
-    write(process, "place s03 %s=75" % protocol_spec['variables'][0])
+    write(process, make_put_command('place', 's03', protocol_spec['variables']))
     while True:
         response = read(process)
         if "group means" in response:
@@ -134,7 +156,7 @@ def run_test(protocol_name,
         response = read(process)
     response = read(process)
 
-    write(process, "place s04 %s=60" % protocol_spec['variables'][0])
+    write(process, make_put_command('place', 's04', protocol_spec['variables']))
     while True:
         response = read(process)
         if "group means" in response:
@@ -147,7 +169,8 @@ def run_test(protocol_name,
     assert (read(process) == "OK")
 
 for protocol_name, protocol_spec in protocols.items():
-    run_test(protocol_name, protocol_spec)
+    for do_alternating in [False, True]:
+        run_test(protocol_name, protocol_spec, do_alternating)
 print()
 print("Success, done!")
 
