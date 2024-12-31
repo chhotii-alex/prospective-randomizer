@@ -209,6 +209,10 @@ Any command starting with # is simply echoed, and has no effect.
 HELLO RAND!  
 Program responds "HI CLIENT!" Followed by a version identifier.
 
+EXISTS
+Must be followed by a subject ID
+Program responds with "YES" or "NO" depending on whether there is already a record of this subject ID.
+
 PUT  
 PUT must be followed by the subject ID, then each of the variables with their values. For example:
 PUT S1 score=4.5 sex=F
@@ -394,6 +398,10 @@ POST /{protocolName}/start The request body must be a JSON object with two keys:
 The value for 'groupNames' must be an array of strings, giving the group names. The value for 'variableSpec' must be
 and array of strings, giving feature names. Each feature is assumed to be numeric continuous. The given protocol is
 started.
+
+GET /{protocolName}/subject/{id}
+Equivalent to "EXISTS" above. Responds with true if there is already record of a subject with this ID; otherwise
+responds with a 404 NOT FOUND status.
 
 POST /{protocolName}/subject/{id} The request body must be a JSON object with key-value pairs giving the feature
 values for the subject whose id appears in the path.
