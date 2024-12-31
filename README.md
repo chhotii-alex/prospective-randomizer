@@ -201,6 +201,9 @@ Example code that demonstrates use of each networking protocol [here] [describe]
 
 ## Simple socket interface
 
+Example code that demonstrates the use of the simple socket interface from within program code is included in this
+repo, in the file my-app/src/main/java/org/sleepandcognition/prosrandclient/App.java
+
 Here are the commands that can be entered if Prospective Randomizer is running a command-line interface in a terminal window, or submitted via the socket connection
 if running in network mode. Commands are not case-sensitive. However, subject identifier are case sensitive; s1 and S1 would be regarded as different subjects.
 
