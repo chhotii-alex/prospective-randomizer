@@ -124,13 +124,22 @@ def run_test(protocol_name,
                           "allowRevision": protocol_spec['allowRevision']}
                     )
     assert r.status_code == 400
-    
 
+    # Haven't added this subject yet, thus 404:
+    r = requests.get(make_url(True, 'subject/s01'))
+    print(r.status_code)
+    assert r.status_code == 404
+    
     r = requests.post(make_url(True, 'subject/s01'),
                       json=make_phony_features(protocol_spec['variableSpec'])
                     )
     assert r.status_code == 200
 
+    # Now that the subject exists in the databse, is found...
+    # This gives us the "EXISTS" functionality
+    r = requests.get(make_url(True, 'subject/s01'))
+    assert r.status_code == 200
+    
     r = requests.post(make_url(True, 'subject/s01'),
                       json=make_phony_features(protocol_spec['variableSpec'])
                     )

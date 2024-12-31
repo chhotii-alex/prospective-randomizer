@@ -105,8 +105,14 @@ def run_test(protocol_name,
     write(process, "HELLO RAND!")
     assert (read(process) == "HI CLIENT! v5")
 
+    write(process, "EXISTS s01")
+    assert read(process) == "NO"
+
     write(process, make_put_command('put', 's01', protocol_spec['variableSpec']))
     assert (read(process) == "OK")
+
+    write(process, "EXISTS s01")
+    assert read(process) == "YES"
 
     write(process, make_put_command('put', 's01', protocol_spec['variableSpec']))
     if protocol_spec['allowRevision']:

@@ -81,12 +81,11 @@ public class VariableSet {
             List<String> choices = variableSpec.get(name);
             if (choices == null) {
                 getter = new ContinuousVariableSetterGetter(name);
-            }
-            else {
+            } else {
                 getter = new CategoricalVariableSetterGetter(name);
                 for (Iterator<String> opts = choices.listIterator(); opts.hasNext(); ) {
                     String optionName = opts.next();
-                    ((CategoricalVariableSetterGetter)getter).addOption(optionName);
+                    ((CategoricalVariableSetterGetter) getter).addOption(optionName);
                 }
             }
             variables.put(name, getter);
@@ -268,14 +267,13 @@ public class VariableSet {
                 if (!variables.get(name).getTypeName().equals("continuous")) {
                     return false;
                 }
-            } 
-            else {
+            } else {
                 if (!variables.get(name).getTypeName().equals("categorical")) {
                     return false;
                 }
                 for (Iterator<String> it = options.iterator(); it.hasNext(); ) {
                     String anOption = it.next();
-                    if (!((CategoricalVariableSetterGetter)(variables.get(name))).options.contains(anOption)) {
+                    if (!((CategoricalVariableSetterGetter) (variables.get(name))).options.contains(anOption)) {
                         return false;
                     }
                 }
