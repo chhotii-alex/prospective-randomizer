@@ -18,6 +18,15 @@ public class AlternatingRandomizer extends Randomizer {
             boolean allowRevision)
             throws SAXException, IOException, ParserConfigurationException, InvalidDataException {
         super(groupListFile, variables, db, listening, allowRevision);
+        init();
+    }
+
+    public AlternatingRandomizer(ProtocolSpec spec, SubjectDatabase db) throws IOException, InvalidDataException {
+        super(spec, db);
+        init();
+    }
+
+    protected void init() {
         groupNamesInOrder = new ArrayList<String>();
         groupNamesInOrder.addAll(groups.keySet());
         Collections.sort(groupNamesInOrder);

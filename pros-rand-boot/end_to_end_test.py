@@ -1,19 +1,36 @@
 import time
 import requests
 from pathlib import Path
+import random
+
+random.seed(42)
 
 homedir = Path(".")
 
 protocols = {
-    "foo" : {
-        'groupNames':['A', 'B'],
-        'variableSpec': ['weight'],
-        'allowRevision': False,
-    },
-    "bar" : {
-        'groupNames':['C', 'D', 'E'],
-        'variableSpec': ['score'],
+    "simpletest" : {
+        'groupNames': ['C', 'D', 'E'],
+        'variableSpec': {'score': None},
         'allowRevision': True,
+        'algorithm': 'Balanced',
+    },
+    "multidim" : {
+        'groupNames': ['A', 'B'],
+        'variableSpec': {'weight': None, 'snark':None},
+        'allowRevision': False,
+        'algorithm': 'Balanced',
+    },
+    "withcategorical" : {
+        'groupNames': ['C', 'D', 'E'],
+        'variableSpec': {'state': ['Montana', 'Wyoming', 'Colorodo']},
+        'allowRevision': True,
+        'algorithm': 'Balanced',
+    },
+    "alternating" : {
+        'groupNames': ['C', 'D', 'E'],
+        'variableSpec': {'state': None},
+        'allowRevision': True,
+        'algorithm': 'Alternating',
     }
 }
 
@@ -29,9 +46,19 @@ if require_restart:
     time.sleep(0.25)
     reply = input("Please hit the Enter key when you see 'Started ProsRandApplication' in the console.")
 
+def make_phony_features(variables):
+    data = {}
+    for var in variables:
+        choices = variables[var]
+        if choices is None:
+            data[var] = random.uniform(1, 99)
+        else:
+            data[var] = random.choice(choices)
+    return data
+
 def run_test(protocol_name,
              protocol_spec):
-    
+
     def make_url(protocol_specific, endpart):
         url = 'http://localhost:8080/'
         if protocol_specific:
@@ -54,7 +81,7 @@ def run_test(protocol_name,
 
     # not found when not yet started
     r = requests.post(make_url(True, 'subject/s01'),
-                      json={protocol_spec['variableSpec'][0]: 50},
+                      json=make_phony_features(protocol_spec['variableSpec'])
                     )
     assert r.status_code == 404
     
@@ -79,7 +106,7 @@ def run_test(protocol_name,
     assert r.status_code == 400
     r = requests.post(make_url(True, 'start'),
                     json={"groupNames": protocol_spec['groupNames'],
-                          "variableSpec": ['froopiness', 'towel_hue'],
+                          "variableSpec": {'froopiness':None, 'towel_hue':None},
                           "allowRevision": protocol_spec['allowRevision']}
                     )
     assert r.status_code == 400
@@ -89,21 +116,23 @@ def run_test(protocol_name,
                           "allowRevision": protocol_spec['allowRevision']}
                     )
     assert r.status_code == 400
+    more_vars = {'loft':None}
+    more_vars.update(protocol_spec['variableSpec'])
     r = requests.post(make_url(True, 'start'),
-                    json={"groupNames": protocol_spec['groupNames'] + ['another'],
-                          "variableSpec": protocol_spec['variableSpec'] + ['loft'],
+                    json={"groupNames": protocol_spec['groupNames'],
+                          "variableSpec": more_vars,
                           "allowRevision": protocol_spec['allowRevision']}
                     )
     assert r.status_code == 400
     
 
     r = requests.post(make_url(True, 'subject/s01'),
-                      json={protocol_spec['variableSpec'][0]: 50},
+                      json=make_phony_features(protocol_spec['variableSpec'])
                     )
     assert r.status_code == 200
 
     r = requests.post(make_url(True, 'subject/s01'),
-                      json={protocol_spec['variableSpec'][0]: 100},
+                      json=make_phony_features(protocol_spec['variableSpec'])
                     )
     if protocol_spec['allowRevision']:
         assert r.status_code == 200
@@ -114,7 +143,7 @@ def run_test(protocol_name,
     assert r.status_code == 200
 
     r = requests.post(make_url(True, 'subject/s02/group'),
-                      json={protocol_spec['variableSpec'][0]: 150},
+                      json=make_phony_features(protocol_spec['variableSpec'])
                      )
     assert r.status_code == 200
 
@@ -153,12 +182,12 @@ def run_test(protocol_name,
     # TODO inspect these results
 
     r = requests.post(make_url(True, 'subject/s03'),
-                      json={protocol_spec['variableSpec'][0]: 75},
+                      json=make_phony_features(protocol_spec['variableSpec'])
                     )
     assert r.status_code == 200
 
     r = requests.post(make_url(True, 'subject/s04'),
-                      json={protocol_spec['variableSpec'][0]: 60},
+                      json=make_phony_features(protocol_spec['variableSpec'])
                     )
     assert r.status_code == 200
 

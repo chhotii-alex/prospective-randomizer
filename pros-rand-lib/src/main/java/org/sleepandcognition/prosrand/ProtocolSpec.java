@@ -1,11 +1,13 @@
 package org.sleepandcognition.prosrand;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class ProtocolSpec {
     List<String> groupNames;
-    List<String> variableSpec;
+    HashMap<String, List<String>> variableSpec;
     boolean allowRevision;
+    String algorithm;
 
     public void setGroupNames(List<String> g) {
         groupNames = g;
@@ -15,11 +17,11 @@ public class ProtocolSpec {
         return groupNames;
     }
 
-    public void setVariableSpec(List<String> v) {
+    public void setVariableSpec(HashMap<String, List<String>> v) {
         variableSpec = v;
     }
 
-    public List<String> getVariableSpec() {
+    public HashMap<String, List<String>> getVariableSpec() {
         return variableSpec;
     }
 
@@ -29,5 +31,13 @@ public class ProtocolSpec {
 
     public boolean getAllowRevision() {
         return allowRevision;
+    }
+
+    public void setAlgorithm(String name) {
+        algorithm = name;
+    }
+
+    public String getAlgorithm() {
+        return algorithm;
     }
 }

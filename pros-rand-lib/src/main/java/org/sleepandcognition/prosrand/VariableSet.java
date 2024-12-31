@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -65,6 +66,29 @@ public class VariableSet {
         for (Iterator<String> it = variableSpec.iterator(); it.hasNext(); ) {
             String name = it.next();
             VariableSetterGetter getter = new ContinuousVariableSetterGetter(name);
+            variables.put(name, getter);
+        }
+        if (variableSpec.size() > 1) {
+            multiDimensional = true;
+        }
+    }
+
+    public VariableSet(HashMap<String, List<String>> variableSpec) {
+        variables = new Hashtable<String, VariableSetterGetter>();
+        for (Iterator<String> it = variableSpec.keySet().iterator(); it.hasNext(); ) {
+            String name = it.next();
+            VariableSetterGetter getter;
+            List<String> choices = variableSpec.get(name);
+            if (choices == null) {
+                getter = new ContinuousVariableSetterGetter(name);
+            }
+            else {
+                getter = new CategoricalVariableSetterGetter(name);
+                for (Iterator<String> opts = choices.listIterator(); opts.hasNext(); ) {
+                    String optionName = opts.next();
+                    ((CategoricalVariableSetterGetter)getter).addOption(optionName);
+                }
+            }
             variables.put(name, getter);
         }
         if (variableSpec.size() > 1) {
@@ -163,15 +187,19 @@ public class VariableSet {
     }
 
     private class CategoricalVariableSetterGetter extends VariableSetterGetter {
-        ArrayList<CategoricalVariableOption> options;
+        ArrayList<String> options;
 
         public CategoricalVariableSetterGetter(String name) {
             super(name);
-            options = new ArrayList<CategoricalVariableOption>();
+            options = new ArrayList<String>();
         }
 
         public String getTypeName() {
             return "categorical";
+        }
+
+        void addOption(String name) {
+            options.add(name);
         }
 
         public void readOptionsFromXML(Node node) {
@@ -185,15 +213,15 @@ public class VariableSet {
                     attrs = child.getAttributes();
                     attrNode = attrs.getNamedItem("name");
                     String name = attrNode.getNodeValue();
-                    options.add(new CategoricalVariableOption(name));
+                    addOption(name);
                 }
             }
         } // END readOptionsFromXML
 
         Hashtable<String, Double> valuesFromKeyValuePair(String value) {
             Hashtable<String, Double> val = new Hashtable<String, Double>();
-            for (Iterator<CategoricalVariableOption> it = options.iterator(); it.hasNext(); ) {
-                CategoricalVariableOption option = it.next();
+            for (Iterator<String> it = options.iterator(); it.hasNext(); ) {
+                String option = it.next();
                 Double optionValue = new Double(0);
                 if (value.equals(option.toString())) {
                     optionValue = new Double(1);
@@ -205,8 +233,8 @@ public class VariableSet {
         }
 
         public boolean hasValues(Hashtable<String, Double> values) {
-            for (Iterator<CategoricalVariableOption> it = options.iterator(); it.hasNext(); ) {
-                CategoricalVariableOption option = it.next();
+            for (Iterator<String> it = options.iterator(); it.hasNext(); ) {
+                String option = it.next();
                 String optionKey = String.format("%s_is%s", key, option);
                 if (!values.containsKey(optionKey)) {
                     return false;
@@ -216,8 +244,8 @@ public class VariableSet {
         }
 
         public String keyValuePairFromValues(Hashtable<String, Double> values) {
-            for (Iterator<CategoricalVariableOption> it = options.iterator(); it.hasNext(); ) {
-                CategoricalVariableOption option = it.next();
+            for (Iterator<String> it = options.iterator(); it.hasNext(); ) {
+                String option = it.next();
                 String optionKey = String.format("%s_is%s", key, option);
                 if (values.get(optionKey).doubleValue() > 0) {
                     return String.format("%s=%s", key, option);
@@ -227,25 +255,30 @@ public class VariableSet {
             System.out.println("No option set for key " + key);
             return "";
         }
-
-        private class CategoricalVariableOption {
-            String name;
-
-            public CategoricalVariableOption(String name) {
-                this.name = name;
-            }
-
-            public String toString() {
-                return name;
-            }
-        }
     } // END class CategoricalVariableSetterGetter
 
-    public boolean matchesSpec(List<String> variableSpec) {
-        for (Iterator<String> it = variableSpec.iterator(); it.hasNext(); ) {
-            String name = it.next();
+    public boolean matchesSpec(HashMap<String, List<String>> variableSpec) {
+        for (Iterator<String> each = variableSpec.keySet().iterator(); each.hasNext(); ) {
+            String name = each.next();
             if (!variables.containsKey(name)) {
                 return false;
+            }
+            List<String> options = variableSpec.get(name);
+            if (options == null) {
+                if (!variables.get(name).getTypeName().equals("continuous")) {
+                    return false;
+                }
+            } 
+            else {
+                if (!variables.get(name).getTypeName().equals("categorical")) {
+                    return false;
+                }
+                for (Iterator<String> it = options.iterator(); it.hasNext(); ) {
+                    String anOption = it.next();
+                    if (!((CategoricalVariableSetterGetter)(variables.get(name))).options.contains(anOption)) {
+                        return false;
+                    }
+                }
             }
         }
         if (variableSpec.size() != variables.size()) {

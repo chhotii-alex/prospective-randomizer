@@ -3,6 +3,8 @@ package org.sleepandcognition.prosrandboot;
 import java.io.IOException;
 import java.util.Hashtable;
 import javax.xml.parsers.ParserConfigurationException;
+
+import org.sleepandcognition.prosrand.AlternatingRandomizer;
 import org.sleepandcognition.prosrand.BalancingRandomizer;
 import org.sleepandcognition.prosrand.InterventionGroup;
 import org.sleepandcognition.prosrand.InvalidDataException;
@@ -57,7 +59,16 @@ public class RandomizerController {
         }
         String subjectFile = String.format("subjects_%s.txt", protocolName);
         SubjectFileDatabase database = new SubjectFileDatabase(subjectFile);
-        Randomizer r = new BalancingRandomizer(spec, database);
+        Randomizer r;
+        if (spec.getAlgorithm().equals("Alternating")){
+            r = new BalancingRandomizer(spec, database);
+        }
+        else if (spec.getAlgorithm().equals("Balanced")) {
+            r = new AlternatingRandomizer(spec, database);
+        } 
+        else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
         r.setVerbosity(100); // TODO: adjust
         randomizers.put(protocolName, r);
     }

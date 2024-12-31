@@ -40,17 +40,17 @@ homedir = Path(".")
 protocols = {
     "simpletest" : {
         'groupNames': ['C', 'D', 'E'],
-        'variables': {'score': None},
+        'variableSpec': {'score': None},
         'allowRevision': True,
     },
     "multidim" : {
         'groupNames': ['A', 'B'],
-        'variables': {'weight': None, 'snark':None},
+        'variableSpec': {'weight': None, 'snark':None},
         'allowRevision': False,
     },
     "withcategorical" : {
         'groupNames': ['C', 'D', 'E'],
-        'variables': {'state': ['Montana', 'Wyoming', 'Colorodo']},
+        'variableSpec': {'state': ['Montana', 'Wyoming', 'Colorodo']},
         'allowRevision': True,
     }
 }
@@ -75,8 +75,8 @@ def run_test(protocol_name,
             print(groupName, file=f)
     with open('variables_%s.xml' % protocol_name, 'w') as f:
         print( '<Variables>', file=f)
-        for varName in protocol_spec['variables']:
-            choices = protocol_spec['variables'][varName]
+        for varName in protocol_spec['variableSpec']:
+            choices = protocol_spec['variableSpec'][varName]
             if choices is None:
                 print('  <Variable name="%s" type="continuous" />' % varName, file=f)
             else:
@@ -105,10 +105,10 @@ def run_test(protocol_name,
     write(process, "HELLO RAND!")
     assert (read(process) == "HI CLIENT! v5")
 
-    write(process, make_put_command('put', 's01', protocol_spec['variables']))
+    write(process, make_put_command('put', 's01', protocol_spec['variableSpec']))
     assert (read(process) == "OK")
 
-    write(process, make_put_command('put', 's01', protocol_spec['variables']))
+    write(process, make_put_command('put', 's01', protocol_spec['variableSpec']))
     if protocol_spec['allowRevision']:
         assert (read(process) == "OK")
     else:
@@ -124,7 +124,7 @@ def run_test(protocol_name,
         response = read(process)
     response = read(process)
 
-    write(process, make_put_command('place', 's02', protocol_spec['variables']))
+    write(process, make_put_command('place', 's02', protocol_spec['variableSpec']))
     while True:
         response = read(process)
         if "group means" in response:
@@ -147,7 +147,7 @@ def run_test(protocol_name,
     write(process, "committed s01")
     assert (read(process) == "NO")
 
-    write(process, make_put_command('place', 's03', protocol_spec['variables']))
+    write(process, make_put_command('place', 's03', protocol_spec['variableSpec']))
     while True:
         response = read(process)
         if "group means" in response:
@@ -156,7 +156,7 @@ def run_test(protocol_name,
         response = read(process)
     response = read(process)
 
-    write(process, make_put_command('place', 's04', protocol_spec['variables']))
+    write(process, make_put_command('place', 's04', protocol_spec['variableSpec']))
     while True:
         response = read(process)
         if "group means" in response:
