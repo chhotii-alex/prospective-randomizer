@@ -8,11 +8,17 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 /**
- * Hello world!
+ * Obviously this is not a full-fledged application of any kind. It does contain the bare minimum amount
+ * of code required to communicate with the prospective randomizer server over a bare socket connection.
+ * Assuming you're leveling one numeric feature, and you name it "score", you could probably drop this
+ * class into your project as-is to use as the interface-- the required methods are public.
+ * Rather lacking in niceties such as error handling and defensive programming, though.
  */
 public class App {
     public static void main(String[] args) {
         System.out.println("Hello World!");
+        System.out.println("My main function doesn't do much. But I do contain demo PR client code!");
+        System.out.println("Ciao!");
     }
 
     class RandomizerConnection {
