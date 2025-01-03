@@ -198,7 +198,7 @@ It can then be started using this command:
 mvn spring-boot:run -pl pros-rand-boot
 ```
 
-Example code that demonstrates use of each networking protocol [here] [describe]
+Example code that demonstrates use of Prospective Randomizer appears [in this project](https://github.com/chhotii-alex/example-task).
 
 ## Simple socket interface
 
