@@ -12,6 +12,7 @@ import org.sleepandcognition.prosrand.ProtocolSpec;
 import org.sleepandcognition.prosrand.Randomizer;
 import org.sleepandcognition.prosrand.SubjectFileDatabase;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.xml.sax.SAXException;
 
+@CrossOrigin
 @RestController
 public class RandomizerController {
     Hashtable<String, Randomizer> randomizers;
