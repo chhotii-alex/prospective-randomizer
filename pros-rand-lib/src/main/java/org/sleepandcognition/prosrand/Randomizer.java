@@ -223,10 +223,6 @@ public abstract class Randomizer {
     }
 
     public void removeSubject(String subjectID) throws IOException {
-        // TODO this is really broken
-        // Not recognized that subjects with the same ID are the same subject
-        // subj.myGroup should be set to null
-        // How to elicit bug: -x mode, POST same subject ID with features twice
         MultiDimSubject subj = subjectsByID.get(subjectID);
         subjectsByID.remove(subjectID);
         if (subj.myGroup != null) {

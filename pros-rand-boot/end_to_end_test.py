@@ -156,6 +156,11 @@ def run_test(protocol_name,
                      )
     assert r.status_code == 200
 
+    r = requests.post(make_url(True, 'subject/s11/group'),
+                      json=make_phony_features({'gooviness':None})
+                      )
+    assert r.status_code == 400
+
     r = requests.post(make_url(True, 'subject/s02/commit'),
                       json={},
                      )

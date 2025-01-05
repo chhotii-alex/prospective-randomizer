@@ -150,6 +150,9 @@ def run_test(protocol_name,
     write(process, "committed s02")
     assert (read(process) == "YES")
 
+    write(process, make_put_command('place', 's02', protocol_spec['variableSpec']))
+    assert (read(process) == '?')
+
     write(process, "committed s01")
     assert (read(process) == "NO")
 

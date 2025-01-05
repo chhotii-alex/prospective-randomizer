@@ -79,6 +79,10 @@ public class SubjectFileDatabase extends SubjectDatabase {
                 io.printStackTrace();
                 System.out.println("Uh-oh... File listing previous subjects appears to exist, but could not be read.");
                 System.exit(1);
+            } catch (InvalidDataException ex) {
+                ex.printStackTrace();
+                System.out.println("Uh-oh... File listing previous subjects appears to exist, but contains invalid data");
+                System.exit(1);
             } finally {
                 try {
                     br.close();

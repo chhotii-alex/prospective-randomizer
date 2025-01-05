@@ -95,7 +95,7 @@ public class VariableSet {
         }
     }
 
-    public Hashtable<String, Double> valuesFromKeyValuePair(String key, String value) {
+    public Hashtable<String, Double> valuesFromKeyValuePair(String key, String value) throws InvalidDataException {
         VariableSetterGetter getter;
         if (key == null) {
             if (!isMultiDimensional()) {
@@ -105,6 +105,9 @@ public class VariableSet {
             }
         } else {
             getter = variables.get(key);
+        }
+        if (getter == null) {
+            throw new InvalidDataException("variable with this key not found");
         }
         return getter.valuesFromKeyValuePair(value);
     }
