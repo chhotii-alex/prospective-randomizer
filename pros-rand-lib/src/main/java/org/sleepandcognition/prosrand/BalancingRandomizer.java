@@ -83,8 +83,8 @@ public class BalancingRandomizer extends Randomizer {
                 assignSubjectToGroup(aGroup, winningSubject);
                 return;
             }
-            if (aGroup.scaledGroupSize() < minimumScaledGroupSize) {
-                minimumScaledGroupSize = aGroup.scaledGroupSize();
+            if (aGroup.currentGroupSize() < minimumScaledGroupSize) {
+                minimumScaledGroupSize = aGroup.currentGroupSize();
             }
         } // END for each group (first pass)
 
@@ -103,7 +103,7 @@ public class BalancingRandomizer extends Randomizer {
         MultiDimSubject winningSubject = null;
         for (Iterator<InterventionGroup> it = groups.values().iterator(); it.hasNext(); ) {
             InterventionGroup aGroup = it.next();
-            if (aGroup.scaledGroupSize()
+            if (aGroup.currentGroupSize()
                     == minimumScaledGroupSize) { // This group is in least-filled tier; consider adding to it
                 Hashtable<String, Double> vector = aGroup.getMeanVector();
                 if (verbosity >= 0) {

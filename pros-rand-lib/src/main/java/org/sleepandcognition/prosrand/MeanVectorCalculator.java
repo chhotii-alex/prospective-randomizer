@@ -60,4 +60,12 @@ public class MeanVectorCalculator {
             }
         }
     }
+
+    public void encounter(MultiDimSubject subject) {
+        for (Enumeration<String> vit = subject.baselineCharacteristics.keys(); vit.hasMoreElements(); ) {
+            String key = vit.nextElement();
+            Double value = subject.baselineCharacteristics.get(key);
+            encounter(key, value.doubleValue());
+        }
+    }
 }

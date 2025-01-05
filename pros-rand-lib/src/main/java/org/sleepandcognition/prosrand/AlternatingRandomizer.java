@@ -43,14 +43,14 @@ public class AlternatingRandomizer extends Randomizer {
                 //                }
                 return;
             }
-            if (aGroup.scaledGroupSize() < minimumScaledGroupSize) {
-                minimumScaledGroupSize = aGroup.scaledGroupSize();
+            if (aGroup.currentGroupSize() < minimumScaledGroupSize) {
+                minimumScaledGroupSize = aGroup.currentGroupSize();
             }
         } // END for each group (first pass)
 
         for (Iterator<String> it = groupNamesInOrder.iterator(); it.hasNext(); ) {
             InterventionGroup aGroup = groups.get(it.next());
-            if (aGroup.scaledGroupSize()
+            if (aGroup.currentGroupSize()
                     == minimumScaledGroupSize) { // This group is in least-filled tier; consider adding to it
                 assignSubjectToGroup(aGroup, unassignedSubjects.get(0));
                 //                if (!it.hasNext()) {

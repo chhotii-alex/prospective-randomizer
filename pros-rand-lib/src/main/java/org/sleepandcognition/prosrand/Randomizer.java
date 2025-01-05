@@ -230,7 +230,7 @@ public abstract class Randomizer {
         MultiDimSubject subj = subjectsByID.get(subjectID);
         subjectsByID.remove(subjectID);
         if (subj.myGroup != null) {
-            subj.myGroup.subjects.remove(subj);
+            subj.myGroup.remove(subj);
         }
         database.WriteOutSubjects(subjectsByID, variables);
     }

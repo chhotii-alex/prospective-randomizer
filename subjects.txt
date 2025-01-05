@@ -1,0 +1,8 @@
+A	s5	score=8.000000	
+A	s4	score=6.000000	
+B	s3	score=2.000000	
+B	s2	score=9.000000	
+A	s1	score=1.000000	
+B	s8	score=8.000000	
+A	s7	score=8.000000	
+B	s6	score=9.000000	

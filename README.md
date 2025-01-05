@@ -366,7 +366,7 @@ A: 1
 B: 1    
 Assigned s3 to B
 Current group means:
-A: {score=4.5}
+A: {score=1.0}
 B: {score=5.5}
 B
 get s3
@@ -381,7 +381,6 @@ place s3 score=9
 Attempt to add duplicate subject ID
 ?
 ```
-_TODO: what whacko group means when re-assigning s3 here? Why?_
 
 ## HTTP Interface
 
