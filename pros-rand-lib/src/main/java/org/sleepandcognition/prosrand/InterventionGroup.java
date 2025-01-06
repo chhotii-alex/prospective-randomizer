@@ -63,7 +63,7 @@ public class InterventionGroup {
         subjects = new ArrayList<MultiDimSubject>();
     }
 
-    public String name() {
+    public String getName() {
         return name;
     }
 

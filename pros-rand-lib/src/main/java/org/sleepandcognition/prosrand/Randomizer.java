@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
+
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -212,7 +214,7 @@ public abstract class Randomizer {
         return max;
     }
 
-    public boolean commitSubject(String subjectID) throws IOException {
+    public synchronized boolean commitSubject(String subjectID) throws IOException {
         if (subjectsByID.containsKey(subjectID)) {
             subjectsByID.get(subjectID).isCommitted = true;
             database.WriteOutSubjects(subjectsByID, variables);
@@ -222,7 +224,7 @@ public abstract class Randomizer {
         }
     }
 
-    public void removeSubject(String subjectID) throws IOException {
+    public synchronized void removeSubject(String subjectID) throws IOException {
         MultiDimSubject subj = subjectsByID.get(subjectID);
         subjectsByID.remove(subjectID);
         if (subj.myGroup != null) {
@@ -242,23 +244,23 @@ public abstract class Randomizer {
         }
     }
 
-    public void setVerbosity(int verbosity) {
+    public synchronized void setVerbosity(int verbosity) {
         this.verbosity = verbosity;
     }
 
-    public Hashtable<String, InterventionGroup> getGroups() {
-        return groups;
+    public synchronized List<InterventionGroup> getGroups() {
+        return new ArrayList<>(groups.values());
     }
 
-    public VariableSet getVariables() {
+    public synchronized VariableSet getVariables() {
         return variables;
     }
 
-    public Hashtable<String, MultiDimSubject> getSubjects() {
-        return subjectsByID;
+    public synchronized List<MultiDimSubject> getSubjects() {
+        return new ArrayList<>(subjectsByID.values());
     }
 
-    public boolean matchesSpecs(ProtocolSpec spec) {
+    public synchronized boolean matchesSpecs(ProtocolSpec spec) {
         if (!variables.matchesSpec(spec.variableSpec)) {
             return false;
         }

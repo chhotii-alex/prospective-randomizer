@@ -103,8 +103,8 @@ for pid in pid_gen():
                 assign_all(protocol_name, prot_suff)
                 groups = get_groups(protocol_name, prot_suff)
                 (min_group_size, max_group_size) = (999999, 0)
-                for group_name, group_data in groups.items():
-                    group_size = len(group_data['subjects'])
+                for group in groups:
+                    group_size = len(group['subjects'])
                     if group_size < min_group_size:
                         min_group_size = group_size
                     if group_size > max_group_size:

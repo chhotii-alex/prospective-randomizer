@@ -179,9 +179,10 @@ def run_test(protocol_name,
     assert r.status_code == 200
     returned_groups = r.json()
     print(returned_groups)
+    returned_group_names = [group['name'] for group in returned_groups]
     assert len(protocol_spec['groupNames']) == len(returned_groups)
     for g in protocol_spec['groupNames']:
-        assert g in returned_groups
+        assert g in returned_group_names
 
     r = requests.get(make_url(True, 'variables'))
     assert r.status_code == 200
@@ -212,7 +213,7 @@ def run_test(protocol_name,
 
     r = requests.get(make_url(True, 'subjects'))
     assert r.status_code == 200
-    for s in r.json().values():
+    for s in r.json():
         assert "groupName" in s
         assert s["groupName"] in protocol_spec['groupNames']
 

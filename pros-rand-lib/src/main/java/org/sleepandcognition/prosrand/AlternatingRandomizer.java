@@ -26,7 +26,7 @@ public class AlternatingRandomizer extends Randomizer {
         init();
     }
 
-    protected void init() {
+    protected synchronized void init() {
         groupNamesInOrder = new ArrayList<String>();
         groupNamesInOrder.addAll(groups.keySet());
         Collections.sort(groupNamesInOrder);

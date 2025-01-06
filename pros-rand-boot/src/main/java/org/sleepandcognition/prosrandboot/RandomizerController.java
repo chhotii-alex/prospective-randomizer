@@ -2,6 +2,8 @@ package org.sleepandcognition.prosrandboot;
 
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.List;
+
 import javax.xml.parsers.ParserConfigurationException;
 import org.sleepandcognition.prosrand.AlternatingRandomizer;
 import org.sleepandcognition.prosrand.BalancingRandomizer;
@@ -130,7 +132,7 @@ public class RandomizerController {
     }
 
     @GetMapping("/{protocolName}/groups")
-    Hashtable<String, InterventionGroup> getAllGroups(@PathVariable String protocolName) {
+    List<InterventionGroup> getAllGroups(@PathVariable String protocolName) {
         return randomizerOfName(protocolName).getGroups();
     }
 
@@ -140,7 +142,7 @@ public class RandomizerController {
     }
 
     @GetMapping("/{protocolName}/subjects")
-    Hashtable<String, MultiDimSubject> getSubjects(@PathVariable String protocolName) {
+    List<MultiDimSubject> getSubjects(@PathVariable String protocolName) {
         return randomizerOfName(protocolName).getSubjects();
     }
 
