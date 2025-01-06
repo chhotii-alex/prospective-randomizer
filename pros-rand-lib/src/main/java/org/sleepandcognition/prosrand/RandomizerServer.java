@@ -20,7 +20,6 @@ public class RandomizerServer {
      *   -q be quiet
      *   -c run interactively on the command line
      *   -n accept requests over the network using a TCP/IP socket
-     *   -i run interactively with a graphical user interface
      *   -p NUM   use NUM for the port for internet communication, instead of the default port number 1996
      *   -r PATH  use the file at PATH as the configuration file for variables (defaults to ./variables.xml)
      *   -g PATH  use the file at PATH to read in the groups (defaults to ./groups.txt)
@@ -28,7 +27,7 @@ public class RandomizerServer {
      *   -x allow a subject's scores to be revised and group re-assigned until commit received for that subject
      *   -a alternate assignment of subjects to groups, rather than trying to do any matching
      *
-     *   The -c and -n options may be used simultaneously. If neither -c, -n, nor -i specified, it is the equivalent of -c -n.
+     *   The -c and -n options may be used simultaneously. If neither -c nor -n is specified, both modes used (equivalent of -c -n).
      */
     public static void main(String[] args) throws SAXException, IOException, ParserConfigurationException {
         RandomizerServer app = new RandomizerServer();
