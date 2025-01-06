@@ -170,7 +170,11 @@ def run_test(protocol_name,
     assert r.status_code == 200
     assert r.text == 'true'
 
-
+    r = requests.post(make_url(True, 'subject/s02'),
+                      json=make_phony_features(protocol_spec['variableSpec'])
+                      )
+    assert r.status_code == 400
+    
     r = requests.get(make_url(True, 'subject/s01/committed'))
     assert r.status_code == 200
     assert r.text == 'false'
@@ -213,7 +217,11 @@ def run_test(protocol_name,
 
     r = requests.get(make_url(True, 'subjects'))
     assert r.status_code == 200
-    for s in r.json():
+    subjects = r.json()
+    subject_ids = [s['id'] for s in subjects]
+    for num in range(1, 5):
+        assert ('s%s' % str(num).zfill(2)) in subject_ids
+    for s in subjects:
         assert "groupName" in s
         assert s["groupName"] in protocol_spec['groupNames']
 
