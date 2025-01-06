@@ -182,7 +182,9 @@ public abstract class Randomizer {
     protected synchronized void printGroups() {
         for (Enumeration<String> it = groups.keys(); it.hasMoreElements(); ) {
             String key = it.nextElement();
-            System.out.println(String.format("Composition of group %s:", key));
+            if (verbosity > 1) {
+                System.out.println(String.format("Composition of group %s:", key));
+            }
             InterventionGroup group = groups.get(key);
             group.printSubjectReport();
         }

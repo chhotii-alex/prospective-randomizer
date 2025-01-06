@@ -67,7 +67,9 @@ public class BalancingRandomizer extends Randomizer {
         for (Iterator<InterventionGroup> it = groups.values().iterator(); it.hasNext(); ) {
             InterventionGroup aGroup = it.next();
             if (aGroup.isEmpty()) {
-                System.out.println("Found empty group, will assign to that one");
+                if (verbosity > 0) {
+                    System.out.println("Found empty group, will assign to that one");
+                }
                 // Find the most normal subject so far
                 // TODO: revisit in simulations: would least normal subject work better?
                 double shortestVector = Double.MAX_VALUE;
@@ -91,8 +93,10 @@ public class BalancingRandomizer extends Randomizer {
         if (verbosity >= 0) {
             for (Enumeration<String> it = means.keyIterator(); it.hasMoreElements(); ) {
                 String key = it.nextElement();
-                System.out.print(String.format("Mean of %s, all subjects: %f  ", key, means.mean(key)));
-                System.out.println(String.format("Std dev of %s: %f", key, means.stddev(key)));
+                if (verbosity > 0) {
+                    System.out.print(String.format("Mean of %s, all subjects: %f  ", key, means.mean(key)));
+                    System.out.println(String.format("Std dev of %s: %f", key, means.stddev(key)));
+                }
             }
         }
         if (verbosity >= 0) {
