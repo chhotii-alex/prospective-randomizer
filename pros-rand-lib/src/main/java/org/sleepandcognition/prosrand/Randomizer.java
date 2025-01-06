@@ -173,7 +173,7 @@ public abstract class Randomizer {
         unassignedSubjects.remove(multiDimSubject);
         if (verbosity >= 0) {
             System.out.println(String.format("Assigned %s to %s", multiDimSubject.identifier, aGroup.name));
-            if (verbosity > 0) {
+            if (verbosity > 1) {
                 printGroups();
             }
         }

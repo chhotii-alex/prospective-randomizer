@@ -197,8 +197,10 @@ def run_test(protocol_name,
 
     r = requests.get(make_url(True, 'subjects'))
     assert r.status_code == 200
-    print(r.json())
-    # TODO inspect these results
+    subjects = r.json()
+    assert len(subjects) == 2
+    for feature in subjects[0]['features'].keys():
+        feature in protocol_spec['variableSpec']
 
     r = requests.post(make_url(True, 'subject/s03'),
                       json=make_phony_features(protocol_spec['variableSpec'])

@@ -79,7 +79,8 @@ public class RandomizerController {
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
-        r.setVerbosity(100); // TODO: adjust
+        // Everything possible in log, as that can be useful for troubleshooting
+        r.setVerbosity(100);
         randomizers.put(protocolName, r);
     }
 

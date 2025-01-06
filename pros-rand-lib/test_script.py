@@ -120,7 +120,6 @@ def run_test(protocol_name,
     else:
         assert (read(process) == "?")
 
-    # TODO: parse these responses
     write(process, "get s01")
     while True:
         response = read(process)

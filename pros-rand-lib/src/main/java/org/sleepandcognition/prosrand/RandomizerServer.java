@@ -178,6 +178,20 @@ public class RandomizerServer {
 
     private static void printUsageSummary() {
         System.out.println("Usage:");
+        System.out.println("java -cp [JAR FILE PATH] org.sleepandcognition.prosrand.RandomizerServer [ARGUMENTS]");
+        System.out.println("Command-line arguments:");
+        System.out.println("-h Print this message and exit");
+        System.out.println("-v Show version");
+        System.out.println("-b Increase verbosity");
+        System.out.println("-q Decrease verbosity");
+        System.out.println("-c Command-line mode: accept commands typed in terminal");
+        System.out.println("-n Network mode: accept command over a TCP/IP socket");
+        System.out.println("-p [int] Specify port to use for TCP/IP socket");
+        System.out.println("-r [path] Specify path of variables-definition file");
+        System.out.println("-g [path] Specify path of group-definition file");
+        System.out.println("-s [path] Specify path of subject database file (tsv format)");
+        System.out.println("-x Allow correction of erroneous subject data until committed");
+        System.out.println("-a Do NOT balance groups by feature values, just do alternating assignment");
         System.exit(0);
     }
 
@@ -270,7 +284,6 @@ public class RandomizerServer {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
                 out.flush();

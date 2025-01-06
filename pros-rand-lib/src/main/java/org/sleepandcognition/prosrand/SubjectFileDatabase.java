@@ -21,7 +21,7 @@ public class SubjectFileDatabase extends SubjectDatabase {
     }
 
     public ArrayList<MultiDimSubject> ReadSubjectsIntoGroups(
-            VariableSet variables, Hashtable<String, InterventionGroup> groups) {
+            VariableSet variables, Hashtable<String, InterventionGroup> groups) throws IOException {
         ArrayList<MultiDimSubject> subjects = new ArrayList<MultiDimSubject>();
         FileInputStream fs = null;
         DataInputStream ds = null;
@@ -56,7 +56,7 @@ public class SubjectFileDatabase extends SubjectDatabase {
                                                     variables.valuesFromKeyValuePair(null, tokens[0]));
                                         } else {
                                             System.out.println("Corrupt subject line? " + oneLine);
-                                            System.exit(1);
+                                            throw new IOException("Unexpected data in subject file");
                                         }
                                     } else {
                                         Hashtable<String, Double> characteristics =
@@ -75,14 +75,10 @@ public class SubjectFileDatabase extends SubjectDatabase {
                         subjects.add(subject);
                     }
                 }
-            } catch (IOException io) {
-                io.printStackTrace();
-                System.out.println("Uh-oh... File listing previous subjects appears to exist, but could not be read.");
-                System.exit(1);
             } catch (InvalidDataException ex) {
                 ex.printStackTrace();
                 System.out.println("Uh-oh... File listing previous subjects appears to exist, but contains invalid data");
-                System.exit(1);
+                throw new IOException("Invalid data in subject file");
             } finally {
                 try {
                     br.close();

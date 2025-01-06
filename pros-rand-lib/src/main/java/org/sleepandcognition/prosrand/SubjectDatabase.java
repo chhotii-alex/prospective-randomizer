@@ -11,7 +11,7 @@ import java.util.Hashtable;
  */
 public class SubjectDatabase {
     public ArrayList<MultiDimSubject> ReadSubjectsIntoGroups(
-            VariableSet variables, Hashtable<String, InterventionGroup> groups) {
+            VariableSet variables, Hashtable<String, InterventionGroup> groups) throws IOException {
         ArrayList<MultiDimSubject> subjects = new ArrayList<MultiDimSubject>();
         return subjects;
     }
