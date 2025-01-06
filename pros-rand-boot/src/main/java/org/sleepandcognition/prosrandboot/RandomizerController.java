@@ -10,6 +10,7 @@ import org.sleepandcognition.prosrand.InvalidDataException;
 import org.sleepandcognition.prosrand.MultiDimSubject;
 import org.sleepandcognition.prosrand.ProtocolSpec;
 import org.sleepandcognition.prosrand.Randomizer;
+import org.sleepandcognition.prosrand.SubjectDatabase;
 import org.sleepandcognition.prosrand.SubjectFileDatabase;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.xml.sax.SAXException;
@@ -49,7 +51,8 @@ public class RandomizerController {
     }
 
     @PostMapping("/{protocolName}/start")
-    synchronized void startProtocol(@PathVariable String protocolName, @RequestBody ProtocolSpec spec)
+    synchronized void startProtocol(@PathVariable String protocolName, @RequestBody ProtocolSpec spec, 
+                 @RequestParam(required = false) boolean temp)
             throws Exception {
         if (randomizers.containsKey(protocolName)) {
             if (!randomizerOfName(protocolName).matchesSpecs(spec)) {
@@ -58,13 +61,19 @@ public class RandomizerController {
             // already started; ignore
             return;
         }
-        String subjectFile = String.format("subjects_%s.txt", protocolName);
-        SubjectFileDatabase database = new SubjectFileDatabase(subjectFile);
+        SubjectDatabase database;
+        if (temp) {
+            database = new SubjectDatabase();
+        }
+        else {
+            String subjectFile = String.format("subjects_%s.txt", protocolName);
+            database = new SubjectFileDatabase(subjectFile);
+        }
         Randomizer r;
         if (spec.getAlgorithm().equals("Alternating")) {
-            r = new BalancingRandomizer(spec, database);
-        } else if (spec.getAlgorithm().equals("Balanced")) {
             r = new AlternatingRandomizer(spec, database);
+        } else if (spec.getAlgorithm().equals("Balanced")) {
+            r = new BalancingRandomizer(spec, database);
         } else {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
