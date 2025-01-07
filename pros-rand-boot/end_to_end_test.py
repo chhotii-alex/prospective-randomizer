@@ -31,7 +31,16 @@ protocols = {
         'variableSpec': {'state': None},
         'allowRevision': True,
         'algorithm': 'Alternating',
-    }
+    },
+    "colliding": {
+        'groupNames': ['A', 'B'],
+        'variableSpec': {'package' : ['can', 'jar', 'box'],
+                         'verb': ['can', 'may', 'will'],
+                         'month': ['may', 'september'],
+                         'document': ['will', 'lease', 'divorce']},
+        'allowRevision': True,
+        'algorithm': 'Balanced',
+    },
 }
 
 require_restart = True
