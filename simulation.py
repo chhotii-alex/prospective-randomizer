@@ -90,7 +90,7 @@ def assign_all(protocol_name, pid):
     assert r.status_code == 200
 
 def get_groups(protocol_name, pid):
-    r = requests.get(make_url(protocol_name, pid, ['groups']))
+    r = requests.get(make_url(protocol_name, pid, ['groups', 'strings']))
     assert r.status_code == 200
     return r.json()
 
@@ -145,6 +145,7 @@ for pid in pid_gen():
                 for algorithm, prot_suff in competitors.items():
                     assign_all(protocol_name, prot_suff)
                     groups = get_groups(protocol_name, prot_suff)
+                    pp(groups)
                     (min_group_size, max_group_size) = (999999, 0)
                     for group in groups:
                         group_size = len(group['subjects'])
@@ -162,17 +163,17 @@ for pid in pid_gen():
                         if continuous:
                             samples = []
                             for group in groups:
-                                samples.append( [subject['features'][var] for subject in group['subjects']])
+                                samples.append( [float(subject[var]) for subject in group['subjects']])
                             if len(groups) > 2:
                                 r = f_oneway(*samples)
                             else:
                                 r = ttest_ind(*samples)
                         else:
-                            pp(groups)
+                            TODO do not use all possible var_options, as we may get zeros in expected frequencies
                             table = np.zeros((len(var_options), len(groups)))
                             for j, group in enumerate(groups):
                                 for subject in group['subjects']:
-                                    feature_value = subject['features'][var]
+                                    feature_value = subject[var]
                                     table[var_options.index(feature_value), j] += 1
                             r = chi2_contingency(table)
                         append_row(algorithm, max_subject_count, placing,
