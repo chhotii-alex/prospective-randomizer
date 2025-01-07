@@ -231,6 +231,9 @@ public abstract class Randomizer {
         if (subj.myGroup != null) {
             subj.myGroup.remove(subj);
         }
+        else {
+            unassignedSubjects.remove(subj);
+        }
         database.WriteOutSubjects(subjectsByID, variables);
     }
 
