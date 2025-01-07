@@ -153,7 +153,6 @@ for pid in pid_gen():
             for algorithm, prot_suff in competitors.items():
                 assign_all(protocol_name, prot_suff)
                 groups = get_groups(protocol_name, prot_suff)
-                pp(groups)
                 (min_group_size, max_group_size) = (999999, 0)
                 for group in groups:
                     group_size = len(group['subjects'])
