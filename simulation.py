@@ -7,6 +7,7 @@ from pprint import pp
 from scipy.stats import f_oneway, ttest_ind, chi2_contingency
 import numpy as np
 import pandas as pd
+from collections import defaultdict
 
 random.seed(42)
 
@@ -32,6 +33,12 @@ protocols = {
         'variableSpec': {'state': ['Iowa', 'Ohio', 'Illinois', 'Pennsylvania']},
         'allowRevision': False,
     },
+    "multitype": {
+        'groupNames': ['A', 'B'],
+        'variableSpec': {'state': ['Iowa', 'Ohio', 'Illinois', 'Pennsylvania'],
+                         'score': None},
+        'allowRevision': False,
+    },
 }
 
 def setup():
@@ -44,7 +51,7 @@ def make_phony_features(variables):
     for var in variables:
         choices = variables[var]
         if choices is None:
-            data[var] = random.uniform(1, 99)
+            data[var] = random.gauss(mu=50, sigma=20) #random.uniform(1, 99)
         else:
             data[var] = random.choice(choices)
     return data
@@ -81,9 +88,9 @@ def place_random_subject(subjectID, protocol_name, pid, features=None):
 # Trigger assignment of this one subject specifically (although might trigger
 # other subjects as well as a side-effect) and return the group for that subject
 def get_group(subjectID, protocol_name, pid):
-    r = requests.get(make_url(protocol_name, pid, ['subject', subjectID, group]))
+    r = requests.get(make_url(protocol_name, pid, ['subject', subjectID, 'group']))
     assert r.status_code == 200
-    return r.text()
+    return r.text
 
 def assign_all(protocol_name, pid):
     r = requests.post(make_url(protocol_name, pid, ['assignall']), {})
@@ -104,84 +111,89 @@ def pid_gen():
     for num in range(25):
         yield 'P' + str(num).zfill(2)
 
-d = {
-    'algorithm': [],
-    'n': [],
-    'placing': [],
-    'n_vars': [],
-    'pvalue': [],
-}
+max_subject_count = 20
 
-def append_row(algorithm, n, placing, n_vars, pvalue):
+d = defaultdict(list)
+
+def append_row(algorithm, n, place_interval, n_vars, exp_num, var, pvalue):
     d['algorithm'].append(algorithm)
     d['n'].append(n)
-    d['placing'].append(placing)
+    d['place_interval'].append(place_interval)
     d['n_vars'].append(n_vars)
+    d['exp_num'].append(exp_num)
+    d['var'].append(var)
     d['pvalue'].append(pvalue)
+
+exp_num = 0
 
 setup();
 for pid in pid_gen():
     for protocol_name in protocols.keys():
-        for placing in [True, False]:
-            for max_subject_count in [12, 24, 36]:
-                competitors = {}
-                for algorithm in ['Alternating', 'Balanced']:
-                    protocols[protocol_name]['algorithm'] = algorithm
-                    prot_suff = pid + algorithm + str(placing) + str(max_subject_count)
-                    start_protocol(protocol_name, prot_suff)
-                    competitors[algorithm] = prot_suff
-                put_subjects = []
-                for s_id in id_gen():
-                    features = make_features_for(protocol_name)
+        for place_interval in [0, 1, 2, 5, 10]:
+            exp_num += 1
+            competitors = {}
+            for algorithm in ['Alternating', 'Balanced']:
+                protocols[protocol_name]['algorithm'] = algorithm
+                prot_suff = pid + algorithm + str(place_interval) + str(max_subject_count)
+                start_protocol(protocol_name, prot_suff)
+                competitors[algorithm] = prot_suff
+            put_subjects = []
+            for count, s_id in enumerate(id_gen()):
+                if (count == max_subject_count):
+                    break
+                features = make_features_for(protocol_name)
+                for prot_suff in competitors.values():
+                    put_random_subject(s_id, protocol_name, prot_suff, features)
+                put_subjects.append(s_id)
+                if count >= place_interval:
                     for prot_suff in competitors.values():
-                        if placing:
-                            place_random_subject(s_id, protocol_name, prot_suff, features)
-                        else:
-                            put_random_subject(s_id, protocol_name, prot_suff, features)
-                    put_subjects.append(s_id)
-                    if (len(put_subjects) >= max_subject_count):
-                        break
+                        get_group(put_subjects[0], protocol_name, prot_suff)
+                    put_subjects.pop(0)
                     
-                for algorithm, prot_suff in competitors.items():
-                    assign_all(protocol_name, prot_suff)
-                    groups = get_groups(protocol_name, prot_suff)
-                    pp(groups)
-                    (min_group_size, max_group_size) = (999999, 0)
-                    for group in groups:
-                        group_size = len(group['subjects'])
-                        if group_size < min_group_size:
-                            min_group_size = group_size
-                        if group_size > max_group_size:
-                            max_group_size = group_size
-                    assert (max_group_size - min_group_size) <= 1
-                    for var in protocols[protocol_name]['variableSpec']:
-                        var_options = protocols[protocol_name]['variableSpec'][var]
-                        if var_options is None:
-                            continuous = True
+            for algorithm, prot_suff in competitors.items():
+                assign_all(protocol_name, prot_suff)
+                groups = get_groups(protocol_name, prot_suff)
+                pp(groups)
+                (min_group_size, max_group_size) = (999999, 0)
+                for group in groups:
+                    group_size = len(group['subjects'])
+                    if group_size < min_group_size:
+                        min_group_size = group_size
+                    if group_size > max_group_size:
+                        max_group_size = group_size
+                assert (max_group_size - min_group_size) <= 1
+                for var in protocols[protocol_name]['variableSpec']:
+                    var_options = protocols[protocol_name]['variableSpec'][var]
+                    if var_options is None:
+                        continuous = True
+                    else:
+                        continuous = False
+                    if continuous:
+                        samples = []
+                        for group in groups:
+                            samples.append( [float(subject[var]) for subject in group['subjects']])
+                        if len(groups) > 2:
+                            r = f_oneway(*samples)
                         else:
-                            continuous = False
-                        if continuous:
-                            samples = []
-                            for group in groups:
-                                samples.append( [float(subject[var]) for subject in group['subjects']])
-                            if len(groups) > 2:
-                                r = f_oneway(*samples)
-                            else:
-                                r = ttest_ind(*samples)
-                        else:
-                            TODO do not use all possible var_options, as we may get zeros in expected frequencies
-                            table = np.zeros((len(var_options), len(groups)))
-                            for j, group in enumerate(groups):
-                                for subject in group['subjects']:
-                                    feature_value = subject[var]
-                                    table[var_options.index(feature_value), j] += 1
-                            r = chi2_contingency(table)
-                        append_row(algorithm, max_subject_count, placing,
-                                   len(protocols[protocol_name]['variableSpec']),
-                                   r.pvalue)
+                            r = ttest_ind(*samples)
+                    else:
+                        table = np.zeros((len(var_options), len(groups)))
+                        for j, group in enumerate(groups):
+                            for subject in group['subjects']:
+                                feature_value = subject[var]
+                                table[var_options.index(feature_value), j] += 1
+                        # do not use all possible var_options, as we may get zeros in expected frequencies
+                        options_to_keep_indices = [i for i in range(len(var_options)) if np.sum(table[i, :]) > 0]
+                        table = table[options_to_keep_indices, :]
+                        r = chi2_contingency(table)
+                    append_row(algorithm, max_subject_count, place_interval,
+                               len(protocols[protocol_name]['variableSpec']),
+                               exp_num, var,
+                               r.pvalue)
 
 df = pd.DataFrame(d)
-print(df)
+df.to_excel('results.xlsx', index=False)
+
 
                 
         
