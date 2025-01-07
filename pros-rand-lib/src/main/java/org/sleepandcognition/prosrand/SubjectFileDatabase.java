@@ -77,7 +77,8 @@ public class SubjectFileDatabase extends SubjectDatabase {
                 }
             } catch (InvalidDataException ex) {
                 ex.printStackTrace();
-                System.out.println("Uh-oh... File listing previous subjects appears to exist, but contains invalid data");
+                System.out.println(
+                        "Uh-oh... File listing previous subjects appears to exist, but contains invalid data");
                 throw new IOException("Invalid data in subject file");
             } finally {
                 try {

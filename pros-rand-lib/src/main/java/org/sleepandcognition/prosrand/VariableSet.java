@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
@@ -169,12 +170,21 @@ public class VariableSet {
 
         public void readOptionsFromXML(Node node) {}
 
-        public String keyValuePairFromValues(Hashtable<String, Double> values) {
+        public Double valueFromValues(Hashtable<String, Double> values) {
             Double value = values.get(key);
             if (value == null) {
-                return "";
+                // should never happen
+                throw new RuntimeException("How could we not have a value?");
             }
-            return String.format("%s=%f", key, value.doubleValue());
+            return value;
+        }
+
+        public String strValueFromValues(Hashtable<String, Double> values) {
+            return String.format("%f", valueFromValues(values).doubleValue());
+        }
+
+        public String keyValuePairFromValues(Hashtable<String, Double> values) {
+            return String.format("%s=%s", key, strValueFromValues(values));
         }
     }
 
@@ -245,17 +255,16 @@ public class VariableSet {
             return true;
         }
 
-        public String keyValuePairFromValues(Hashtable<String, Double> values) {
+        public String strValueFromValues(Hashtable<String, Double> values) {
             for (Iterator<String> it = options.iterator(); it.hasNext(); ) {
                 String option = it.next();
                 String optionKey = String.format("%s_is%s", key, option);
                 if (values.get(optionKey).doubleValue() > 0) {
-                    return String.format("%s=%s", key, option);
+                    return option;
                 }
             }
-            System.out.println("Inconceivable!");
-            System.out.println("No option set for key " + key);
-            return "";
+            // One should be valued, so we should never get here:
+            throw new RuntimeException("How could we not have a value? (categorical)");
         }
     } // END class CategoricalVariableSetterGetter
 
@@ -286,5 +295,16 @@ public class VariableSet {
             return false;
         }
         return true;
+    }
+
+    public Map<String, String> stringsFromValues(Hashtable<String, Double> baselineCharacteristics) {
+        HashMap<String, String> map = new HashMap<>();
+        for (Enumeration<String> e = variables.keys(); e.hasMoreElements(); ) {
+            String key = e.nextElement();
+            VariableSetterGetter getter = variables.get(key);
+            String val = getter.strValueFromValues(baselineCharacteristics);
+            map.put(key, val);
+        }
+        return map;
     }
 }

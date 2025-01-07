@@ -4,6 +4,9 @@ import requests
 from pathlib import Path
 import random
 from pprint import pp
+from scipy.stats import f_oneway, ttest_ind, chi2_contingency
+import numpy as np
+import pandas as pd
 
 random.seed(42)
 
@@ -22,6 +25,11 @@ protocols = {
     "moregroups": {
         'groupNames': ['A', 'B', 'C', 'D'],
         'variableSpec': {'score': None},
+        'allowRevision': False,
+    },
+    "categorical": {
+        'groupNames': ['A', 'B'],
+        'variableSpec': {'state': ['Iowa', 'Ohio', 'Illinois', 'Pennsylvania']},
         'allowRevision': False,
     },
 }
@@ -50,7 +58,6 @@ def make_url(protocol_name, pid, parts):
 
 def start_protocol(protocol_name, pid):
     url = make_url(protocol_name, pid, ['start?temp=true'])
-    print(url)
     r = requests.post(url,
                       json=protocols[protocol_name])
     assert r.status_code == 200
@@ -97,6 +104,21 @@ def pid_gen():
     for num in range(25):
         yield 'P' + str(num).zfill(2)
 
+d = {
+    'algorithm': [],
+    'n': [],
+    'placing': [],
+    'n_vars': [],
+    'pvalue': [],
+}
+
+def append_row(algorithm, n, placing, n_vars, pvalue):
+    d['algorithm'].append(algorithm)
+    d['n'].append(n)
+    d['placing'].append(placing)
+    d['n_vars'].append(n_vars)
+    d['pvalue'].append(pvalue)
+
 setup();
 for pid in pid_gen():
     for protocol_name in protocols.keys():
@@ -120,7 +142,7 @@ for pid in pid_gen():
                     if (len(put_subjects) >= max_subject_count):
                         break
                     
-                for prot_suff in competitors.values():
+                for algorithm, prot_suff in competitors.items():
                     assign_all(protocol_name, prot_suff)
                     groups = get_groups(protocol_name, prot_suff)
                     (min_group_size, max_group_size) = (999999, 0)
@@ -130,8 +152,35 @@ for pid in pid_gen():
                             min_group_size = group_size
                         if group_size > max_group_size:
                             max_group_size = group_size
-                    pp(groups)
                     assert (max_group_size - min_group_size) <= 1
+                    for var in protocols[protocol_name]['variableSpec']:
+                        var_options = protocols[protocol_name]['variableSpec'][var]
+                        if var_options is None:
+                            continuous = True
+                        else:
+                            continuous = False
+                        if continuous:
+                            samples = []
+                            for group in groups:
+                                samples.append( [subject['features'][var] for subject in group['subjects']])
+                            if len(groups) > 2:
+                                r = f_oneway(*samples)
+                            else:
+                                r = ttest_ind(*samples)
+                        else:
+                            pp(groups)
+                            table = np.zeros((len(var_options), len(groups)))
+                            for j, group in enumerate(groups):
+                                for subject in group['subjects']:
+                                    feature_value = subject['features'][var]
+                                    table[var_options.index(feature_value), j] += 1
+                            r = chi2_contingency(table)
+                        append_row(algorithm, max_subject_count, placing,
+                                   len(protocols[protocol_name]['variableSpec']),
+                                   r.pvalue)
+
+df = pd.DataFrame(d)
+print(df)
 
                 
         

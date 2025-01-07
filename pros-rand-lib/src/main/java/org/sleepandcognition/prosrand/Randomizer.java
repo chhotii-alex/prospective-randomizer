@@ -6,7 +6,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -276,5 +275,14 @@ public abstract class Randomizer {
             return false;
         }
         return true;
+    }
+
+    public synchronized List<InterventionGroupStrings> getGroupsWithStrings() {
+        ArrayList<InterventionGroupStrings> list = new ArrayList<>();
+        for (Iterator<InterventionGroup> e = groups.values().iterator(); e.hasNext(); ) {
+            InterventionGroupStrings g = e.next().makeStringVersion(variables);
+            list.add(g);
+        }
+        return list;
     }
 }

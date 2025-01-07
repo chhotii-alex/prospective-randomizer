@@ -87,7 +87,7 @@ public class InterventionGroup {
         }
     }
 
-    protected MeanVectorCalculator getMeans(){
+    protected MeanVectorCalculator getMeans() {
         if (means == null) {
             means = new MeanVectorCalculator();
             for (Iterator<MultiDimSubject> it = subjects.iterator(); it.hasNext(); ) {
@@ -128,5 +128,14 @@ public class InterventionGroup {
         subj.myGroup = null;
         // invalidate calculations so far
         means = null;
+    }
+
+    public InterventionGroupStrings makeStringVersion(VariableSet variables) {
+        InterventionGroupStrings g = new InterventionGroupStrings(name);
+        for (Iterator<MultiDimSubject> it = subjects.iterator(); it.hasNext(); ) {
+            MultiDimSubject s = it.next();
+            g.addSubject(variables.stringsFromValues(s.baselineCharacteristics));
+        }
+        return g;
     }
 }
