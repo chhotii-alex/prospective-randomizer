@@ -24,13 +24,19 @@ import org.xml.sax.SAXException;
  * is handled with one-hot encoding.
  */
 
+ /*
+  * TODO: refactor to eliminate redunancy in various contructors (also, this would result in better separation of 
+   concerns)
+  */
 public class VariableSet {
     Hashtable<String, VariableSetterGetter> variables;
+    Hashtable<String, String> variableFromDimension;
     boolean multiDimensional;
 
     public VariableSet(String fileNameOrPath) throws SAXException, IOException, ParserConfigurationException {
         multiDimensional = false;
         variables = new Hashtable<String, VariableSetterGetter>();
+        variableFromDimension = new Hashtable<String, String>();
         File xmlFileName = new File(fileNameOrPath);
         Document document =
                 DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlFileName);
@@ -49,10 +55,16 @@ public class VariableSet {
                 VariableSetterGetter getter = null;
                 if (type.equalsIgnoreCase("continuous")) {
                     getter = new ContinuousVariableSetterGetter(name);
+                    variableFromDimension.put(name, name);
                 } else if (type.equalsIgnoreCase("categorical")) {
-                    getter = new CategoricalVariableSetterGetter(name);
+                    CategoricalVariableSetterGetter catGetter = new CategoricalVariableSetterGetter(name);
+                    catGetter.readOptionsFromXML(node);
+                    for (Iterator<String> it = catGetter.options.iterator(); it.hasNext(); ) {
+                        String optionName = it.next();
+                        variableFromDimension.put(catGetter.optionKey(optionName), name);
+                    }
+                    getter = catGetter;
                 }
-                getter.readOptionsFromXML(node);
                 variables.put(name, getter);
                 if (!first) {
                     multiDimensional = true;
@@ -62,32 +74,24 @@ public class VariableSet {
         }
     }
 
-    public VariableSet(List<String> variableSpec) {
-        variables = new Hashtable<String, VariableSetterGetter>();
-        for (Iterator<String> it = variableSpec.iterator(); it.hasNext(); ) {
-            String name = it.next();
-            VariableSetterGetter getter = new ContinuousVariableSetterGetter(name);
-            variables.put(name, getter);
-        }
-        if (variableSpec.size() > 1) {
-            multiDimensional = true;
-        }
-    }
-
     public VariableSet(HashMap<String, List<String>> variableSpec) {
         variables = new Hashtable<String, VariableSetterGetter>();
+        variableFromDimension = new Hashtable<String, String>();
         for (Iterator<String> it = variableSpec.keySet().iterator(); it.hasNext(); ) {
             String name = it.next();
             VariableSetterGetter getter;
             List<String> choices = variableSpec.get(name);
             if (choices == null) {
                 getter = new ContinuousVariableSetterGetter(name);
+                variableFromDimension.put(name, name);
             } else {
-                getter = new CategoricalVariableSetterGetter(name);
+                CategoricalVariableSetterGetter catGetter = new CategoricalVariableSetterGetter(name);
                 for (Iterator<String> opts = choices.listIterator(); opts.hasNext(); ) {
                     String optionName = opts.next();
-                    ((CategoricalVariableSetterGetter) getter).addOption(optionName);
+                    catGetter.addOption(optionName);
+                    variableFromDimension.put(catGetter.optionKey(optionName), name);
                 }
+                getter = catGetter;
             }
             variables.put(name, getter);
         }
@@ -156,6 +160,10 @@ public class VariableSet {
             key = name;
         }
 
+        public double weight() {
+            return 1.0;
+        }
+
         public abstract String getTypeName();
 
         Hashtable<String, Double> valuesFromKeyValuePair(String value) {
@@ -210,6 +218,10 @@ public class VariableSet {
             return "categorical";
         }
 
+        public double weight() {
+            return 1.0 / options.size();
+        }
+
         void addOption(String name) {
             options.add(name);
         }
@@ -238,8 +250,7 @@ public class VariableSet {
                 if (value.equals(option.toString())) {
                     optionValue = new Double(1);
                 }
-                String optionKey = String.format("%s_is%s", key, option);
-                val.put(optionKey, optionValue);
+                val.put(optionKey(option), optionValue);
             }
             return val;
         }
@@ -247,19 +258,21 @@ public class VariableSet {
         public boolean hasValues(Hashtable<String, Double> values) {
             for (Iterator<String> it = options.iterator(); it.hasNext(); ) {
                 String option = it.next();
-                String optionKey = String.format("%s_is%s", key, option);
-                if (!values.containsKey(optionKey)) {
+                if (!values.containsKey(optionKey(option))) {
                     return false;
                 }
             }
             return true;
         }
 
+        public String optionKey(String option) {
+            return String.format("%s_is%s", key, option);
+        }
+
         public String strValueFromValues(Hashtable<String, Double> values) {
             for (Iterator<String> it = options.iterator(); it.hasNext(); ) {
                 String option = it.next();
-                String optionKey = String.format("%s_is%s", key, option);
-                if (values.get(optionKey).doubleValue() > 0) {
+                if (values.get(optionKey(option)).doubleValue() > 0) {
                     return option;
                 }
             }
@@ -306,5 +319,9 @@ public class VariableSet {
             map.put(key, val);
         }
         return map;
+    }
+
+    public double weightForKey(String key) {
+        return variables.get(variableFromDimension.get(key)).weight();
     }
 }

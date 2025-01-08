@@ -127,18 +127,7 @@ public class BalancingRandomizer extends Randomizer {
     }
 
     private double nomalizedLength(Hashtable<String, Double> baselineCharacteristics) {
-        double accum = 0.0;
-        for (Enumeration<String> vit = baselineCharacteristics.keys(); vit.hasMoreElements(); ) {
-            String key = vit.nextElement();
-            double mean = getMeans().mean(key);
-            double stddev = getMeans().stddev(key);
-            double v1 = 0.0;
-            if (stddev > 0.0) {
-                v1 = (baselineCharacteristics.get(key).doubleValue() - mean) / stddev;
-            }
-            accum += v1 * v1;
-        }
-
+        double accum = dotProductForVectors(baselineCharacteristics, baselineCharacteristics);
         return Math.sqrt(accum);
     }
 
@@ -156,7 +145,8 @@ public class BalancingRandomizer extends Randomizer {
                 v1 = (baselineCharacteristics.get(key).doubleValue() - mean) / stddev;
                 v2 = (vector.get(key).doubleValue() - mean) / stddev;
             }
-            accum += v1 * v2;
+            double weight = variables.weightForKey(key);
+            accum += weight * v1 * v2;
         }
         return accum;
     }

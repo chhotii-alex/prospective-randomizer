@@ -52,7 +52,7 @@ protocols = {
         'groupNames': ['C', 'D', 'E'],
         'variableSpec': {'state': ['Montana', 'Wyoming', 'Colorodo']},
         'allowRevision': True,
-    }
+    },
 }
 
 def make_put_command(put_or_place, subject, variables):
