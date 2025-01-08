@@ -1,0 +1,14 @@
+Some things that could be done to provide a more robust and professional deployment:
+
+* Current code has only two options for saving the list of subjects: in-memory only (and thus
+not surviving a restart), for testing only; and in a flat text file local to the server.
+Ideally there should be a subclass of SubjectDatabase that provides an interface to a
+database server. This would be easy, especially within the Spring Boot framework.
+
+* There is no security hardening of the network endpoints. Ideally clients (i.e. instances
+of the computerized task, doing PUT and GET) should have to provide some kind of token
+when they contact the server. There should be some kind of authentication/authorization
+on the endpoints that divulge all the study information (/groups etc.) As it is, it's
+open to spying and mischief. We've been deploying it locally on-campus only, and
+relying on "security by obscurity", but definitely a cloud deployment would absolutely
+require some security measures.
