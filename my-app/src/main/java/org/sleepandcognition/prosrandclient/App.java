@@ -12,7 +12,8 @@ import java.net.Socket;
  * of code required to communicate with the prospective randomizer server over a bare socket connection.
  * Assuming you're leveling one numeric feature, and you name it "score", you could probably drop this
  * class into your project as-is to use as the interface-- the required methods are public.
- * Rather lacking in niceties such as error handling and defensive programming, though.
+ * Rather lacking in niceties such as error handling and defensive programming, though, and the
+ * hard-coded IP address and port may need to be changed to fit your deployment needs.
  */
 public class App {
     public static void main(String[] args) {
@@ -33,12 +34,16 @@ public class App {
         }
 
         String getRandomizerIP() {
-            return "128.0.0.1";
+            return "127.0.0.1";  // localhost-- change this if PR not running on the same computer
+        }
+
+        int getPort() {
+            return 6000;
         }
 
         Socket getRandomizerSocket() throws IOException {
             Socket sock = new Socket();
-            sock.connect(new InetSocketAddress(getRandomizerIP(), 6000));
+            sock.connect(new InetSocketAddress(getRandomizerIP(), getPort()));
             return sock;
         }
 
@@ -47,13 +52,9 @@ public class App {
         }
     }
 
-    public String getSubjectID() {
-        return "S01";
-    }
-
-    public void submitScore(int score) throws IOException {
+    public void submitScore(String subjectID, int score) throws IOException {
         RandomizerConnection rc = new RandomizerConnection();
-        rc.out.println(String.format("PUT %s score=%d", getSubjectID(), score));
+        rc.out.println(String.format("PUT %s score=%d", subjectID, score));
         String reply = rc.in.readLine().trim();
         if (!reply.equals("OK")) {
             System.err.println(reply);
@@ -62,9 +63,9 @@ public class App {
         rc.close();
     }
 
-    public String getStudyGroup() throws IOException {
+    public String getStudyGroup(String subjectID) throws IOException {
         RandomizerConnection rc = new RandomizerConnection();
-        rc.out.println(String.format("GET %s", getSubjectID()));
+        rc.out.println(String.format("GET %s", subjectID));
         String reply = rc.in.readLine().trim();
         rc.close();
         return reply;
