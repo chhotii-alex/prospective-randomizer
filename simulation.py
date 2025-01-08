@@ -10,39 +10,53 @@ import pandas as pd
 from collections import defaultdict
 from greylock import Metacommunity
 from greylock.similarity import SimilarityFromFunction
+from tqdm import tqdm
 
 random.seed(42)
 
-protocols = {
-    "simpletest" : {
-        'groupNames': ['A', 'B'],
-        'variableSpec': {'score': None},
-        'allowRevision': False,
-    },
-    "multivar": {
-        'groupNames': ['A', 'B'],
-        'variableSpec': {'iq': None,
-                         'shoesize': None},
-        'allowRevision': False,
-    },
-    "moregroups": {
-        'groupNames': ['A', 'B', 'C', 'D'],
-        'variableSpec': {'score': None},
-        'allowRevision': False,
+def dict_interleave(d1, d2):
+    as_list = [x for xs in zip(d1.items(), d2.items()) for x in xs]
+    return dict(as_list)
+
+def dict_subset(d, n):
+    return dict(list(d.items())[:n])
+
+groupNames = ['W', 'X', 'Y', 'Z']
+variables = {
+    "continuous": {
+        "score": None,
+        "age": None,
+        "shoesize": None,
+        "iq": None,
     },
     "categorical": {
-        'groupNames': ['A', 'B'],
-        'variableSpec': {'state': ['Iowa', 'Ohio', 'Illinois', 'Pennsylvania']},
-        'allowRevision': False,
-    },
-    "multitype": {
-        'groupNames': ['A', 'B'],
-        'variableSpec': {'state': ['Iowa', 'Ohio', 'Illinois', 'Pennsylvania'],
-                         'score': None},
-        'allowRevision': False,
+        'state': ['Iowa', 'Ohio', 'Illinois', 'Pennsylvania'],
+        'fruit': ['apple', 'banana', 'cherry', 'durian'],
+        'mouse': ['micky', 'minnie'],
+        'student': ['BS', 'MS', 'PhD'],
     },
 }
-
+protocols = {}
+for n_groups in range(2, 5):
+    protocol_groups = groupNames[:n_groups]
+    for n_vars in range(1, 5):
+        for variable_type in ["continuous", "categorical", "both"]:
+            if variable_type == 'both':
+                protocol_vars = dict_interleave(*variables.values())
+            else:
+                protocol_vars = variables[variable_type]
+            all_vars = dict_subset(protocol_vars, 4)
+            protocol_vars = dict_subset(protocol_vars, n_vars)
+            protocol_name = "%d_%d_%s" % (n_groups, n_vars, variable_type)
+            protocols[protocol_name] = {
+                "spec" : {
+                    'groupNames': protocol_groups,
+                    'variableSpec': protocol_vars,
+                    'allowRevision': False,
+                },
+                "allVars": all_vars,
+            }
+            
 def setup():
     print("Please shut down the Spring Boot implementation and start it again.")
     time.sleep(0.25)
@@ -59,7 +73,11 @@ def make_phony_features(variables):
     return data
 
 def make_features_for(protocol_name):
-    return make_phony_features(protocols[protocol_name]['variableSpec'])
+    all_features = make_phony_features(protocols[protocol_name]['allVars'])
+    features = {}
+    for key in protocols[protocol_name]['spec']['variableSpec'].keys():
+        features[key] = all_features[key]
+    return (features, all_features)
 
 def make_url(protocol_name, pid, parts):
     url = 'http://localhost:8080/%s_%s/%s' % (protocol_name, pid, '/'.join(parts))
@@ -68,21 +86,17 @@ def make_url(protocol_name, pid, parts):
 def start_protocol(protocol_name, pid):
     url = make_url(protocol_name, pid, ['start?temp=true'])
     r = requests.post(url,
-                      json=protocols[protocol_name])
+                      json=protocols[protocol_name]['spec'])
     assert r.status_code == 200
 
 # This submits feature values but doesn't demand immediate group assignment
-def put_random_subject(subjectID, protocol_name, pid, features=None):
-    if features is None:
-        features = make_features_for(protocol_name)
+def put_random_subject(subjectID, protocol_name, pid, features):
     r = requests.post(make_url(protocol_name, pid, ['subject', subjectID]),
                       json=features)
     assert r.status_code == 200
 
 # This submits feature values and demands immediate group assignment
-def place_random_subject(subjectID, protocol_name, pid, features=None):
-    if features is None:
-        features = make_features_for(protocol_name)
+def place_random_subject(subjectID, protocol_name, pid, features):
     r = requests.post(make_url(protocol_name, pid, ['subject', subjectID, 'group']),
                       json=features)
     assert r.status_code == 200
@@ -99,7 +113,7 @@ def assign_all(protocol_name, pid):
     assert r.status_code == 200
 
 def get_groups(protocol_name, pid):
-    r = requests.get(make_url(protocol_name, pid, ['groups', 'strings']))
+    r = requests.get(make_url(protocol_name, pid, ['groups']))
     assert r.status_code == 200
     return r.json()
 
@@ -109,8 +123,9 @@ def id_gen():
         yield 'S' + str(num).zfill(3)
         num += 1
 
+rep_count = 25
 def pid_gen():
-    for num in range(25):
+    for num in range(rep_count):
         yield 'P' + str(num).zfill(2)
 
 max_subject_count = 20
@@ -134,7 +149,7 @@ def make_similarity_function(vars):
         return result
     return similarity
 
-def make_metacommunity(groups, vars):
+def make_metacommunity(groups, all_features_by_subject, vars):
     number_of_groups = len(groups)
     number_of_subjects = np.sum([len(g['subjects']) for g in groups])
     abundance = np.zeros((number_of_subjects, number_of_groups))
@@ -147,36 +162,32 @@ def make_metacommunity(groups, vars):
     d = defaultdict(list)
     for group in groups:
         for subject in group['subjects']:
-            for key, value in subject.items():
-                d[key].append(value)
+            s_id = subject['id']
+            for key in vars:
+                d[key].append(all_features_by_subject[s_id][key])
     X = pd.DataFrame(d)
     metacommunity = Metacommunity(abundance,
                                   similarity=SimilarityFromFunction(similarity_function,
                                                                     X=X))
     return metacommunity
 
-def get_diversity_measure(groups, vars, level, measure):
-    m = make_metacommunity(groups, vars)
-    results = m.to_dataframe(viewpoint=[0, 1, np.inf]).set_index(['viewpoint', 'community'])
+def get_diversity_measure(groups, all_features_by_subject, vars, level, measure):
+    m = make_metacommunity(groups, all_features_by_subject, vars)
+    results = m.to_dataframe(viewpoint=[0, 1, np.inf],
+                             measures=[measure]).set_index(['viewpoint', 'community'])
     return results.loc[(0.0, level), measure]
 
 ### Relevant to saving results to DataFrame
 
 d = defaultdict(list)
 
-def append_row(algorithm, n, place_interval, n_vars, exp_num, var, pvalue, norm_rho):
-    d['algorithm'].append(algorithm)
-    d['n'].append(n)
-    d['place_interval'].append(place_interval)
-    d['n_vars'].append(n_vars)
-    d['exp_num'].append(exp_num)
-    d['var'].append(var)
-    d['pvalue'].append(pvalue)
-    d['norm_rho'].append(norm_rho)
+def append_row(**kwargs):
+    for key, value in kwargs.items():
+        d[key].append(value)
 
 ### Relevant to running many simulations
     
-def evaluate_protocol_result(protocol_name, prot_suff, algorithm):
+def evaluate_protocol_result(protocol_name, prot_suff, algorithm, all_features_by_subject):
     assign_all(protocol_name, prot_suff)
     groups = get_groups(protocol_name, prot_suff)
     (min_group_size, max_group_size) = (999999, 0)
@@ -187,66 +198,82 @@ def evaluate_protocol_result(protocol_name, prot_suff, algorithm):
         if group_size > max_group_size:
             max_group_size = group_size
     assert (max_group_size - min_group_size) <= 1
-    for var in protocols[protocol_name]['variableSpec']:
-        var_options = protocols[protocol_name]['variableSpec'][var]
+    for var in protocols[protocol_name]['allVars']:
+        is_used = var in protocols[protocol_name]['spec']['variableSpec']
+        var_options = protocols[protocol_name]['allVars'][var]
         if var_options is None:
             continuous = True
         else:
             continuous = False
+        samples = []
+        for group in groups:
+            samples.append([all_features_by_subject[s['id']][var] for s in group['subjects']])
         if continuous:
-            samples = []
-            for group in groups:
-                samples.append( [float(subject[var]) for subject in group['subjects']])
             if len(groups) > 2:
                 r = f_oneway(*samples)
             else:
                 r = ttest_ind(*samples)
         else:
             table = np.zeros((len(var_options), len(groups)))
-            for j, group in enumerate(groups):
-                for subject in group['subjects']:
-                    feature_value = subject[var]
-                    table[var_options.index(feature_value), j] += 1
+            for j, group_samples in enumerate(samples):
+                for feature_val in group_samples:
+                    table[var_options.index(feature_val), j] += 1
             # do not use all possible var_options, as we may get zeros in expected frequencies
             options_to_keep_indices = [i for i in range(len(var_options)) if np.sum(table[i, :]) > 0]
             table = table[options_to_keep_indices, :]
             r = chi2_contingency(table)
-        norm_rho = get_diversity_measure(groups, protocols[protocol_name]['variableSpec'],
+        norm_rho = get_diversity_measure(groups,
+                                         all_features_by_subject,
+                                         protocols[protocol_name]['allVars'],
                                          'metacommunity', 'normalized_rho')
-        append_row(algorithm, max_subject_count, place_interval,
-                   len(protocols[protocol_name]['variableSpec']),
-                   exp_num, var,
-                   r.pvalue, norm_rho)
+        norm_rho_used = get_diversity_measure(groups,
+                                              all_features_by_subject,
+                                              protocols[protocol_name]['spec']['variableSpec'],
+                                         'metacommunity', 'normalized_rho')
+        append_row(algorithm=algorithm, n=max_subject_count, place_interval=place_interval,
+                   n_vars=len(protocols[protocol_name]['spec']['variableSpec']),
+                   exp=exp_num, var_name=var,
+                   pvalue=r.pvalue, norm_rho=norm_rho, norm_rho_used=norm_rho_used,
+                   is_used=is_used)
 
-def compare_algorithms(protocol_name, competitors):
+def compare_algorithms(protocol_name, competitors, all_features_by_subject):
     for algorithm, prot_suff in competitors.items():
-        evaluate_protocol_result(protocol_name, prot_suff, algorithm)
+        evaluate_protocol_result(protocol_name, prot_suff, algorithm, all_features_by_subject)
+
+place_interval_range = 10
 
 setup()
-exp_num = 0
-for pid in pid_gen():
-    for protocol_name in protocols.keys():
-        for place_interval in [0, 1, 2, 5, 10]:
-            exp_num += 1
-            competitors = {}
-            for algorithm in ['Alternating', 'Balanced']:
-                protocols[protocol_name]['algorithm'] = algorithm
-                prot_suff = pid + algorithm + str(place_interval) + str(max_subject_count)
-                start_protocol(protocol_name, prot_suff)
-                competitors[algorithm] = prot_suff
-            put_subjects = []
-            for count, s_id in enumerate(id_gen()):
-                if (count == max_subject_count):
-                    break
-                features = make_features_for(protocol_name)
-                for prot_suff in competitors.values():
-                    put_random_subject(s_id, protocol_name, prot_suff, features)
-                put_subjects.append(s_id)
-                if count >= place_interval:
+
+perm_count = rep_count*len(protocols)*place_interval_range
+print(perm_count)
+with tqdm(total=perm_count) as pbar:
+    exp_num = 0
+    for pid in pid_gen():
+        for protocol_name in protocols.keys():
+            for place_interval in range(place_interval_range): 
+                exp_num += 1
+                competitors = {}
+                for algorithm in ['Alternating', 'Balanced']:
+                    protocols[protocol_name]['spec']['algorithm'] = algorithm
+                    prot_suff = pid + algorithm + str(place_interval) + str(max_subject_count)
+                    start_protocol(protocol_name, prot_suff)
+                    competitors[algorithm] = prot_suff
+                put_subjects = []
+                all_features_by_subject = {}
+                for count, s_id in enumerate(id_gen()):
+                    if (count == max_subject_count):
+                        break
+                    features, all_features = make_features_for(protocol_name)
+                    all_features_by_subject[s_id] = all_features
                     for prot_suff in competitors.values():
-                        get_group(put_subjects[0], protocol_name, prot_suff)
-                    put_subjects.pop(0)
-            compare_algorithms(protocol_name, competitors)
+                        put_random_subject(s_id, protocol_name, prot_suff, features)
+                    put_subjects.append(s_id)
+                    if count >= place_interval:
+                        for prot_suff in competitors.values():
+                            get_group(put_subjects[0], protocol_name, prot_suff)
+                        put_subjects.pop(0)
+                compare_algorithms(protocol_name, competitors, all_features_by_subject)
+                pbar.update(1)
 
 df = pd.DataFrame(d)
 df.to_csv('results.csv', index=False)
