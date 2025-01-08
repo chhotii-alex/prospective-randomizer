@@ -8,6 +8,8 @@ from scipy.stats import f_oneway, ttest_ind, chi2_contingency
 import numpy as np
 import pandas as pd
 from collections import defaultdict
+from greylock import Metacommunity
+from greylock.similarity import SimilarityFromFunction
 
 random.seed(42)
 
@@ -42,7 +44,7 @@ protocols = {
 }
 
 def setup():
-    print("Please shut down the Spring Boot implemenation and start it again.")
+    print("Please shut down the Spring Boot implementation and start it again.")
     time.sleep(0.25)
     reply = input("Please hit the Enter key when you see 'Started ProsRandApplication' in the console.")
 
@@ -113,9 +115,56 @@ def pid_gen():
 
 max_subject_count = 20
 
+### Relevant to diversity analysis of group composition
+
+def make_similarity_function(vars):
+    def similarity(s1, s2):
+        accum = 0.0
+        for var_name, var_levels in vars.items():
+            if var_levels is None:
+                diff = float(getattr(s1, var_name))-float(getattr(s2, var_name))
+                r = np.exp(-abs(diff)/25)
+            else:
+                if getattr(s1, var_name) == getattr(s2, var_name):
+                    r = 1.0
+                else:
+                    r = 0.0
+            accum += r
+        result = accum/len(vars)
+        return result
+    return similarity
+
+def make_metacommunity(groups, vars):
+    number_of_groups = len(groups)
+    number_of_subjects = np.sum([len(g['subjects']) for g in groups])
+    abundance = np.zeros((number_of_subjects, number_of_groups))
+    row = 0
+    for i, group in enumerate(groups):
+        n_this_group = len(group['subjects'])
+        abundance[row:(row+n_this_group), i] = 1
+        row += n_this_group
+    similarity_function = make_similarity_function(vars)
+    d = defaultdict(list)
+    for group in groups:
+        for subject in group['subjects']:
+            for key, value in subject.items():
+                d[key].append(value)
+    X = pd.DataFrame(d)
+    metacommunity = Metacommunity(abundance,
+                                  similarity=SimilarityFromFunction(similarity_function,
+                                                                    X=X))
+    return metacommunity
+
+def get_diversity_measure(groups, vars, level, measure):
+    m = make_metacommunity(groups, vars)
+    results = m.to_dataframe(viewpoint=[0, 1, np.inf]).set_index(['viewpoint', 'community'])
+    return results.loc[(0.0, level), measure]
+
+### Relevant to saving results to DataFrame
+
 d = defaultdict(list)
 
-def append_row(algorithm, n, place_interval, n_vars, exp_num, var, pvalue):
+def append_row(algorithm, n, place_interval, n_vars, exp_num, var, pvalue, norm_rho):
     d['algorithm'].append(algorithm)
     d['n'].append(n)
     d['place_interval'].append(place_interval)
@@ -123,10 +172,58 @@ def append_row(algorithm, n, place_interval, n_vars, exp_num, var, pvalue):
     d['exp_num'].append(exp_num)
     d['var'].append(var)
     d['pvalue'].append(pvalue)
+    d['norm_rho'].append(norm_rho)
 
+### Relevant to running many simulations
+    
+def evaluate_protocol_result(protocol_name, prot_suff, algorithm):
+    assign_all(protocol_name, prot_suff)
+    groups = get_groups(protocol_name, prot_suff)
+    (min_group_size, max_group_size) = (999999, 0)
+    for group in groups:
+        group_size = len(group['subjects'])
+        if group_size < min_group_size:
+            min_group_size = group_size
+        if group_size > max_group_size:
+            max_group_size = group_size
+    assert (max_group_size - min_group_size) <= 1
+    for var in protocols[protocol_name]['variableSpec']:
+        var_options = protocols[protocol_name]['variableSpec'][var]
+        if var_options is None:
+            continuous = True
+        else:
+            continuous = False
+        if continuous:
+            samples = []
+            for group in groups:
+                samples.append( [float(subject[var]) for subject in group['subjects']])
+            if len(groups) > 2:
+                r = f_oneway(*samples)
+            else:
+                r = ttest_ind(*samples)
+        else:
+            table = np.zeros((len(var_options), len(groups)))
+            for j, group in enumerate(groups):
+                for subject in group['subjects']:
+                    feature_value = subject[var]
+                    table[var_options.index(feature_value), j] += 1
+            # do not use all possible var_options, as we may get zeros in expected frequencies
+            options_to_keep_indices = [i for i in range(len(var_options)) if np.sum(table[i, :]) > 0]
+            table = table[options_to_keep_indices, :]
+            r = chi2_contingency(table)
+        norm_rho = get_diversity_measure(groups, protocols[protocol_name]['variableSpec'],
+                                         'metacommunity', 'normalized_rho')
+        append_row(algorithm, max_subject_count, place_interval,
+                   len(protocols[protocol_name]['variableSpec']),
+                   exp_num, var,
+                   r.pvalue, norm_rho)
+
+def compare_algorithms(protocol_name, competitors):
+    for algorithm, prot_suff in competitors.items():
+        evaluate_protocol_result(protocol_name, prot_suff, algorithm)
+
+setup()
 exp_num = 0
-
-setup();
 for pid in pid_gen():
     for protocol_name in protocols.keys():
         for place_interval in [0, 1, 2, 5, 10]:
@@ -149,49 +246,10 @@ for pid in pid_gen():
                     for prot_suff in competitors.values():
                         get_group(put_subjects[0], protocol_name, prot_suff)
                     put_subjects.pop(0)
-                    
-            for algorithm, prot_suff in competitors.items():
-                assign_all(protocol_name, prot_suff)
-                groups = get_groups(protocol_name, prot_suff)
-                (min_group_size, max_group_size) = (999999, 0)
-                for group in groups:
-                    group_size = len(group['subjects'])
-                    if group_size < min_group_size:
-                        min_group_size = group_size
-                    if group_size > max_group_size:
-                        max_group_size = group_size
-                assert (max_group_size - min_group_size) <= 1
-                for var in protocols[protocol_name]['variableSpec']:
-                    var_options = protocols[protocol_name]['variableSpec'][var]
-                    if var_options is None:
-                        continuous = True
-                    else:
-                        continuous = False
-                    if continuous:
-                        samples = []
-                        for group in groups:
-                            samples.append( [float(subject[var]) for subject in group['subjects']])
-                        if len(groups) > 2:
-                            r = f_oneway(*samples)
-                        else:
-                            r = ttest_ind(*samples)
-                    else:
-                        table = np.zeros((len(var_options), len(groups)))
-                        for j, group in enumerate(groups):
-                            for subject in group['subjects']:
-                                feature_value = subject[var]
-                                table[var_options.index(feature_value), j] += 1
-                        # do not use all possible var_options, as we may get zeros in expected frequencies
-                        options_to_keep_indices = [i for i in range(len(var_options)) if np.sum(table[i, :]) > 0]
-                        table = table[options_to_keep_indices, :]
-                        r = chi2_contingency(table)
-                    append_row(algorithm, max_subject_count, place_interval,
-                               len(protocols[protocol_name]['variableSpec']),
-                               exp_num, var,
-                               r.pvalue)
+            compare_algorithms(protocol_name, competitors)
 
 df = pd.DataFrame(d)
-df.to_excel('results.xlsx', index=False)
+df.to_csv('results.csv', index=False)
 
 
                 
