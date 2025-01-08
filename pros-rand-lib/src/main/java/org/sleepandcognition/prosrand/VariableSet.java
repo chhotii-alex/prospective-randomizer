@@ -34,15 +34,13 @@ public class VariableSet {
     boolean multiDimensional;
 
     public VariableSet(String fileNameOrPath) throws SAXException, IOException, ParserConfigurationException {
-        multiDimensional = false;
-        variables = new Hashtable<String, VariableSetterGetter>();
-        variableFromDimension = new Hashtable<String, String>();
+        HashMap<String, List<String>> variableSpec = new HashMap<String, List<String>>();
+
         File xmlFileName = new File(fileNameOrPath);
         Document document =
                 DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(xmlFileName);
         NodeList documentNodes = document.getChildNodes();
         NodeList children = documentNodes.item(0).getChildNodes();
-        boolean first = true;
         for (int i = 0; i < children.getLength(); ++i) {
             org.w3c.dom.Node node = children.item(i);
             if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
@@ -52,29 +50,33 @@ public class VariableSet {
                 String name = attrNode.getNodeValue();
                 attrNode = attrs.getNamedItem("type");
                 String type = attrNode.getNodeValue();
-                VariableSetterGetter getter = null;
-                if (type.equalsIgnoreCase("continuous")) {
-                    getter = new ContinuousVariableSetterGetter(name);
-                    variableFromDimension.put(name, name);
-                } else if (type.equalsIgnoreCase("categorical")) {
-                    CategoricalVariableSetterGetter catGetter = new CategoricalVariableSetterGetter(name);
-                    catGetter.readOptionsFromXML(node);
-                    for (Iterator<String> it = catGetter.options.iterator(); it.hasNext(); ) {
-                        String optionName = it.next();
-                        variableFromDimension.put(catGetter.optionKey(optionName), name);
+                ArrayList<String> options = null;
+                if (type.equalsIgnoreCase("categorical")) {
+                    options = new ArrayList<>();
+                    attrs = node.getAttributes();
+        
+                    NodeList childOptions = node.getChildNodes();
+                    for (int j = 0; j < childOptions.getLength(); ++j) {
+                        org.w3c.dom.Node child = childOptions.item(j);
+                        if (child.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+                            attrs = child.getAttributes();
+                            attrNode = attrs.getNamedItem("name");
+                            String optionName = attrNode.getNodeValue();
+                            options.add(optionName);
+                        }
                     }
-                    getter = catGetter;
                 }
-                variables.put(name, getter);
-                if (!first) {
-                    multiDimensional = true;
-                }
-                first = false;
+                variableSpec.put(name, options);
             }
         }
+        init(variableSpec);
     }
 
     public VariableSet(HashMap<String, List<String>> variableSpec) {
+        init(variableSpec);
+    }
+
+    protected void init(HashMap<String, List<String>> variableSpec) {
         variables = new Hashtable<String, VariableSetterGetter>();
         variableFromDimension = new Hashtable<String, String>();
         for (Iterator<String> it = variableSpec.keySet().iterator(); it.hasNext(); ) {
@@ -176,8 +178,6 @@ public class VariableSet {
             return (values.containsKey(key));
         }
 
-        public void readOptionsFromXML(Node node) {}
-
         public Double valueFromValues(Hashtable<String, Double> values) {
             Double value = values.get(key);
             if (value == null) {
@@ -225,22 +225,6 @@ public class VariableSet {
         void addOption(String name) {
             options.add(name);
         }
-
-        public void readOptionsFromXML(Node node) {
-            org.w3c.dom.NamedNodeMap attrs = node.getAttributes();
-            org.w3c.dom.Node attrNode;
-
-            NodeList children = node.getChildNodes();
-            for (int i = 0; i < children.getLength(); ++i) {
-                org.w3c.dom.Node child = children.item(i);
-                if (child.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
-                    attrs = child.getAttributes();
-                    attrNode = attrs.getNamedItem("name");
-                    String name = attrNode.getNodeValue();
-                    addOption(name);
-                }
-            }
-        } // END readOptionsFromXML
 
         Hashtable<String, Double> valuesFromKeyValuePair(String value) {
             Hashtable<String, Double> val = new Hashtable<String, Double>();
