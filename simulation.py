@@ -275,8 +275,8 @@ with tqdm(total=perm_count) as pbar:
                 compare_algorithms(protocol_name, competitors, all_features_by_subject)
                 pbar.update(1)
 
-df = pd.DataFrame(d)
-df.to_csv('results.csv', index=False)
+        df = pd.DataFrame(d)
+        df.to_csv('results.csv', index=False)
 
 
                 
