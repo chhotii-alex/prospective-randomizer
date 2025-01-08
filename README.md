@@ -70,14 +70,15 @@ increasingly probable that sampling error in a small-N study will result in base
 differences between groups.
 
 This can abolish the information-gaining value of a study. In Bayesian terms, we would hope that our
-confidence in a hypothesis would be updated by the results of an experiment according to the formula:
+confidence in a hypothesis (H) would be updated by the results (r) of an experiment according to the formula:
 
-probability(hypothesis given results)
-    = probability(results given hypothesis) x probability(hypothesis) / probability(results)
+$$
+P(H | r) = \frac{P(r | H) \times P(H) } {P(r)}
+$$
 
 If there is a difference between groups at baseline, the probability of a difference between groups
 post-intervention is extremely high&mdash;regardless of the validity of the hypothesis. Thus, the
-probability(results given hypothesis) and probability(results) terms cancel out, yielding almost no
+$P(r | H)$ and $P(r)$ terms cancel out, yielding almost no
 power to update our confidence in the hypothesis.
 
 Let's look at the interpretation difficulties that have plagued previous studies with inadvertent
