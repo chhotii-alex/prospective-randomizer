@@ -444,6 +444,31 @@ GET /{protocolName}/groups returns information about the given protocol's groups
 
 simulation results
 
+### Using the BalancedRandomizer and having it distribute to groups based on one variable results in groups that are more similar than using AlternatingRandomizer.
+
+We performed __ simulated tests of a protocol with each of the following settings: one continuous variable and 2 groups, one continuous variable and 3 groups,
+one categorical variable and 2 groups, and one categorical variable and 3 groups.
+In each case, we simulated enrolling 20 subjects in the protocol. In the cases where a continuous variable was used, the value of the variable was randomly selected from a Gaussian
+distribution. When a categorical variable was used, an option was chosen with equal probability for each option.
+
+### Accumulating information about more subjects before doing a group assignment improves the algorithm's performance.
+
+We varied the interval between
+
+### When using more than one variable, p-values are still better for Balanced than Alternating, but less so.
+
+### Using a measure of diversity reveals that using multiple variables results in overall more similar groups.
+
+Human subjects are extremely diverse. _Diversity_ can be given an exact mathematical definition, related to measures of entropy. The mathematics of quantifying diversity has been well-developed
+in the field of ecology [cite L&C]. Fortunately for us, the ecoologists have thought long and hard about how to quantify the partitioning of diversity&mdash;i.e. how much diversity there is
+between subgroups ("subcommunities") of a larger overall group ("metacommunity") [cite Reeve].
+This mathematical framework is proving to be useful beyond ecology [cite greylock paper, alpha paper]. A useful measure of what
+we are trying to do that is provided by this framework is $\bar{R}$, the average redundancies of the subcommunities, in other words to what extent are individuals in one group similar to
+members of other groups. $\bar{R}$ equals 1.0 when the composition of each group is identical. Rather surprisingly, $\bar{R}$ can exceed 1.0 when typically a member of one group is more
+similar to some members of other groups than any member of their own group.
+
+We used the `greylock` python package [citation] to calculate $\bar{R}$ for the group composition of each simulated run of each protocol.
+
 discuss Barsky's study
 
 my thesis?

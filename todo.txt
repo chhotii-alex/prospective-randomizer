@@ -1,5 +1,10 @@
 Some things that could be done to provide a more robust and professional deployment:
 
+* An extremely useful enhancement would be some provision to delete a subject, in case
+subjects are dropped mid-study and to remove the undue influence of outliers on group
+composition. (This was handled in the past by manually editing subjects.txt when the
+server was not running.)
+
 * Current code has only two options for saving the list of subjects: in-memory only (and thus
 not surviving a restart), for testing only; and in a flat text file local to the server.
 Ideally there should be a subclass of SubjectDatabase that provides an interface to a
