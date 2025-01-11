@@ -446,10 +446,28 @@ simulation results
 
 ### Using the BalancedRandomizer and having it distribute to groups based on one variable results in groups that are more similar than using AlternatingRandomizer.
 
-We performed __ simulated tests of a protocol with each of the following settings: one continuous variable and 2 groups, one continuous variable and 3 groups,
+We performed 25 simulated runs of each of these protocols: one continuous variable and 2 groups, one continuous variable and 3 groups,
 one categorical variable and 2 groups, and one categorical variable and 3 groups.
 In each case, we simulated enrolling 20 subjects in the protocol. In the cases where a continuous variable was used, the value of the variable was randomly selected from a Gaussian
 distribution. When a categorical variable was used, an option was chosen with equal probability for each option.
+Subjects were added to groups two different ways: in the traditional manner, where subjects were assigned to groups in strictly alternating order ("Aternating"); and using the balanced
+algorithm described above based on the one simulated variable ("Balanced").
+After each simulated subject was submitted to the algorithm, their group assignment was not determined until after 4 additional subjects were submitted. Thus, the Balanced algorithm had
+the benefit of more information about the overall sample when it made its decisions than if group assignments had been immediately demanded. (That is, GET came after several PUT commands,
+rather than using PLACE.)
+After each simulation, the quality of the distribution of subjects
+to gropus was measured using non-paired t-tests of means of the feature values when a continuous variable was used for two groups,
+using one-way ANOVA tests of means of continuous feature values when there were three groups,
+and using chi-squared tests of the distribution of feature levels
+across groups when a categorical variable was used. N.B., in this case, _higher_ p-values are more desirable&mdash;the more similar groups are, the higher the p-value. If the
+randomization produces completely equiavalent groups, the probability that randomly-assorted groups would be more different would be 1.0.
+
+In the groups populated via the Alternating algorithm, these p-values were very close to the 0.5 that we would expect by chance (mean=0.51, median=0.51).
+
+In the groups populated via the Balanced algorithm, these p-values were much higher (mean=0.92, median=0.95). This difference was quite statistically significant (paired t-test = -16,
+p = $3 x 10^{-29}$, df=99). Given that the p-value is sometimes quite high by chance with Alternating assignment, the performance of the Balanced algorithm was superior in only 92% of the
+simulated runs. However, the overall dramatic difference is apparent in Figure 1.
+
 
 ### Accumulating information about more subjects before doing a group assignment improves the algorithm's performance.
 

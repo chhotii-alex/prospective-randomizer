@@ -40,7 +40,10 @@ protocols = {}
 for n_groups in range(2, 5):
     protocol_groups = groupNames[:n_groups]
     for n_vars in range(1, 5):
-        for variable_type in ["continuous", "categorical", "both"]:
+        variable_types = ["continuous", "categorical"]
+        if n_vars > 1:
+            variable_types += ["both"]
+        for variable_type in variable_types:
             if variable_type == 'both':
                 protocol_vars = dict_interleave(*variables.values())
             else:
@@ -198,6 +201,14 @@ def evaluate_protocol_result(protocol_name, prot_suff, algorithm, all_features_b
         if group_size > max_group_size:
             max_group_size = group_size
     assert (max_group_size - min_group_size) <= 1
+    norm_rho = get_diversity_measure(groups,
+                                     all_features_by_subject,
+                                     protocols[protocol_name]['allVars'],
+                                     'metacommunity', 'normalized_rho')
+    norm_rho_used = get_diversity_measure(groups,
+                                          all_features_by_subject,
+                                          protocols[protocol_name]['spec']['variableSpec'],
+                                     'metacommunity', 'normalized_rho')
     for var in protocols[protocol_name]['allVars']:
         is_used = var in protocols[protocol_name]['spec']['variableSpec']
         var_options = protocols[protocol_name]['allVars'][var]
@@ -222,16 +233,9 @@ def evaluate_protocol_result(protocol_name, prot_suff, algorithm, all_features_b
             options_to_keep_indices = [i for i in range(len(var_options)) if np.sum(table[i, :]) > 0]
             table = table[options_to_keep_indices, :]
             r = chi2_contingency(table)
-        norm_rho = get_diversity_measure(groups,
-                                         all_features_by_subject,
-                                         protocols[protocol_name]['allVars'],
-                                         'metacommunity', 'normalized_rho')
-        norm_rho_used = get_diversity_measure(groups,
-                                              all_features_by_subject,
-                                              protocols[protocol_name]['spec']['variableSpec'],
-                                         'metacommunity', 'normalized_rho')
         append_row(algorithm=algorithm, n=max_subject_count, place_interval=place_interval,
                    n_vars=len(protocols[protocol_name]['spec']['variableSpec']),
+                   n_groups=len(groups),
                    exp=exp_num, var_name=var,
                    pvalue=r.pvalue, norm_rho=norm_rho, norm_rho_used=norm_rho_used,
                    is_used=is_used)
