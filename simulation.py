@@ -126,7 +126,7 @@ def id_gen():
         yield 'S' + str(num).zfill(3)
         num += 1
 
-rep_count = 25
+rep_count = 100
 def pid_gen():
     for num in range(rep_count):
         yield 'P' + str(num).zfill(2)

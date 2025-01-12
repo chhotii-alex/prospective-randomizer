@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 df = pd.read_csv('results.csv')
 print(df.columns)
 
+df['is_bad'] = df['pvalue'] < 0.25
+
 print("Number of subjects per protocol:")
 print(df['n'].describe())
 print()
@@ -25,9 +27,14 @@ print(summ)
 
 result1_filter = (df['n_vars']==1) & (df['place_interval']==4) & df['is_used'] & (df['n_groups'] <= 3)
 print(df[result1_filter])
+print("Runs with pvalue < 0.25")
+print(df[result1_filter].groupby('algorithm')['is_bad'].sum())
+print()
+
 result1_alt = df[result1_filter & (df['algorithm'] == 'Alternating')]
 result1_bal = df[result1_filter & (df['algorithm'] == 'Balanced')]
 m = pd.merge(result1_alt, result1_bal, on=["exp", 'n_vars', 'n_groups', 'var_name', 'place_interval', 'n', 'is_used'], suffixes=('_alt', '_bal'))
+print("Subset of dataset for first part of results:")
 print(m)
 
 print("p-values, alt:")
@@ -57,20 +64,20 @@ for a in ax:
 ax[1].set_xlabel("p-value, difference in groups")
 fig.savefig('fig1.pdf')
 
-print("Variables")
-print(m['var_name'].unique())
-fig, ax = plt.subplots(4, 2, sharex=True, sharey=True)
-print(ax)
+fig, ax = plt.subplots(4, 2, sharex=True, sharey=True, figsize=(6, 8))
 for i, n_groups in enumerate(m['n_groups'].unique()):
+    print("group i=", i)
     for j, var_name in enumerate(m['var_name'].unique()):
         if var_name == 'score':
             var_type = 'continuous'
         else:
             var_type = 'categorical'
         subfilter = (m['n_groups']==n_groups) & (m['var_name']==var_name)
-        ax_index = i*4+j*2
-        ax[i*2, j].hist(m[subfilter]['pvalue_bal'])
-        ax_index = i*4+j*2+1
-        ax[i*2, j+1].hist(m[subfilter]['pvalue_alt'])
+        ax[2*j, i].hist(m[subfilter]['pvalue_bal'])
+        ax[2*j+1, i].hist(m[subfilter]['pvalue_alt'])
+        ax[2*j, i].set_title('%s variable, %d groups' % (var_type, n_groups))
+        ax[2*j, i].set_xlabel('p-values, Balanced')
+        ax[2*j+1, i].set_xlabel('p-values, Alternating')
+fig.tight_layout()
 fig.savefig("fig2.pdf")
 
