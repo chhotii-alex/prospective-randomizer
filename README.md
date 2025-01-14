@@ -442,7 +442,7 @@ GET /{protocolName}/groups returns information about the given protocol's groups
 
 # Results
 
-simulation results
+We performed _in scilico_ experiments to simulate the use of this algorithm and test whether, when, and to what extent it would produce more desirable group randomizations.
 
 ### Using the BalancedRandomizer and having it distribute to groups based on one variable results in groups that are more similar than using AlternatingRandomizer.
 
@@ -450,22 +450,24 @@ We performed 100 simulated runs of each of these protocols: one continuous varia
 one categorical variable and 2 groups, and one categorical variable and 3 groups.
 In each case, we simulated enrolling 20 subjects in the protocol. In the cases where a continuous variable was used, the value of the variable was randomly selected from a Gaussian
 distribution. When a categorical variable was used, an option was chosen with equal probability for each option.
-Subjects were added to groups two different ways: in the traditional manner, where subjects were assigned to groups in strictly alternating order ("Aternating"); and using the balanced
+For each simulated run, two simulated experiments were performed in parallel, which differed in how subjects 
+were added to groups: in one, in the traditional manner, where subjects were assigned to groups in strictly alternating order ("Aternating"); and in the other, using the balanced
 algorithm described above based on the one simulated variable ("Balanced").
 After each simulated subject was submitted to the algorithm, their group assignment was not determined until after 4 additional subjects were submitted. Thus, the Balanced algorithm had
 the benefit of more information about the overall sample when it made its decisions than if group assignments had been immediately demanded. (That is, GET came after several PUT commands,
 rather than using PLACE.)
-After each simulation, the quality of the distribution of subjects
-to gropus was measured using non-paired t-tests of means of the feature values when a continuous variable was used for two groups,
-using one-way ANOVA tests of means of continuous feature values when there were three groups,
-and using chi-squared tests of the distribution of feature levels
-across groups when a categorical variable was used. N.B., in this case, _higher_ p-values are more desirable&mdash;the more similar groups are, the higher the p-value. If the
-randomization produces completely equiavalent groups, the probability that randomly-assorted groups would be more different would be 1.0.
+After each simulation, we measured the quality of the randomization of the subjects to the 2 or 3 groups.
+When there were two groups and a continuous (numeric) feature was used, this measurement was the p-value of a non-paired t-test on the means of the feature values in each group.
+When a continuous feature was used and there were three groups, a one-way ANOVA test of means was used.
+When a categorical variable was used, the test was a chi-squared test that the distribution of feature levels did not differ between the 2 or 3 groups.
+N.B., in this analysis, _higher_ p-values are more desirable&mdash;the more similar groups were, the higher the p-value. Lower p-values would indicate greater dissimilarity between groups at
+baseline&mdash;exactly what the Balanced algorithm tries to avoid.
 
 In the groups populated via the Alternating algorithm, these p-values were very close to the 0.5 that we would expect by chance (mean=0.48, median=0.45).
 
-In the groups populated via the Balanced algorithm, these p-values were much higher (mean=0.92, median=0.95). This difference was quite statistically significant (paired t-test = -30.0,
-p = $1.4 x 10^{-104}$, df=399). The performance of the Balanced algorithm was not inevitibly superior in every case&mdash;the p-value for the Alternating randomizer was greater in 8% of the
+In the groups populated via the Balanced algorithm, these p-values were much higher (mean=0.92, median=0.95). For any given pair of simulations, the p-value resulting from the Balanced algorithm
+was greater than from Alternating by 0.44 on average (paired t-test = -30.0,
+p = $1.4 x 10^{-104}$, df=399). The performance of the Balanced algorithm was not inevitibly superior in every case&mdash;the p-value for the Alternating randomizer was greater in 12% of the
 simulated runs, because the Alternating algorithm will sometimes yield an ideal grouping by chance. However, the overall dramatic difference is apparent in Figure 1. Drilling down by
 number of groups and type of variable, we see that the same pattern appears across these variations (figure 2).
 
@@ -474,11 +476,30 @@ less than 0.25 in 99 out of 400 runs (spot-on what we would expect from random c
 
 ### Accumulating information about more subjects before doing a group assignment improves the algorithm's performance.
 
-We varied the interval between 
+We did additional _in scilico_ experiments similar to those described above, but varying the interval between when any given subject's feature values were submitted to the algorithm and when their
+group placement was requested. We allowed the algorithm to accumulate data on 0 to 9 additional subjects (but never more than 20 in total) after any one subject's data was submitted and before
+their group placement was requested. This number of additional subjects is referred to as the _place interval_.
+
+Increasing the place interval has a positive effect on p-values resulting from using the Balanced algorithm (see figure 4). A considerable advantage is gained by collecting data on just one
+additional subjects before group assignment (place interval = 0 mean p-value = 0.86, place interval = 1 mean p-value = 0.90, difference = 0.048, unpaired t-test=-5.3, p= $1.2 x 10^-7$, df=798).
+Collecting data on
+additional subjects before group assignment improves the algorithm's performance (Pearson correlation coefficent for p-value vs. place intervals between 1 and 9 = 0.95, $p=7.8 x 10^-5$), but the
+magnitude of improvement with each additional increment of place interval is not as large as the first (linear regression slope = 0.005, contrast with the slope between 0 and 1 = 0.048 above).
+
+The implication of this is that when using the Prospective Randomizer, it is more likely that a study will have a good outcome (in terms of having well-matched groups at baseline) if one can have
+subjects go though the protocol in parallel, a few at a time, and submit the baseline values for more than one subject before their group assignments; but one need not bend over backwards for this.
+The advantage of running many subjects in parallel over just a few is negligible.
 
 ### When using more than one variable, p-values are still better for Balanced than Alternating, but less so.
 
+We also simulated protocols in which more than one baseline feature was taken into account for group assignment. For each subject, 4 feature values (all continuous, all categorical, or 2 continuous and
+2 categorical) were randomly generated. For various simulated protocols, 1 to 4 of the feature values were submitted to the Prospective Randomizer. When we looked at the p-values of the differences between groups with regards to individual feature values, increasing the number of variables submitted decreased the advantage of Balanced over Alternating for any one variable (see figure 5) (Pearson correlation coefficient = -0.997, $p = 0.0026$).
+
 ### Using a measure of diversity reveals that using multiple variables results in overall more similar groups.
+
+The previous analysis might be read as casting a bad light on the use of more than one variable. Submitting more than one variable does not degrade the performance of the algorithm, but it does diminish
+the power of any one dimension to drive group assignment. Like sibings, the dimensions may not always agree, and have to share. The question is, by using more than one feature, are the subjects
+_overall_ better randomized, taking all dimensions into account?
 
 Human subjects are extremely diverse. _Diversity_ can be given an exact mathematical definition, related to measures of entropy. The mathematics of quantifying diversity has been well-developed
 in the field of ecology [cite L&C]. Fortunately for us, the ecoologists have thought long and hard about how to quantify the partitioning of diversity&mdash;i.e. how much diversity there is
@@ -488,7 +509,8 @@ we are trying to do that is provided by this framework is $\bar{R}$, the average
 members of other groups. $\bar{R}$ equals 1.0 when the composition of each group is identical. Rather surprisingly, $\bar{R}$ can exceed 1.0 when typically a member of one group is more
 similar to some members of other groups than any member of their own group.
 
-We used the `greylock` python package [citation] to calculate $\bar{R}$ for the group composition of each simulated run of each protocol.
+We used the `greylock` python package [citation] to calculate $\bar{R}$ for the group composition of each simulated run of each protocol. Similarity between subjects was defined to take into account
+values of all 4 of the features generated for each subject. Either 1, 2, 3, or 4 feature values were submitted to the algorithm consistently throughout each protocol.  
 
 discuss Barsky's study
 

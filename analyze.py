@@ -1,6 +1,9 @@
 import pandas as pd
-from scipy.stats import ttest_rel
+import numpy as np
+from scipy.stats import ttest_rel, ttest_ind, pearsonr, linregress
 import matplotlib.pyplot as plt
+import matplotlib.transforms as mtrans
+
 
 df = pd.read_csv('results.csv')
 print(df.columns)
@@ -79,5 +82,73 @@ for i, n_groups in enumerate(m['n_groups'].unique()):
         ax[2*j, i].set_xlabel('p-values, Balanced')
         ax[2*j+1, i].set_xlabel('p-values, Alternating')
 fig.tight_layout()
+line = plt.Line2D([0.52, 0.52],[0, 1], transform=fig.transFigure, color="black")
+fig.add_artist(line)
+line = plt.Line2D([0, 1],[0.515,0.515], transform=fig.transFigure, color="black")
+fig.add_artist(line)
+
 fig.savefig("fig2.pdf")
 
+result2_filter = (df['n_vars']==1) & df['is_used'] & (df['n_groups'] <= 3)
+result2_alt = df[result2_filter & (df['algorithm'] == 'Alternating')]
+result2_bal = df[result2_filter & (df['algorithm'] == 'Balanced')]
+m = pd.merge(result2_alt, result2_bal, on=["exp", 'n_vars', 'n_groups', 'var_name', 'place_interval', 'n', 'is_used'], suffixes=('_alt', '_bal'))
+m['advantage'] = m['pvalue_bal'] - m['pvalue_alt']
+print("Subset of dataset for second part of results:")
+print(m)
+
+place_vs_advantage = m.groupby('place_interval')['advantage'].mean()
+print("effect of place interval on balanced's advantage")
+print(place_vs_advantage)
+fig, ax = plt.subplots()
+ax.scatter(place_vs_advantage.index, place_vs_advantage)
+ax.set_title("Effect of Place Interval on Balanced Algorithm Advantage")
+ax.set_xlabel("Place Interval")
+ax.set_ylabel("mean (Balanced pvalue) - (Alternating pvalue)")
+fig.savefig('fig3.pdf')
+
+place_vs_pvalue = m.groupby('place_interval')['pvalue_bal'].mean()
+print("effect of place interval on balanced's p-value")
+print(place_vs_pvalue)
+print("Difference between 1 and 0")
+print(place_vs_pvalue[1] - place_vs_pvalue[0])
+fig, ax = plt.subplots()
+ax.scatter(place_vs_pvalue.index, place_vs_pvalue)
+ax.set_title("Effect of Place Interval on Balanced p-value")
+ax.set_xlabel("Place Interval")
+ax.set_ylabel("mean (Balanced pvalue)")
+fig.savefig('fig4.pdf')
+
+the0s = m.loc[m['place_interval'] == 0, 'pvalue_bal']
+the1s = m.loc[m['place_interval'] == 1, 'pvalue_bal']
+r = ttest_ind(the0s, the1s)
+print("Place interval is 0 vs. 1:")
+print(r)
+
+r = pearsonr(place_vs_pvalue.index[1:], place_vs_pvalue[1:])
+print("Pearson corellation coef for place interval vs. Balanced p-values")
+print(r)
+r = linregress(place_vs_pvalue.index[1:], place_vs_pvalue[1:])
+print("Linear regression of improvement with plae interval:")
+print(r)
+
+print("Analyses of effect of varying number of features")
+
+print(df['n_vars'].describe())
+filter = df['is_used']
+filter_alt = filter & (df['algorithm'] == 'Alternating')
+filter_bal = filter & (df['algorithm'] == 'Balanced')
+m = pd.merge(df[filter_alt], df[filter_bal], on=['exp', 'n_vars', 'n_groups', 'var_name', 'place_interval', 'n', 'is_used'], suffixes=('_alt', '_bal'))
+m['advantage'] = m['pvalue_bal'] - m['pvalue_alt']
+print(m)
+g = m.groupby('n_vars')['advantage'].mean()
+print(g)
+
+fig, ax = plt.subplots()
+ax.scatter(g.index, g)
+ax.set_xlabel("Number of Baseline Variables Submitted")
+ax.set_ylabel("mean (Balanced pvalue) - (Alternating pvalue)")
+fig.savefig('fig5.pdf')
+r = pearsonr(g.index, g)
+print("Correlation, # variables vs. p-value advantage:")
+print(r)
