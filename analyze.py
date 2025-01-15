@@ -66,6 +66,7 @@ for a in ax:
     a.set_ylabel("Number of Simulations")
 ax[1].set_xlabel("p-value, difference in groups")
 fig.savefig('fig1.pdf')
+fig.savefig('fig1.png')
 
 fig, ax = plt.subplots(4, 2, sharex=True, sharey=True, figsize=(6, 8))
 for i, n_groups in enumerate(m['n_groups'].unique()):
@@ -88,6 +89,7 @@ line = plt.Line2D([0, 1],[0.515,0.515], transform=fig.transFigure, color="black"
 fig.add_artist(line)
 
 fig.savefig("fig2.pdf")
+fig.savefig("fig2.png")
 
 result2_filter = (df['n_vars']==1) & df['is_used'] & (df['n_groups'] <= 3)
 result2_alt = df[result2_filter & (df['algorithm'] == 'Alternating')]
@@ -106,6 +108,7 @@ ax.set_title("Effect of Place Interval on Balanced Algorithm Advantage")
 ax.set_xlabel("Place Interval")
 ax.set_ylabel("mean (Balanced pvalue) - (Alternating pvalue)")
 fig.savefig('fig3.pdf')
+fig.savefig('fig3.png')
 
 place_vs_pvalue = m.groupby('place_interval')['pvalue_bal'].mean()
 print("effect of place interval on balanced's p-value")
@@ -118,6 +121,7 @@ ax.set_title("Effect of Place Interval on Balanced p-value")
 ax.set_xlabel("Place Interval")
 ax.set_ylabel("mean (Balanced pvalue)")
 fig.savefig('fig4.pdf')
+fig.savefig('fig4.png')
 
 the0s = m.loc[m['place_interval'] == 0, 'pvalue_bal']
 the1s = m.loc[m['place_interval'] == 1, 'pvalue_bal']
@@ -149,6 +153,7 @@ ax.scatter(g.index, g)
 ax.set_xlabel("Number of Baseline Variables Submitted")
 ax.set_ylabel("mean (Balanced pvalue) - (Alternating pvalue)")
 fig.savefig('fig5.pdf')
+fig.savefig('fig5.png')
 r = pearsonr(m['n_vars'], m['advantage'])
 print("Correlation, # variables vs. p-value advantage:")
 print(r)
@@ -177,6 +182,7 @@ ax.scatter(g.index, g)
 ax.set_xlabel("Number of Baseline Variables Submitted")
 ax.set_ylabel("$\\bar{R}$")
 fig.savefig('fig6.pdf')
+fig.savefig('fig6.png')
 r = pearsonr(m['n_vars'], m['norm_rho_bal'])
 print("Correlation, # variables vs. Rho-bar:")
 print(r)
