@@ -475,7 +475,12 @@ number of groups and type of variable, we see that the same pattern appears acro
   <img src='fig1.png' width='350'>
   <figcaption>Figure 1</figcaption>
 </figure>
-<img src='fig2.png' width='350'>
+
+
+<figure>
+  <img src='fig2.png' width='350'>
+  <figcaption>Figure 2</figcaption>
+</figure>
 
 What proportion of the time would the group distribution actually be a problem when using either algorithm? The Alternating algorithm yielded groups with a p-value of
 less than 0.25 in 99 out of 400 runs (spot-on what we would expect from random chance.) For the Balanced algorithm, with the above-described parameters for the simulations, this never happened.
@@ -492,7 +497,10 @@ Collecting data on
 additional subjects before group assignment improves the algorithm's performance (Pearson correlation coefficent for p-value vs. place intervals between 1 and 9 = 0.95, $p=7.8 \times 10^{-5}$), but the
 magnitude of improvement with each additional increment of place interval is not as large as the first (linear regression slope = 0.005, contrast with the slope between 0 and 1 = 0.048 above).
 
-<img src='fig3.png' width='350'>
+<figure>
+  <img src='fig3.png' width='350'>
+  <figcaption>Figure 3</figcaption>
+</figure>
 
 The implication of this is that when using the Prospective Randomizer, it is more likely that a study will have a good outcome (in terms of having well-matched groups at baseline) if one can have
 subjects go though the protocol in parallel, a few at a time, and submit the baseline values for more than one subject before their group assignments; but one need not bend over backwards for this.
@@ -504,7 +512,10 @@ We also simulated protocols in which more than one baseline feature was taken in
 2 categorical) were randomly generated. For various simulated protocols, 1 to 4 of the feature values were submitted to the Prospective Randomizer. When we looked at the p-values of the differences between groups with regards to individual feature values, increasing the number of variables submitted decreased the advantage of Balanced over Alternating for any one variable (see figure 4) [do this again but with
 error bars] (Pearson correlation coefficient = -0.09, $p = 2 \times 10^{-162}$).
 
-<img src='fig4.png' width='350'>
+<figure>
+  <img src='fig4.png' width='350'>
+  <figcaption>Figure 4</figcaption>
+</figure>
 
 ### Using a measure of diversity reveals that using multiple variables results in overall more similar groups.
 
@@ -524,7 +535,10 @@ We used the `greylock` python package [citation] to calculate $\bar{R}$ for the 
 values of all 4 of the features generated for each subject. Either 1, 2, 3, or 4 feature values were submitted to the algorithm consistently throughout each protocol.
 As figure 5 shows, the more variables submitted to the algorithm, the higher $\bar{R}$ is on average (Pearson correlation coefficient = 0.25, p = 0).
 
-<img src='fig5.png' width='350'>
+<figure>
+  <img src='fig5.png' width='350'>
+  <figcaption>Figure 4</figcaption>
+</figure>
 
 [discuss Barsky's study]
 
