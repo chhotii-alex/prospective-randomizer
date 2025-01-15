@@ -471,6 +471,9 @@ p = $1.4 \times 10^{-104}$, df=399). The performance of the Balanced algorithm w
 simulated runs, because the Alternating algorithm will sometimes yield an ideal grouping by chance. However, the overall dramatic difference is apparent in Figure 1. Drilling down by
 number of groups and type of variable, we see that the same pattern appears across these variations (figure 2).
 
+<img src='fig1.pdf' width='350'>
+<img src='fig2.pdf' width='350'>
+
 What proportion of the time would the group distribution actually be a problem when using either algorithm? The Alternating algorithm yielded groups with a p-value of
 less than 0.25 in 99 out of 400 runs (spot-on what we would expect from random chance.) For the Balanced algorithm, with the above-described parameters for the simulations, this never happened.
 
