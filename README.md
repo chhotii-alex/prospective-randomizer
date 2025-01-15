@@ -468,14 +468,14 @@ In the groups populated via the Alternating algorithm, these p-values were very 
 In the groups populated via the Balanced algorithm, these p-values were much higher (mean=0.92, median=0.95). For any given pair of simulations, the p-value resulting from the Balanced algorithm
 was greater than from Alternating by 0.44 on average (paired t-test = -30.0,
 p = $1.4 \times 10^{-104}$, df=399). The performance of the Balanced algorithm was not inevitibly superior in every case&mdash;the p-value for the Alternating randomizer was greater in 12% of the
-simulated runs, because the Alternating algorithm will sometimes yield an ideal grouping by chance. However, the overall dramatic difference is apparent in Figure 1. Drilling down by
-number of groups and type of variable, we see that the same pattern appears across these variations (figure 2).
-
+simulated runs, because the Alternating algorithm will sometimes yield an ideal grouping by chance. However, the overall dramatic difference is apparent in Figure 1. 
 <figure>
   <img src='fig1.png' width='350'>
   <figcaption>Figure 1</figcaption>
 </figure>
 
+Drilling down by
+number of groups and type of variable, we see that the same pattern appears across these variations (figure 2).
 
 <figure>
   <img src='fig2.png' width='350'>
@@ -537,7 +537,7 @@ As figure 5 shows, the more variables submitted to the algorithm, the higher $\b
 
 <figure>
   <img src='fig5.png' width='350'>
-  <figcaption>Figure 4</figcaption>
+  <figcaption>Figure 5</figcaption>
 </figure>
 
 [discuss Barsky's study]
