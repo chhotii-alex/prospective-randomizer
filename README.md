@@ -509,8 +509,8 @@ The advantage of running many subjects in parallel over just a few is negligible
 ### When using more than one variable, p-values are still better for Balanced than Alternating, but less so.
 
 We also simulated protocols in which more than one baseline feature was taken into account for group assignment. For each subject, 4 feature values (all continuous, all categorical, or 2 continuous and
-2 categorical) were randomly generated. For various simulated protocols, 1 to 4 of the feature values were submitted to the Prospective Randomizer. When we looked at the p-values of the differences between groups with regards to individual feature values, increasing the number of variables submitted decreased the advantage of Balanced over Alternating for any one variable (see figure 4) [do this again but with
-error bars] (Pearson correlation coefficient = -0.09, $p = 2 \times 10^{-162}$).
+2 categorical) were randomly generated. For various simulated protocols, 1 to 4 of the feature values were submitted to the Prospective Randomizer. When we looked at the p-values of the differences between groups with regards to individual feature values, increasing the number of variables submitted decreased the advantage of Balanced over Alternating for any one variable (see figure 4) 
+(Pearson correlation coefficient = -0.09, $p = 2 \times 10^{-162}$).
 
 <figure>
   <img src='fig4.png' width='350'>
@@ -527,7 +527,7 @@ Human subjects are extremely diverse. _Diversity_ can be given an exact mathemat
 in the field of ecology [cite L&C]. Fortunately for us, the ecoologists have thought long and hard about how to quantify the partitioning of diversity&mdash;i.e. how much diversity there is
 between subgroups ("subcommunities") of a larger overall group ("metacommunity") [cite Reeve].
 This mathematical framework is proving to be useful beyond ecology [cite greylock paper, alpha paper]. A useful measure of what
-we are trying to do that is provided by this framework is $\bar{R}$, the average redundancies of the subcommunities, in other words to what extent are individuals in one group similar to
+we are trying to do that is provided by this framework is $\bar{R}$, the average redundancies of the subcommunities; in other words, to what extent are individuals in one group similar to
 members of other groups. $\bar{R}$ equals 1.0 when the composition of each group is identical. Rather surprisingly, $\bar{R}$ can exceed 1.0 when typically a member of one group is more
 similar to some members of other groups than any member of their own group.
 
