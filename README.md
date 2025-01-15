@@ -481,9 +481,9 @@ group placement was requested. We allowed the algorithm to accumulate data on 0 
 their group placement was requested. This number of additional subjects is referred to as the _place interval_.
 
 Increasing the place interval has a positive effect on p-values resulting from using the Balanced algorithm (see figure 4). A considerable advantage is gained by collecting data on just one
-additional subjects before group assignment (place interval = 0 mean p-value = 0.86, place interval = 1 mean p-value = 0.90, difference = 0.048, unpaired t-test=-5.3, p= $1.2 x 10^-7$, df=798).
+additional subjects before group assignment (place interval = 0 mean p-value = 0.86, place interval = 1 mean p-value = 0.90, difference = 0.048, unpaired t-test=-5.3, p= $1.2 x 10^{-7}$, df=798).
 Collecting data on
-additional subjects before group assignment improves the algorithm's performance (Pearson correlation coefficent for p-value vs. place intervals between 1 and 9 = 0.95, $p=7.8 x 10^-5$), but the
+additional subjects before group assignment improves the algorithm's performance (Pearson correlation coefficent for p-value vs. place intervals between 1 and 9 = 0.95, $p=7.8 x 10^{-5}$), but the
 magnitude of improvement with each additional increment of place interval is not as large as the first (linear regression slope = 0.005, contrast with the slope between 0 and 1 = 0.048 above).
 
 The implication of this is that when using the Prospective Randomizer, it is more likely that a study will have a good outcome (in terms of having well-matched groups at baseline) if one can have
@@ -493,7 +493,8 @@ The advantage of running many subjects in parallel over just a few is negligible
 ### When using more than one variable, p-values are still better for Balanced than Alternating, but less so.
 
 We also simulated protocols in which more than one baseline feature was taken into account for group assignment. For each subject, 4 feature values (all continuous, all categorical, or 2 continuous and
-2 categorical) were randomly generated. For various simulated protocols, 1 to 4 of the feature values were submitted to the Prospective Randomizer. When we looked at the p-values of the differences between groups with regards to individual feature values, increasing the number of variables submitted decreased the advantage of Balanced over Alternating for any one variable (see figure 5) (Pearson correlation coefficient = -0.997, $p = 0.0026$).
+2 categorical) were randomly generated. For various simulated protocols, 1 to 4 of the feature values were submitted to the Prospective Randomizer. When we looked at the p-values of the differences between groups with regards to individual feature values, increasing the number of variables submitted decreased the advantage of Balanced over Alternating for any one variable (see figure 5) [do this again but with
+error bars] (Pearson correlation coefficient = -0.09, $p = 2 x 10^{-162}$).
 
 ### Using a measure of diversity reveals that using multiple variables results in overall more similar groups.
 
@@ -510,9 +511,11 @@ members of other groups. $\bar{R}$ equals 1.0 when the composition of each group
 similar to some members of other groups than any member of their own group.
 
 We used the `greylock` python package [citation] to calculate $\bar{R}$ for the group composition of each simulated run of each protocol. Similarity between subjects was defined to take into account
-values of all 4 of the features generated for each subject. Either 1, 2, 3, or 4 feature values were submitted to the algorithm consistently throughout each protocol.  
+values of all 4 of the features generated for each subject. Either 1, 2, 3, or 4 feature values were submitted to the algorithm consistently throughout each protocol.
+As figure 6 shows, the more variables submitted to the algorithm, the higher $\bar{R}$ is on average (Pearson correlation coefficient = 0.25, p = 0).
 
-discuss Barsky's study
+
+[discuss Barsky's study]
 
 my thesis?
 
