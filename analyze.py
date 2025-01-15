@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import ttest_rel, ttest_ind, pearsonr, linregress
 import matplotlib.pyplot as plt
 import matplotlib.transforms as mtrans
-
+import seaborn as sns
 
 df = pd.read_csv('results.csv')
 print(df.columns)
@@ -109,10 +109,12 @@ print(place_vs_pvalue)
 print("Difference between 1 and 0")
 print(place_vs_pvalue[1] - place_vs_pvalue[0])
 fig, ax = plt.subplots()
-ax.scatter(place_vs_pvalue.index, place_vs_pvalue)
-ax.set_title("Effect of Place Interval on Balanced p-value")
+#sns.violinplot(data=m, x="place_interval", y="pvalue_bal", ax=ax)
+sns.boxplot(data=m, x="place_interval", y="pvalue_bal", ax=ax)
+#ax.scatter(place_vs_pvalue.index, place_vs_pvalue)
+#ax.set_title("Effect of Place Interval on Balanced p-value")
 ax.set_xlabel("Place Interval")
-ax.set_ylabel("mean (Balanced pvalue)")
+ax.set_ylabel("Balanced pvalue")
 fig.savefig('fig3.pdf')
 fig.savefig('fig3.png')
 
@@ -142,9 +144,10 @@ g = m.groupby('n_vars')['advantage'].mean()
 print(g)
 
 fig, ax = plt.subplots()
-ax.scatter(g.index, g)
+sns.boxplot(data=m, x='n_vars', y="advantage", ax=ax)
+#ax.scatter(g.index, g)
 ax.set_xlabel("Number of Baseline Variables Submitted")
-ax.set_ylabel("mean (Balanced pvalue) - (Alternating pvalue)")
+ax.set_ylabel("(Balanced pvalue) - (Alternating pvalue)")
 fig.savefig('fig4.pdf')
 fig.savefig('fig4.png')
 r = pearsonr(m['n_vars'], m['advantage'])
