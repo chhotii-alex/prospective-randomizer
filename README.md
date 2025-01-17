@@ -109,11 +109,11 @@ in-order assignment of subjects with these values: 5, 6, 9, 1, 13, 2, which wind
 add subjects to groups with the least number of subjects already added. Feature values still play a role,
 as there may be more than one group tied for having the least subjects. Feature values can be given an
 even stronger role if subjects do not need to be added to groups immediately&mdash;that is, if there is some
-temporal delay in the protocol between aquiring any given subject's feature value and submitting that to the
+temporal delay in the protocol between acquiring any given subject's feature value and submitting that to the
 algorithm, and acting upon the decision as to which group that subject is in. If values for several subjects
 are buffered, even if one group is in the least-filled tier, an optimal decision can be made between the
 several subjects as to which subject to assign to that group for optimal group balance. This is done by
-swapping roles in the simple algorithm's desciption: compare the feature mean of the group to the overall
+swapping roles in the simple algorithm's description: compare the feature mean of the group to the overall
 mean; if it is lower, choose the highest-value subject available, and vice versa.
 
 It may be difficult to anticipate what one feature is most important to try to equalize. Fortunately, this
