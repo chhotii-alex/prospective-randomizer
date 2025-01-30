@@ -15,7 +15,7 @@
 Experimental science seeks to infer causality by isolating the effect of an intervention,
 uncontaminated by confounding factors.
 
-Standard teaching on experimental design is, to quote [Munnangi and Boktor 2024](https://pubmed.ncbi.nlm.nih.gov/29262004/):
+Standard teaching on experimental design is, according to [Munnangi and Boktor 2024](https://pubmed.ncbi.nlm.nih.gov/29262004/):
 > Randomized... control trials (RCT) are considered the gold standard of study design...
 > Randomization in RCT avoids confounding and minimizes selection bias.
 > This enables the researcher to have similar experimental and control groups,
@@ -35,7 +35,7 @@ But how do we obtain similar groups? Classically the role of _randomization_ is 
 a coin is flipped; or subjects are alternatively assigned A-B-A-B, with the assumption that the
 random factors that influence the exact date of subjects' entry into a study effectively scrambles their
 ordering. This is in contrast to two notoriously bad study designs; one would be the application of some
-fixed rule or bias to group assignment ("Shorter people will fit into the experimental rig with less bother,
+fixed rule or bias to group assignment ("Shorter people will fit into the experimental rig with less hassle,
 so let's put the shorter people in the experimental group..."), or the replacement of a coin or
 randomization schedule with a human decision, which allows for whim or bias, either conscious or
 unconscious ("Hmm, she looks like the type who has done well on this treatment.") In either case, effects
