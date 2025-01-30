@@ -25,7 +25,7 @@ But is it in fact the _randomization_ that obtains all these advantages? Randomi
 to what?
 
 An _observational_ study is likely to be plagued by confounding factors: for example, in a
-case-control study contrasting heart disease with healthy subjects, it is difficult to isolate
+case-control study contrasting patients with heart disease to healthy subjects, it is difficult to isolate
 the precise effect of one factor (such as exercise) given that the cases and controls are likely
 to differ on many other factors as well (diet, genetics, socio-economic status, etc.) It is for
 this reason that division of subjects into similar intervention and non-intervention groups is the
@@ -34,7 +34,7 @@ canonical method of experimentally establishing causality.
 But how do we obtain similar groups? Classically the role of _randomization_ is stressed. Essentially,
 a coin is flipped; or subjects are alternatively assigned A-B-A-B, with the assumption that the
 random factors that influence the exact date of subjects' entry into a study effectively scrambles their
-ordering. This is in contrast to two notoriously bad study designs; one would be the application of some
+group assignment. This is in contrast to two notoriously bad study designs; one would be the application of some
 fixed rule or bias to group assignment ("Shorter people will fit into the experimental rig with less hassle,
 so let's put the shorter people in the experimental group..."), or the replacement of a coin or
 randomization schedule with a human decision, which allows for whim or bias, either conscious or
