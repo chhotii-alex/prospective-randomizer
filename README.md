@@ -38,28 +38,31 @@ group assignment. This is in contrast to two notoriously bad study designs; one 
 fixed rule or bias to group assignment ("Shorter people will fit into the experimental rig with less hassle,
 so let's put the shorter people in the experimental group..."), or the replacement of a coin or
 randomization schedule with a human decision, which allows for whim or bias, either conscious or
-unconscious ("Hmm, she looks like the type who has done well on this treatment.") In either case, effects
+unconscious ("Hmm, she looks like the type who would do well on this treatment.") In either case, effects
 of the experimental intervention are _not_ isolated, and are confounded by biases in group selection.
 However, surely now in the
-21st century these are straw men: only the most venially corrupt researcher would apply a static rule
-or whim to group assignment (and given such corruption, anything is possible, including faking data at any
-stage).
+21st century these are straw men: such studies would indeed be incredibly rare.
 
 The existence of these _bad_ experimental designs demonstrate that it is easy to do _worse_ than
-randomization in making groups similar and isolating intervention effects. But can we do _better_?
+randomization in attempting to make groups similar and isolating intervention effects. But can we do _better_?
 
 The law of large numbers dictates that with sufficiently large group sizes, the mean (of whatever feature)
 of a randomly selected group
-will approach the population mean, thus ensuring that all randomly selected groups will be similar.
-In an ideal world all studies would have large N; however this ideal may be out of reach.
+will approach the population mean, thus ensuring that all randomly selected groups will be similar
+in baseline features.
+In an ideal world all studies would have large N; however this ideal is often out of reach.
 Many studies in fields such as psychology, education, circadian biology, etc. suffer the triple
-challenges of stingier funding, more intensive research protocols per subject, and higher variance in
+challenges of stingier funding, more intensive research protocols, and higher variance in
 both features and
 outcome measures. Economics have hampered researchers' ability to run large-N studies even when they have
-the patience and motivation to want to. At smaller N, sampling error becomes a large problem.
-[math and numbers here]
+the patience and motivation to do so. But at smaller N, sampling error becomes a large problem, with the standard 
+error of the mean equal to the standard deviation divided by the square root of the sample size:
 
-Sampling error is [relationship to] the variance in the population. Classically variance has been
+$$
+s.e.m. = \frac{std dev}{\sqrt{n}}
+$$
+
+Thus as the sample size, $n$, increases the likely sample error decreases. Sampling error is [relationship to] the variance in the population. Classically variance has been
 minimized by selecting subjects from a small population&mdash;only selecting students between 18 and 22 at
 a specific university, for example. However, universities have become increasingly accessible to more
 diverse backgrounds, and granting agencies have noticed and taken a dim view of studies only on narrow
