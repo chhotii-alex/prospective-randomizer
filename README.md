@@ -122,15 +122,15 @@ the algorithms immediately add to that group.)
 PR-3.1 is a simple generalization. It adds subjects to 3 (or more) groups one at a time, achieving the same goals as above.
 ```
 Find the smallest group size.
-Find the groups whose size is equal to the smallest group size.
+Find the groups whose sizes are equal to the smallest group size.
 If there are two or more such groups:
-    Compare the feature value for the subject to the mean of all subjects enrolled so far.
+    Compare the feature value for the new subject to the mean of all subjects enrolled so far.
     If the value is less than the overall mean:
         Add the subject to the smallest-group-size group with the highest mean.
     Otherwise:
         Add the subject to the smallest-group-size group with the lowest mean.
 Otherwise:
-    Add the subject to the one group of smallest size.
+    Add the new subject to the one group of smallest size.
 ```    
 Note that at this point, the algorithm will give the exact same results if, before each iteration of the algorithm, 
 we replace the feature values with z-score normalized feature values (that is, values with the mean subtracted, 
@@ -150,7 +150,7 @@ Using  z-score normalized feature values we can revise PR-3.1 thusly, getting ri
 less than/greater than conditional:
 ```
 Find the smallest group size.
-Find the groups whose size is equal to the smallest group size.
+Find the groups whose sizes are equal to the smallest group size.
 If there are two or more such groups:
     Compute the mean and standard deviation of the feature values for all subjects enrolled so far.
     Compute the z-score normalized value of the new subject’s feature value.
@@ -158,7 +158,7 @@ If there are two or more such groups:
     For each of the smallest-group-size groups, compute the product of its normalized mean and the subject's.
     Add the new subject to the group for which this product is the least (i.e. most negative).
 Otherwise:
-    Add the subject to the one group of smallest size.
+    Add the new subject to the one group of smallest size.
 ```
 Getting rid of this conditional may seem like a pedantic coding style nit-pick at this point, but on the contrary: 
 applying this most negative product rule allows us to develop an even more generalized algorithm.
@@ -178,7 +178,7 @@ While there are subjects not yet assigned to groups whose group assignment is ne
     For each of the smallest-group-size groups, compute the z-score normalized mean.
     For each of the smallest-group-size groups, for each new subject,
         Compute the product of its normalized mean and the subject's.
-    Add the new subject to the smallest-group-size group for which this product is the least.
+    Add the subject to the smallest-group-size group for which this product is the least.
 ```
 Note that our remaining “if” statement has gone away: even if there isn’t more than one group at the smallest group size,
 we still go through with the z-score normalization and comparing products, as we may be choosing between subjects. 
@@ -203,11 +203,11 @@ Compute the means and standard deviations of each dimension of the features for 
 Compute the z-score normalized vectors for each of the new subjects.
 While there are  subjects not yet assigned to groups whose group assignment is needed:
     Find the smallest group size.
-    Find the groups whose size is equal to the smallest group size.
+    Find the groups whose sizes are equal to the smallest group size.
     For each of the smallest-group-size groups, compute the z-score normalized mean vector.
     For each of the smallest-group-size groups, for each new subject,
         Compute the dot product of its normalized mean and the subject's.
-    Add the new subject to the smallest-group-size group for which this dot product is the least (i.e. most negative).
+    Add the subject to the smallest-group-size group for which this dot product is the least (i.e. most negative).
 ```
 A drawback of equalizing more than one feature is that the more features are used, the poorer the expected 
 equalization on any one dimension. Thus, unimportant features should not be used, lest they damage the equalization 
