@@ -154,8 +154,9 @@ Find the groups whose size is equal to the smallest group size.
 If there are two or more such groups:
     Compute the mean and standard deviation of the feature values for all subjects enrolled so far.
     Compute the z-score normalized value of the new subject’s feature value.
-    Compute the z-score normalized mean of each of the smallest-group-size groups.
-    Add the new subject to the group for which the product of the subject’s normalized feature value and the group’s normalized mean is the least.
+    For each of the smallest-group-size groups, compute the z-score normalized mean.
+    For each of the smallest-group-size groups, compute the product of its normalized mean and the subject's.
+    Add the new subject to the group for which this product is the least.
 Otherwise:
     Add the subject to the one group of smallest size.
 ```
@@ -174,11 +175,14 @@ Compute the z-score normalized value of each of the new subject’s feature valu
 While there are new subjects not yet assigned to groups:
     Find the smallest group size.
     Find the groups whose size is equal to the smallest group size.
-    Compute the z-score normalized mean of each of the smallest-group-size groups.
-    Add the new subject to the smallest-group-size group for which the product of the subject’s normalized feature value and the group’s normalized mean is the least. (Note that if there are n subjects remaining to be engrouped and m minimum-sized groups, the algorithm is finding the least of n*m products.)
+    For each of the smallest-group-size groups, compute the z-score normalized mean.
+    For each of the smallest-group-size groups, for each new subject,
+        Compute the product of its normalized mean and the subject's.
+    Add the new subject to the smallest-group-size group for which this product is the least.
 ```
 Note that our remaining “if” statement has gone away: even if there isn’t more than one group at the smallest group size,
 we still go through with the z-score normalization and comparing products, as we may be choosing between subjects. 
+In general, if there are $n$ subjects remaining to be engrouped and $m$ minimum-sized groups, the algorithm is finding the least of $n * m$ products. Of course, if there is only one group at the smallest group size, and we are adding the only remaining new subject, the algorithm is constrained– we calculate one product, but it has no competition.
 
 #### More than one critical feature: 
 It may be difficult to anticipate what one feature is most important to try to equalize. Fortunately, this algorithm
