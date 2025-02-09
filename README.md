@@ -333,7 +333,7 @@ magnitude of improvement with each additional increment of place interval is not
 </figure>
 
 The implication of this is that when using the Prospective Randomizer, it is more likely that a study will have a good outcome (in terms of having well-matched groups at baseline) if one can have
-subjects go though the protocol in parallel, a few at a time, and submit the baseline values for more than one subject before their group assignments; but one need not bend over backwards for this.
+subjects go through the protocol in parallel, a few at a time, and submit the baseline values for more than one subject before their group assignments; but one need not bend over backwards for this.
 The advantage of running many subjects in parallel over just a few is negligible.
 
 ### When using more than one variable, p-values are still better for Balanced than Alternating, but less so.
@@ -369,11 +369,6 @@ As figure 5 shows, the more variables submitted to the algorithm, the higher $\b
   <img src='fig5.png' width='350'>
   <figcaption>Figure 5</figcaption>
 </figure>
-
-[discuss Barsky's study]
-
-
-# Conclusion
 
 
 
