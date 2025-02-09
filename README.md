@@ -156,7 +156,7 @@ If there are two or more such groups:
     Compute the z-score normalized value of the new subject’s feature value.
     For each of the smallest-group-size groups, compute the z-score normalized mean.
     For each of the smallest-group-size groups, compute the product of its normalized mean and the subject's.
-    Add the new subject to the group for which this product is the least.
+    Add the new subject to the group for which this product is the least (i.e. most negative).
 Otherwise:
     Add the subject to the one group of smallest size.
 ```
@@ -202,8 +202,10 @@ Compute the z-score normalized vectors for each of the new subjects.
 While there are new subjects not yet assigned to groups:
     Find the smallest group size.
     Find the groups whose size is equal to the smallest group size.
-    Compute the z-score normalized mean vector for each of the smallest-group-size groups.
-    Add the new subject to the smallest-group-size group for which the dot product of the subject’s normalized feature vector and the group’s normalized mean vector is the least.
+    For each of the smallest-group-size groups, compute the z-score normalized mean vector.
+    For each of the smallest-group-size groups, for each new subject,
+        Compute the dot product of its normalized mean and the subject's.
+    Add the new subject to the smallest-group-size group for which this dot product is the least (i.e. most negative).
 ```
 A drawback of equalizing more than one feature is that the more features are used, the poorer the expected 
 equalization on any one dimension.
