@@ -15,7 +15,7 @@
 Experimental science seeks to infer causality by isolating the effect of an intervention,
 uncontaminated by confounding factors.
 
-Standard teaching on experimental design is, according to [Munnangi and Boktor 2024](https://pubmed.ncbi.nlm.nih.gov/29262004/):
+Standard teaching on experimental design is, to quote [Munnangi and Boktor 2024](https://pubmed.ncbi.nlm.nih.gov/29262004/):
 > Randomized... control trials (RCT) are considered the gold standard of study design...
 > Randomization in RCT avoids confounding and minimizes selection bias.
 > This enables the researcher to have similar experimental and control groups,
@@ -62,38 +62,18 @@ $$
 s.e.m. = \frac{std dev}{\sqrt{n}}
 $$
 
-Thus as the sample size, $n$, increases the likely sample error decreases. Sampling error is [relationship to] the variance in the population. Classically variance has been
-minimized by selecting subjects from a small population&mdash;only selecting students between 18 and 22 at
-a specific university, for example. However, universities have become increasingly accessible to more
-diverse backgrounds, and granting agencies have noticed and taken a dim view of studies only on narrow
-privileged populations, such as the all-male all-white elite university student cohort. Given the resource
-constraints on many studies and the desire to have broadly-applicable results, many studies apply very few
-exclusion criteria, and take nearly all comers as subjects&mdash;often a motley crew indeed. Thus, it becomes
-increasingly probable that sampling error in a small-N study will result in baseline (pre-intervention)
-differences between groups.
-
-This can abolish the information-gaining value of a study. In Bayesian terms, we would hope that our
-confidence in a hypothesis (H) would be updated by the results (r) of an experiment according to the formula:
-
-$$
-P(H | r) = \frac{P(r | H) \times P(H) } {P(r)}
-$$
-
-If there is a difference between groups at baseline, the probability of a difference between groups
-post-intervention is extremely high&mdash;regardless of the validity of the hypothesis. Thus, the
-$P(r | H)$ and $P(r)$ terms cancel out, yielding almost no
-power to update our confidence in the hypothesis.
-
-Let's look at the interpretation difficulties that have plagued previous studies with inadvertent
-baseline difference.
-[Bob please supply some examples to discuss here]
-
-## A new direction
-
-Ideally, to avoid confounding factors, one would have identical subjects in each experimental group. In
-some experiments this is nearly possible, by ordering a flat-pack of six-week-old male inbreed Wistar
+Thus as the sample size, $n$, increases, or as the standard deviation decreasees, 
+the likely sample error decreases. Classically variance has been
+minimized by selecting subjects from a relatively homogeneous population, _e.g._,
+only selecting students between 18 and 22 at
+a specific university. Ideally, to avoid confounding factors, one would have identical 
+subjects in each experimental group. In
+some experiments this is nearly possible, by ordering a litter of six-week-old male inbreed Wistar
 lab rats from the same supplier, all kept in the same type of enclosure and fed the same type of chow
-their entire lives.
+their entire lives. But given the difficulties in translating results from animal studies, and the
+desire to have broadly applicable results, may studies on humans apply very few exclusion criteria.
+Thus, it becomes increasingly probable that group sampling differences in a small-N study will have
+significant baseline (pre-intervention) differences between groups.
 
 In human studies, all measurable features of subjects will have some more or less broad distribution.
 Without the resources to go out and search for a subject similar to a subject in group A to put into
