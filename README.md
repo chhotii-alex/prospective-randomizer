@@ -281,7 +281,7 @@ one categorical variable and 2 groups, and one categorical variable and 3 groups
 In each case, we simulated enrolling 20 subjects in the protocol. In the cases where a continuous variable was used, the value of the variable was randomly selected from a Gaussian
 distribution. When a categorical variable was used, an option was chosen with equal probability for each option.
 For each simulated run, two simulated experiments were performed in parallel, which differed in how subjects 
-were added to groups: in one, in the traditional manner, where subjects were assigned to groups in strictly alternating order ("Aternating"); and in the other, using the balanced
+were added to groups: in one, in the traditional manner, where subjects were assigned to groups in strictly alternating order ("Alternating"); and in the other, using the balanced
 algorithm described above based on the one simulated variable ("Balanced").
 After each simulated subject was submitted to the algorithm, their group assignment was not determined until after 4 additional subjects were submitted. Thus, the Balanced algorithm had
 the benefit of more information about the overall sample when it made its decisions than if group assignments had been immediately demanded. (That is, GET came after several PUT commands,
@@ -372,7 +372,6 @@ As figure 5 shows, the more variables submitted to the algorithm, the higher $\b
 
 [discuss Barsky's study]
 
-my thesis?
 
 # Conclusion
 
