@@ -4,9 +4,6 @@
 - [Methods](#methods)
 - [Implementation](#implementation)
   - [Compiling and Running](#compiling-and-running)
-  - [Simple socket interface](#simple-socket-interface)
-  - [HTTP Interface](#http-interface)
-  - [Updatable Variables Mode](#updatable-variables-mode)
   - [Limitations and future work](#limitations-and-future-work)
 - [Results](#results)
 
@@ -246,7 +243,7 @@ The same executable offers command-line interaction, so that researchers may int
 manually.
 
 A more modern approach is taken by the Spring Boot wrapper. This allows client tasks to communicate with the
-server using the HTTP protocol.
+server using the HTTP protocol. For new work, it is recommended that the HTTP protocol is used. 
 
 ## Compiling and Running
 
@@ -268,8 +265,6 @@ mvn package
 
 See the README files in either the `pros-rand-lib` or `pros-rand-boot` directories (depending on whether you wish to use 
 the command line/simple socket or the HTTP interface respectively) for where to go from here.
-Rather than using a bare TCP/IP socket, for new work, it is recommended that the HTTP protocol is used to communicate
-with the Prospective Randomizer server. 
 
 ## Limitations and future work
 * As mentioned above, the "database" of subjects is not implemented as a real database; it's implemented as a simple text file, which is re-written after every transaction. This is okay for small local deployments&mdash;the number of subjects enrolled per unit time is not likely to be fast enough to run into the performance limitations of this approach. It does mean that care has to be taken to move the subject.txt file from machine to machine if the server is moved from one host to another. Generally this is not an issue with a small local study. However, this may make cloud deployment tricky. If the application is containerized, the local file system may not persist across re-starts, and re-starts can happen for various reasons (software crashes, load balancing, etc.) Ideally, SubjectDatabase would be implemented as a real database such as MySQL or Postgres.
