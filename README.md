@@ -1,6 +1,7 @@
 # <h1> <i>prospective-randomizer</i>: Java server that assigns subjects to matched experimental groups </h1>
 
 - [Introduction](#introduction)
+- [Methods](#methods)
 - [Implementation](#implementation)
   - [Compiling and Running](#compiling-and-running)
   - [Simple socket interface](#simple-socket-interface)
@@ -76,48 +77,138 @@ in a small-N study will have significant baseline (pre-intervention) differences
 
 In human studies, all measurable features of subjects will have some more or less broad distribution.
 Without the resources to go out and search for a subject similar to a subject in group A to put into
-group B&dash;in the typical arrangement of taking all comers&mdash;we cannot match subjects, but can
+group B, we cannot match subjects, but can
 perhaps hope to match groups, at least on selected features. With small-N studies, it is not uncommon for
-outcome measures to differ more at baseline than after the experimental intervention.
+outcome measures to differ more at baseline than after the experimental intervention, posing challenges for interpretation. Thus, while one hopes for an outcome similar to this:
 
-However, when subjects are
-added to the study one at a time (or a few at a time), it is difficult to accurately anticipate the mean
-of the subjects who will enroll.
+|                 | Pre-test | Post-test | Delta |
+| :---            | :---:    | :---:     | :---: |
+| Intervention    | 100      | 110       | 10    |
+| Placebo control | 100      | 100       |  0    |
 
-A simple algorithm to add subjects to groups one at a time to keep the mean of one feature approximately the
-same between groups: Compare the feature value for each new subject to the mean of all subjects so far;
-if that value is less than the overall mean, add the subject to the group with the highest mean, and
-if the value is greater, add to the lowest-mean group. This has the complication that the number of subjects
-in each group can become quite unequal with an unlucky sequence of subjects. Consider how things go with
-in-order assignment of subjects with these values: 5, 6, 9, 1, 13, 2, which winds up with one group having
-5 members and the other only one. [Show this?] A compromise solution is to constrain the algorithm to only
-add subjects to groups with the least number of subjects already added. Feature values still play a role,
-as there may be more than one group tied for having the least subjects. Feature values can be given an
-even stronger role if subjects do not need to be added to groups immediately&mdash;that is, if there is some
-temporal delay in the protocol between acquiring any given subject's feature value and submitting that to the
-algorithm, and acting upon the decision as to which group that subject is in. If values for several subjects
-are buffered, even if one group is in the least-filled tier, an optimal decision can be made between the
-several subjects as to which subject to assign to that group for optimal group balance. This is done by
-swapping roles in the simple algorithm's description: compare the feature mean of the group to the overall
-mean; if it is lower, choose the highest-value subject available, and vice versa.
+It is not uncommon  to end up with data more like this:
 
-It may be difficult to anticipate what one feature is most important to try to equalize. Fortunately, this
-algorithm easily generalizes to multiple dimensions. The feature values in each dimension should be
-normalized (centered
-and scaled), by subtracting the current mean and dividing by the current standard deviation. A vector
-consisting of the mean normalized value of each feature is calculated for each group. The dot product of
-each least-filled group's vector and the vector of normalized features for each new subject is calculated, and the
-group-subject pairing with the least dot product is selected (that is, negative with the largest magnitude).
+|                 | Pre-test | Post-test | Delta |
+| :---            | :---:    | :---:     | :---: |
+| Intervention    | 100      | 110       | 10    |
+| Placebo control | 110      | 110       |  0    |
 
-A drawback of equalizing more than one feature is that the more features are used, the poorer the
-expected equalization on any one dimension.
+Thus, while the intervention effect is the same in both situations, randomization of subjects in the second has the
+unfortunate outcome that baseline means differ between the two groups, often significantly, and the post-test values 
+are the same for both groups. While one can, and should, make the argument that it is the intervention effect 
+that is statistically most important, one is nevertheless left unable to conclude that the intervention leads to a 
+higher post-test value, and both reviewers and readers often conclude that the desired intervention effect was 
+not achieved, all because of a baseline difference in group values.
 
-[maybe work through an example with pictures with arrows]
+At first glance, this would appear to just be bad luck; that this is inevitable some fraction of the time in 
+small-N studies. But in fact, this is not true. “Prospective randomization,” described in detail below can 
+dramatically decrease the frequency and size of such baseline group differences.
 
-Non-numeric (i.e. categorical) features can be converted to numeric by encoding as one-hot features. [Do
-I need to explain this?] A concern with this approach is that a single feature then potentially becomes
-several feature, and thus makes several contributions to the dot product of the feature vectors. This will
-give the categorical feature greater importance than other features, unless [... TODO: do I do weighting?]
+# Methods
+
+PR-2.1 is the simplest version of the progressive randomization algorithm. It adds subjects to two groups one at a time, keeping the mean value of a critical feature approximately the same across two groups, while also keeping the groups of equal size. 
+```
+Compare the sizes of the groups.
+If the two groups are the same size:
+    Compare the feature value for the subject to the mean of all subjects enrolled so far.
+    If the value is less than the overall mean:
+        Add the subject to the group with the higher mean.
+    Otherwise:
+        Add the subject to the group with the lower mean.
+Otherwise:
+    Add the subject to the smaller group. This is necessary to keep the group sizes the same.
+```
+#### More than two groups
+PR-3.1 is a simple generalization. It adds subjects to 3 (or more) groups one at a time, achieving the same goals as above.
+```
+Find the smallest group size.
+Find the groups whose size is equal to the smallest group size.
+If there are two or more such groups:
+    Compare the feature value for the subject to the mean of all subjects enrolled so far.
+    If the value is less than the overall mean:
+        Add the subject to the smallest-group-size group with the highest mean.
+    Otherwise:
+        Add the subject to the smallest-group-size group with the lowest mean.
+Otherwise:
+    Add the subject to the one group of smallest size.
+```    
+Note that at this point, the algorithm will give the exact same results if, before each iteration of the algorithm, 
+we replace the feature values with z-score normalized feature values (that is, values with the mean subtracted, 
+divided by the standard deviation). For example, suppose the mean value for all subjects enrolled so far is 5.0, 
+the mean of group A is 4.5, the mean of group B is 5.5, and we are deciding where to place a new subject with 
+value 4.0. The rule above stating “If the value is less than the overall mean: Add the subject to the 
+smallest-group-size group with the highest mean” kicks in, and of course we place this subject into group B. 
+If we replace the values with normalized values (assuming std. dev. = 1.0), the mean for all becomes 0.0, 
+group A’s mean is -0.5, group B’s mean is 0.5, and the new subject’s value is -1.0. Since -1.0 is smaller 
+than 0.0, we once again choose the group with the larger mean, which is once again B (at 0.5 rather than -0.5). 
+More generally, we choose the group for which the product of the groups mean and the subject’s feature value 
+is negative (0.5 * -1.0 = -0.5). This is a rule that works in the opposite direction as well: if the new 
+subject had a greater than average feature value (z-scored normalized to 1.0, say), we would be choosing 
+the group with the negative mean value (-0.5 * 1.0 = -0.5). 
+
+Using  z-score normalized feature values we can revise PR-3.1 thusly, getting rid of the inner 
+less than/greater than conditional:
+```
+Find the smallest group size.
+Find the groups whose size is equal to the smallest group size.
+If there are two or more such groups:
+    Compute the mean and standard deviation of the feature values for all subjects enrolled so far.
+    Compute the z-score normalized value of the new subject’s feature value.
+    Compute the z-score normalized mean of each of the smallest-group-size groups.
+    Add the new subject to the group for which the product of the subject’s normalized feature value and the group’s normalized mean is the least.
+Otherwise:
+    Add the subject to the one group of smallest size.
+```
+Getting rid of this conditional may seem like a pedantic coding style nit-pick at this point, but on the contrary: 
+applying this most negative product rule allows us to develop an even more generalized algorithm.
+
+#### More than one subject assigned at a time
+
+PR-3.2 is the next level generalization. It adds subjects to 3 (or more) groups, two (or more) at a time, seeking 
+the same goals as above. One could arbitrarily impose an ordering within each pair of subjects added and use the 
+PR-3.1 algorithm; however, by allowing the algorithm to “peek ahead” a bit and choose which subject in the queue 
+to engroup first, PR-3.2 achieves improved performance.
+```
+Compute the mean and standard deviation of the feature values for all subjects enrolled so far.
+Compute the z-score normalized value of each of the new subject’s feature values.
+While there are new subjects not yet assigned to groups:
+    Find the smallest group size.
+    Find the groups whose size is equal to the smallest group size.
+    Compute the z-score normalized mean of each of the smallest-group-size groups.
+    Add the new subject to the smallest-group-size group for which the product of the subject’s normalized feature value and the group’s normalized mean is the least. (Note that if there are n subjects remaining to be engrouped and m minimum-sized groups, the algorithm is finding the least of n*m products.)
+```
+Note that our remaining “if” statement has gone away: even if there isn’t more than one group at the smallest group size,
+we still go through with the z-score normalization and comparing products, as we may be choosing between subjects. 
+
+#### More than one critical feature: 
+It may be difficult to anticipate what one feature is most important to try to equalize. Fortunately, this algorithm
+easily generalizes to multiple dimensions. In place of a feature value, we use a vector of feature values, z-score 
+normalizing each dimension independently. In place of calculating the product of a subject’s value and a group’s mean, 
+we calculate the dot product. Again, the subject/group pairing with the most-negative product wins. When we think of 
+a group of subjects as a cloud of vectors (with the overall mean at the origin), hopefully the use of the most-negative
+dot product becomes intuitively clear: we are selecting the vector that points away from the overall mean, and thus 
+most pulls the aggregate back towards the origin. See Box 1 for a worked example.
+
+PR-3.2.2 adds any number of subjects at a time to any number of groups based on any number of features. 
+It is equivalent to (makes the same decisions as) the simpler algorithms given above when the applicable 
+simplifying assumptions are true (i.e., two groups, one subject at a time, or only one feature).
+```
+Compute the means and standard deviations of each dimension of the features for all subjects enrolled so far.
+Compute the z-score normalized vectors for each of the new subjects.
+While there are new subjects not yet assigned to groups:
+    Find the smallest group size.
+    Find the groups whose size is equal to the smallest group size.
+    Compute the z-score normalized mean vector for each of the smallest-group-size groups.
+    Add the new subject to the smallest-group-size group for which the dot product of the subject’s normalized feature vector and the group’s normalized mean vector is the least.
+```
+A drawback of equalizing more than one feature is that the more features are used, the poorer the expected 
+equalization on any one dimension.
+
+Non-numeric (i.e. categorical) features can be converted to numeric by encoding as one-hot features. 
+A concern with this approach is that a single feature then potentially becomes
+several feature, and thus makes several contributions to the dot product of the feature vectors.  This would 
+give the categorical feature greater importance than other features; for this reason, the one-hot features 
+are given a weighting of 1/n (where n is the number of levels in the categorical).
 
 While this approach could be applied manually (particularly if there is only one feature being equalized),
 it is better to computerize the algorithm and leave humans out of the group-assignment loop, thus avoiding
