@@ -1,7 +1,6 @@
-# <h1> <i>prospective-randomizer</i>: Java server that assigns subject to matched experimental groups </h1>
+# <h1> <i>prospective-randomizer</i>: Java server that assigns subjects to matched experimental groups </h1>
 
 - [Introduction](#introduction)
-  - [A new direction](#a-new-direction)
 - [Implementation](#implementation)
   - [Compiling and Running](#compiling-and-running)
   - [Simple socket interface](#simple-socket-interface)
@@ -62,8 +61,8 @@ $$
 s.e.m. = \frac{std dev}{\sqrt{n}}
 $$
 
-Thus as the sample size, $n$, increases, or as the standard deviation decreasees, 
-the likely sample error decreases. Classically variance has been
+Thus as the sample size, $n$, decreases, or as the standard deviation increasees, 
+the likely sample error increases. Classically variance has been
 minimized by selecting subjects from a relatively homogeneous population, _e.g._,
 only selecting students between 18 and 22 at
 a specific university. Ideally, to avoid confounding factors, one would have identical 
@@ -71,14 +70,17 @@ subjects in each experimental group. In
 some experiments this is nearly possible, by ordering a litter of six-week-old male inbreed Wistar
 lab rats from the same supplier, all kept in the same type of enclosure and fed the same type of chow
 their entire lives. But given the difficulties in translating results from animal studies, and the
-desire to have broadly applicable results, may studies on humans apply very few exclusion criteria.
-Thus, it becomes increasingly probable that group sampling differences in a small-N study will have
-significant baseline (pre-intervention) differences between groups.
+desire to have broadly applicable results, may studies use human subjects, and apply very few exclusion criteria.
+Given the diversity of humans compared to lab animals, it becomes unfortunately likely that group sampling differences 
+in a small-N study will have significant baseline (pre-intervention) differences between groups.
 
 In human studies, all measurable features of subjects will have some more or less broad distribution.
 Without the resources to go out and search for a subject similar to a subject in group A to put into
 group B&dash;in the typical arrangement of taking all comers&mdash;we cannot match subjects, but can
-perhaps hope to match groups, at least in their means on selected features. However, when subjects are
+perhaps hope to match groups, at least on selected features. With small-N studies, it is not uncommon for
+outcome measures to differ more at baseline than after the experimental intervention.
+
+However, when subjects are
 added to the study one at a time (or a few at a time), it is difficult to accurately anticipate the mean
 of the subjects who will enroll.
 
