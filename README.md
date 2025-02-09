@@ -59,8 +59,8 @@ $$
 s.e.m. = \frac{std dev}{\sqrt{n}}
 $$
 
-Thus as the sample size, $n$, decreases, or as the standard deviation increasees, 
-the likely sample error increases. Classically variance has been
+Thus as the sample size, $n$, decreases, or as the standard deviation increases, 
+the likely sampling error increases. Classically variance has been
 minimized by selecting subjects from a relatively homogeneous population, _e.g._,
 only selecting students between 18 and 22 at
 a specific university. Ideally, to avoid confounding factors, one would have identical 
@@ -68,14 +68,11 @@ subjects in each experimental group. In
 some experiments this is nearly possible, by ordering a litter of six-week-old male inbreed Wistar
 lab rats from the same supplier, all kept in the same type of enclosure and fed the same type of chow
 their entire lives. But given the difficulties in translating results from animal studies, and the
-desire to have broadly applicable results, may studies use human subjects, and apply very few exclusion criteria.
+desire to have broadly applicable results, many studies use human subjects, and apply very few exclusion criteria.
 Given the diversity of humans compared to lab animals, it becomes unfortunately likely that group sampling differences 
 in a small-N study will have significant baseline (pre-intervention) differences between groups.
 
-In human studies, all measurable features of subjects will have some more or less broad distribution.
-Without the resources to go out and search for a subject similar to a subject in group A to put into
-group B, we cannot match subjects, but can
-perhaps hope to match groups, at least on selected features. With small-N studies, it is not uncommon for
+With small-N studies, it may happen that
 outcome measures to differ more at baseline than after the experimental intervention, posing challenges for interpretation. Thus, while one hopes for an outcome similar to this:
 
 |                 | Pre-test | Post-test | Delta |
@@ -115,6 +112,12 @@ If the two groups are the same size:
 Otherwise:
     Add the subject to the smaller group. This is necessary to keep the group sizes the same.
 ```
+
+(A boring but crucial step is omitted from all versions of the pseudo-code: what to do at the starting rounds, 
+as long as any group
+contains zero subjects (because we cannot compute means of zero items). If any group is found to have zero subjects, 
+the algorithms immediately add to that group.)
+
 #### More than two groups
 PR-3.1 is a simple generalization. It adds subjects to 3 (or more) groups one at a time, achieving the same goals as above.
 ```
@@ -169,7 +172,7 @@ to engroup first, PR-3.2 achieves improved performance.
 ```
 Compute the mean and standard deviation of the feature values for all subjects enrolled so far.
 Compute the z-score normalized value of each of the new subject’s feature values.
-While there are new subjects not yet assigned to groups:
+While there are subjects not yet assigned to groups whose group assignment is needed:
     Find the smallest group size.
     Find the groups whose size is equal to the smallest group size.
     For each of the smallest-group-size groups, compute the z-score normalized mean.
@@ -179,7 +182,9 @@ While there are new subjects not yet assigned to groups:
 ```
 Note that our remaining “if” statement has gone away: even if there isn’t more than one group at the smallest group size,
 we still go through with the z-score normalization and comparing products, as we may be choosing between subjects. 
-In general, if there are $n$ subjects remaining to be engrouped and $m$ minimum-sized groups, the algorithm is finding the least of $n * m$ products. Of course, if there is only one group at the smallest group size, and we are adding the only remaining new subject, the algorithm is constrained– we calculate one product, but it has no competition.
+In general, if there are $n$ subjects remaining to be engrouped and $m$ minimum-sized groups, the algorithm is finding the least of $n * m$ products. Of course, if there is only one group at the smallest group size, and we are adding the only remaining new subject, the algorithm is constrained– we calculate one product, but it has no competition.  
+Also note that we do not necessarily assign all new subjects to groups right away: not-yet-needed group assignments 
+may be deferred, allowing the algorithm to possibly acquire more information.
 
 #### More than one critical feature: 
 It may be difficult to anticipate what one feature is most important to try to equalize. Fortunately, this algorithm
@@ -188,7 +193,7 @@ normalizing each dimension independently. In place of calculating the product of
 we calculate the _dot_ product. Again, the subject/group pairing with the most-negative product wins. When we think of 
 a group of subjects as a cloud of vectors (with the overall mean at the origin), hopefully the use of the most-negative
 dot product becomes intuitively clear: we are selecting the vector that points away from the overall mean, and thus 
-most pulls the aggregate back towards the origin. See Box 1 for a worked example.
+most pulls the aggregate back towards the origin.
 
 PR-3.2.2 adds any number of subjects at a time to any number of groups based on any number of features. 
 It is equivalent to (makes the same decisions as) the simpler algorithms given above when the applicable 
@@ -196,7 +201,7 @@ simplifying assumptions are true (i.e., two groups, one subject at a time, or on
 ```
 Compute the means and standard deviations of each dimension of the features for all subjects enrolled so far.
 Compute the z-score normalized vectors for each of the new subjects.
-While there are new subjects not yet assigned to groups:
+While there are  subjects not yet assigned to groups whose group assignment is needed:
     Find the smallest group size.
     Find the groups whose size is equal to the smallest group size.
     For each of the smallest-group-size groups, compute the z-score normalized mean vector.
@@ -297,7 +302,7 @@ In the groups populated via the Alternating algorithm, these p-values were very 
 
 In the groups populated via the Balanced algorithm, these p-values were much higher (mean=0.92, median=0.95). For any given pair of simulations, the p-value resulting from the Balanced algorithm
 was greater than from Alternating by 0.44 on average (paired t-test = -30.0,
-p = $1.4 \times 10^{-104}$, df=399). The performance of the Balanced algorithm was not inevitibly superior in every case&mdash;the p-value for the Alternating randomizer was greater in 12% of the
+p = $1.4 \times 10^{-104}$, df=399). The performance of the Balanced algorithm was not inevitably superior in every case&mdash;the p-value for the Alternating randomizer was greater in 12% of the
 simulated runs, because the Alternating algorithm will sometimes yield an ideal grouping by chance. However, the overall dramatic difference is apparent in Figure 1. 
 <figure>
   <img src='fig1.png' width='350'>
@@ -319,13 +324,13 @@ less than 0.25 in 99 out of 400 runs (spot-on what we would expect from random c
 
 We did additional _in scilico_ experiments similar to those described above, but varying the interval between when any given subject's feature values were submitted to the algorithm and when their
 group placement was requested. We allowed the algorithm to accumulate data on 0 to 9 additional subjects (but never more than 20 in total) after any one subject's data was submitted and before
-their group placement was requested. This number of additional subjects is referred to as the _place interval_.
+their group placement was requested. This number of additional subjects is referred to as the _placement interval_.
 
-Increasing the place interval has a positive effect on p-values resulting from using the Balanced algorithm (see figure 3). A considerable advantage is gained by collecting data on just one
+Increasing the placement interval has a positive effect on p-values resulting from using the Balanced algorithm (see figure 3). A considerable advantage is gained by collecting data on just one
 additional subjects before group assignment (place interval = 0 mean p-value = 0.86, place interval = 1 mean p-value = 0.90, difference = 0.048, unpaired t-test=-5.3, p= $1.2 \times 10^{-7}$, df=798).
 Collecting data on
 additional subjects before group assignment improves the algorithm's performance (Pearson correlation coefficent for p-value vs. place intervals between 1 and 9 = 0.95, $p=7.8 \times 10^{-5}$), but the
-magnitude of improvement with each additional increment of place interval is not as large as the first (linear regression slope = 0.005, contrast with the slope between 0 and 1 = 0.048 above).
+magnitude of improvement with each additional increment of placement interval is not as large as the first (linear regression slope = 0.005, contrast with the slope between 0 and 1 = 0.048 above).
 
 <figure>
   <img src='fig3.png' width='350'>
@@ -350,20 +355,22 @@ We also simulated protocols in which more than one baseline feature was taken in
 ### Using a measure of diversity reveals that using multiple variables results in overall more similar groups.
 
 The previous analysis might be read as casting a bad light on the use of more than one variable. Submitting more than one variable does not degrade the performance of the algorithm, but it does diminish
-the power of any one dimension to drive group assignment. Like sibings, the dimensions may not always agree, and have to share. The question is, by using more than one feature, are the subjects
+the power of any one dimension to drive group assignment. Like siblings, the dimensions may not always agree, and have to share. The question is, by using more than one feature, are the subjects
 _overall_ better randomized, taking all dimensions into account?
 
 Human subjects are extremely diverse. _Diversity_ can be given an exact mathematical definition, related to measures of entropy. The mathematics of quantifying diversity has been well-developed
-in the field of ecology [cite L&C]. Fortunately for us, the ecoologists have thought long and hard about how to quantify the partitioning of diversity&mdash;i.e. how much diversity there is
+in the field of ecology [cite L&C]. Fortunately for us, the ecologists have thought long and hard about how to quantify the partitioning of diversity&mdash;i.e. how much diversity there is
 between subgroups ("subcommunities") of a larger overall group ("metacommunity") [cite Reeve].
-This mathematical framework is proving to be useful beyond ecology [cite greylock paper, alpha paper]. A useful measure of what
-we are trying to do that is provided by this framework is $\bar{R}$, the average redundancies of the subcommunities; in other words, to what extent are individuals in one group similar to
-members of other groups. $\bar{R}$ equals 1.0 when the composition of each group is identical. Rather surprisingly, $\bar{R}$ can exceed 1.0 when typically a member of one group is more
-similar to some members of other groups than any member of their own group.
+This mathematical framework, with the adjustment that each individual is considered a separate “species”,
+is proving to be useful beyond ecology [cite greylock paper, alpha paper]. In this framework, a useful measure
+is $\bar{R}$, the average redundancies of the subcommunities; in other words, 
+to what extent are individuals in one group are similar to
+members of other groups. $\bar{R}$ equals 1.0 when the composition of each group is identical. Rather surprisingly, $\bar{R}$ can exceed 1.0 when individuals are more
+similar to members of other groups than any member of their own group.
 
 We used the `greylock` python package [citation] to calculate $\bar{R}$ for the group composition of each simulated run of each protocol. Similarity between subjects was defined to take into account
 values of all 4 of the features generated for each subject. Either 1, 2, 3, or 4 feature values were submitted to the algorithm consistently throughout each protocol.
-As figure 5 shows, the more variables submitted to the algorithm, the higher $\bar{R}$ is on average (Pearson correlation coefficient = 0.25, p = 0).
+As figure 5 shows, the more variables submitted to the algorithm, the higher $\bar{R}$ is on average (Pearson correlation coefficient = 0.25, p = 0), indicating greater overall similarity between the groups.
 
 <figure>
   <img src='fig5.png' width='350'>
