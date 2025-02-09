@@ -188,7 +188,7 @@ In general, if there are $n$ subjects remaining to be engrouped and $m$ minimum-
 It may be difficult to anticipate what one feature is most important to try to equalize. Fortunately, this algorithm
 easily generalizes to multiple dimensions. In place of a feature value, we use a vector of feature values, z-score 
 normalizing each dimension independently. In place of calculating the product of a subject’s value and a group’s mean, 
-we calculate the dot product. Again, the subject/group pairing with the most-negative product wins. When we think of 
+we calculate the _dot_ product. Again, the subject/group pairing with the most-negative product wins. When we think of 
 a group of subjects as a cloud of vectors (with the overall mean at the origin), hopefully the use of the most-negative
 dot product becomes intuitively clear: we are selecting the vector that points away from the overall mean, and thus 
 most pulls the aggregate back towards the origin. See Box 1 for a worked example.
@@ -208,13 +208,14 @@ While there are new subjects not yet assigned to groups:
     Add the new subject to the smallest-group-size group for which this dot product is the least (i.e. most negative).
 ```
 A drawback of equalizing more than one feature is that the more features are used, the poorer the expected 
-equalization on any one dimension.
+equalization on any one dimension. Thus, unimportant features should not be used, lest they damage the equalization 
+of more important features.
 
 Non-numeric (i.e. categorical) features can be converted to numeric by encoding as one-hot features. 
 A concern with this approach is that a single feature then potentially becomes
 several feature, and thus makes several contributions to the dot product of the feature vectors.  This would 
 give the categorical feature greater importance than other features; for this reason, the one-hot features 
-are given a weighting of 1/n (where n is the number of levels in the categorical).
+are given a weighting of $1/n$ (where $n$ is the number of levels in the categorical).
 
 While this approach could be applied manually (particularly if there is only one feature being equalized),
 it is better to computerize the algorithm and leave humans out of the group-assignment loop, thus avoiding
