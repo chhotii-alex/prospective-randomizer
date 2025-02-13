@@ -3,7 +3,8 @@ package org.sleepandcognition.prosrand;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
 import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
@@ -11,8 +12,8 @@ import org.xml.sax.SAXException;
 
 public abstract class Randomizer {
     VariableSet variables;
-    Hashtable<String, InterventionGroup> groups;
-    protected Hashtable<String, MultiDimSubject> subjectsByID;
+    Map<String, InterventionGroup> groups;
+    protected ConcurrentHashMap<String, MultiDimSubject> subjectsByID;
     protected ArrayList<MultiDimSubject> unassignedSubjects;
     StillGoingFlag controllersOffSwitch;
     SubjectDatabase database;
@@ -42,7 +43,7 @@ public abstract class Randomizer {
         this.allowRevision = spec.allowRevision;
         database = db;
         variables = new VariableSet(spec.variableSpec);
-        groups = new Hashtable<String, InterventionGroup>();
+        groups = new ConcurrentHashMap<String, InterventionGroup>();
         for (Iterator<String> it = spec.groupNames.iterator(); it.hasNext(); ) {
             String groupName = it.next();
             groups.put(groupName, new InterventionGroup(groupName));
@@ -50,9 +51,9 @@ public abstract class Randomizer {
         readSubjects();
     }
 
-    protected void readSubjects() throws IOException, InvalidDataException {
+    private void readSubjects() throws IOException, InvalidDataException {
         ArrayList<MultiDimSubject> subjects = database.ReadSubjectsIntoGroups(variables, groups);
-        subjectsByID = new Hashtable<String, MultiDimSubject>();
+        subjectsByID = new ConcurrentHashMap<String, MultiDimSubject>();
         unassignedSubjects = new ArrayList<MultiDimSubject>();
         for (Iterator<MultiDimSubject> it = subjects.iterator(); it.hasNext(); ) {
             addSubject(it.next());
@@ -77,7 +78,7 @@ public abstract class Randomizer {
         return checkID(subjectID) && !(subjectsByID.get(subjectID).isCommitted);
     }
 
-    public synchronized String putOrPlaceSubject(String subjectID, Hashtable<String, String> values, boolean putFlag)
+    public synchronized String putOrPlaceSubject(String subjectID, Map<String, String> values, boolean putFlag)
             throws IOException, InvalidDataException {
         if (allowRevision) {
             if (isRemovable(subjectID)) {
@@ -85,8 +86,8 @@ public abstract class Randomizer {
             }
         }
         MultiDimSubject subject = new MultiDimSubject(subjectID);
-        for (Enumeration<String> e = values.keys(); e.hasMoreElements(); ) {
-            String key = e.nextElement();
+        for (Iterator<String> e = values.keySet().iterator(); e.hasNext(); ) {
+            String key = e.next();
             String value = values.get(key);
             if (value.length() < 1) {
                 if (!variables.isMultiDimensional()) {
@@ -112,12 +113,12 @@ public abstract class Randomizer {
         }
     }
 
-    public synchronized void putSubject(String subjectID, Hashtable<String, String> values)
+    public synchronized void putSubject(String subjectID, Map<String, String> values)
             throws IOException, InvalidDataException {
         putOrPlaceSubject(subjectID, values, true);
     }
 
-    public synchronized void placeSubject(String subjectID, Hashtable<String, String> values)
+    public synchronized void placeSubject(String subjectID, Map<String, String> values)
             throws IOException, InvalidDataException {
         putOrPlaceSubject(subjectID, values, false);
     }
@@ -151,8 +152,8 @@ public abstract class Randomizer {
                 database.WriteOutSubjects(subjectsByID, variables);
                 if (verbosity >= 0) {
                     System.out.println("Current group means:");
-                    for (Enumeration<String> it = groups.keys(); it.hasMoreElements(); ) {
-                        String key = it.nextElement();
+                    for (Iterator<String> it = groups.keySet().iterator(); it.hasNext(); ) {
+                        String key = it.next();
                         System.out.print(String.format("%s: ", key));
                         InterventionGroup group = groups.get(key);
                         System.out.println(group.getMeanVector());
@@ -179,8 +180,8 @@ public abstract class Randomizer {
     }
 
     protected synchronized void printGroups() {
-        for (Enumeration<String> it = groups.keys(); it.hasMoreElements(); ) {
-            String key = it.nextElement();
+        for (Iterator<String> it = groups.keySet().iterator(); it.hasNext(); ) {
+            String key = it.next();
             if (verbosity > 1) {
                 System.out.println(String.format("Composition of group %s:", key));
             }
@@ -191,16 +192,16 @@ public abstract class Randomizer {
 
     public synchronized double maxDistanceBetweenGroups() {
         double max = 0.0;
-        for (Enumeration<String> it1 = groups.keys(); it1.hasMoreElements(); ) {
-            String key1 = it1.nextElement();
-            Hashtable<String, Double> meanVector1 = groups.get(key1).getMeanVector();
-            for (Enumeration<String> it2 = groups.keys(); it2.hasMoreElements(); ) {
-                String key2 = it2.nextElement();
+        for (Iterator<String> it1 = groups.keySet().iterator(); it1.hasNext(); ) {
+            String key1 = it1.next();
+            Map<String, Double> meanVector1 = groups.get(key1).getMeanVector();
+            for (Iterator<String> it2 = groups.keySet().iterator(); it2.hasNext(); ) {
+                String key2 = it2.next();
                 if (key1 != key2) {
-                    Hashtable<String, Double> meanVector2 = groups.get(key2).getMeanVector();
+                    Map<String, Double> meanVector2 = groups.get(key2).getMeanVector();
                     double sum = 0.0;
-                    for (Enumeration<String> e = meanVector2.keys(); e.hasMoreElements(); ) {
-                        String dimKey = e.nextElement();
+                    for (Iterator<String> e = meanVector2.keySet().iterator(); e.hasNext(); ) {
+                        String dimKey = e.next();
                         double diff = meanVector1.get(dimKey).doubleValue()
                                 - meanVector2.get(dimKey).doubleValue();
                         sum += diff * diff;

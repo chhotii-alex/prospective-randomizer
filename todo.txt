@@ -17,3 +17,6 @@ on the endpoints that divulge all the study information (/groups etc.) As it is,
 open to spying and mischief. We've been deploying it locally on-campus only, and
 relying on "security by obscurity", but definitely a cloud deployment would absolutely
 require some security measures.
+
+* A dashboard with a web-based UI would be nice
+

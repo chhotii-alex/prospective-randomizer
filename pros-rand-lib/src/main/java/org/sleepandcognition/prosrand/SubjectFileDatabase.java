@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Hashtable;
 import java.util.Iterator;
 
@@ -21,7 +22,7 @@ public class SubjectFileDatabase extends SubjectDatabase {
     }
 
     public ArrayList<MultiDimSubject> ReadSubjectsIntoGroups(
-            VariableSet variables, Hashtable<String, InterventionGroup> groups) throws IOException {
+            VariableSet variables, Map<String, InterventionGroup> groups) throws IOException {
         ArrayList<MultiDimSubject> subjects = new ArrayList<MultiDimSubject>();
         FileInputStream fs = null;
         DataInputStream ds = null;
@@ -98,7 +99,7 @@ public class SubjectFileDatabase extends SubjectDatabase {
         return subjects;
     }
 
-    public void WriteOutSubjects(Hashtable<String, MultiDimSubject> subjectsByID, VariableSet variables)
+    public void WriteOutSubjects(Map<String, MultiDimSubject> subjectsByID, VariableSet variables)
             throws IOException {
         File directory = subjectDatabaseFile.getParentFile();
         File tempFile = File.createTempFile("subj", ".txt", directory);

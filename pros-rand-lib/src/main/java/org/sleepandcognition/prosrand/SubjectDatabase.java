@@ -2,6 +2,7 @@ package org.sleepandcognition.prosrand;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Hashtable;
 
 /*
@@ -11,11 +12,11 @@ import java.util.Hashtable;
  */
 public class SubjectDatabase {
     public ArrayList<MultiDimSubject> ReadSubjectsIntoGroups(
-            VariableSet variables, Hashtable<String, InterventionGroup> groups) throws IOException {
+            VariableSet variables, Map<String, InterventionGroup> groups) throws IOException {
         ArrayList<MultiDimSubject> subjects = new ArrayList<MultiDimSubject>();
         return subjects;
     }
 
-    public void WriteOutSubjects(Hashtable<String, MultiDimSubject> subjectsByID, VariableSet variables)
+    public void WriteOutSubjects(Map<String, MultiDimSubject> subjectsByID, VariableSet variables)
             throws IOException {}
 }

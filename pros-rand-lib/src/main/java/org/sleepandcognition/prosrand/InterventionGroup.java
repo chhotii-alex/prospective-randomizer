@@ -8,7 +8,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 
 /* See https://clinicaltrials.gov/ct2/about-studies/glossary for terminology
@@ -25,8 +26,8 @@ public class InterventionGroup {
     protected ArrayList<MultiDimSubject> subjects;
     protected MeanVectorCalculator means;
 
-    static Hashtable<String, InterventionGroup> ReadGroups(String fileNameOrPath) {
-        Hashtable<String, InterventionGroup> groups = new Hashtable<String, InterventionGroup>();
+    static Map<String, InterventionGroup> ReadGroups(String fileNameOrPath) {
+        HashMap<String, InterventionGroup> groups = new HashMap<String, InterventionGroup>();
         File file = new File(fileNameOrPath);
         FileInputStream fs = null;
         DataInputStream ds = null;
@@ -98,8 +99,8 @@ public class InterventionGroup {
         return means;
     }
 
-    public Hashtable<String, Double> getMeanVector() {
-        Hashtable<String, Double> meanVector = new Hashtable<String, Double>();
+    public Map<String, Double> getMeanVector() {
+        HashMap<String, Double> meanVector = new HashMap<String, Double>();
         if (subjects.size() > 0) {
             for (Enumeration<String> vit = getMeans().keyIterator(); vit.hasMoreElements(); ) {
                 String key = vit.nextElement();

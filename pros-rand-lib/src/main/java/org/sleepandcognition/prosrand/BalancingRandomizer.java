@@ -2,9 +2,11 @@ package org.sleepandcognition.prosrand;
 
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
+
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
 
 public class BalancingRandomizer extends Randomizer {
@@ -62,6 +64,7 @@ public class BalancingRandomizer extends Randomizer {
      * Be sure to save the subject database after each assignment, so that we do not lose
      * any assignment which may have been announced to the world.
      */
+    @Override
     protected synchronized void assignAnySubjectAGroup() {
         int minimumScaledGroupSize = Integer.MAX_VALUE;
         for (Iterator<InterventionGroup> it = groups.values().iterator(); it.hasNext(); ) {
@@ -108,7 +111,7 @@ public class BalancingRandomizer extends Randomizer {
             InterventionGroup aGroup = it.next();
             if (aGroup.currentGroupSize()
                     == minimumScaledGroupSize) { // This group is in least-filled tier; consider adding to it
-                Hashtable<String, Double> vector = aGroup.getMeanVector();
+                Map<String, Double> vector = aGroup.getMeanVector();
                 if (verbosity >= 0) {
                     System.out.println(aGroup.sizeString());
                 }
@@ -126,17 +129,17 @@ public class BalancingRandomizer extends Randomizer {
         assignSubjectToGroup(winningGroup, winningSubject);
     }
 
-    private double nomalizedLength(Hashtable<String, Double> baselineCharacteristics) {
+    private double nomalizedLength(Map<String, Double> baselineCharacteristics) {
         double accum = dotProductForVectors(baselineCharacteristics, baselineCharacteristics);
         return Math.sqrt(accum);
     }
 
     private double dotProductForVectors(
-            Hashtable<String, Double> vector, Hashtable<String, Double> baselineCharacteristics) {
+            Map<String, Double> vector, Map<String, Double> baselineCharacteristics) {
         double accum = 0.0;
 
-        for (Enumeration<String> vit = baselineCharacteristics.keys(); vit.hasMoreElements(); ) {
-            String key = vit.nextElement();
+        for (Iterator<String> vit = baselineCharacteristics.keySet().iterator(); vit.hasNext(); ) {
+            String key = vit.next();
             double mean = getMeans().mean(key);
             double stddev = getMeans().stddev(key);
             double v1 = 0.0;

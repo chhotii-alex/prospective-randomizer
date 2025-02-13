@@ -2,6 +2,8 @@ from pathlib import Path
 import subprocess
 import random
 
+jar_path = Path(".") / "target" / "pros-rand-lib-1.0-SNAPSHOT.jar "
+
 random.seed(42)
 
 # Functions for communicating with command-line process
@@ -86,7 +88,7 @@ def run_test(protocol_name,
                 print('  </Variable>', file=f)
         print( '</Variables>', file=f)
 
-    command = "java -cp server.jar org.sleepandcognition.prosrand.RandomizerServer  "
+    command = "java -cp %s org.sleepandcognition.prosrand.RandomizerServer  " % jar_path
     command += "-s %s -g groups_%s.txt -r variables_%s.xml -c " % (subject_file_path, protocol_name, protocol_name)
     if protocol_spec['allowRevision']:
         command += " -x"

@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+
 import javax.xml.parsers.ParserConfigurationException;
+
 import org.xml.sax.SAXException;
 
 public class AlternatingRandomizer extends Randomizer {
@@ -26,21 +28,19 @@ public class AlternatingRandomizer extends Randomizer {
         init();
     }
 
-    protected synchronized void init() {
-        groupNamesInOrder = new ArrayList<String>();
+    private void init() {
+        groupNamesInOrder = new ArrayList<>();
         groupNamesInOrder.addAll(groups.keySet());
         Collections.sort(groupNamesInOrder);
     }
 
+    @Override
     protected synchronized void assignAnySubjectAGroup() {
         int minimumScaledGroupSize = Integer.MAX_VALUE;
         for (Iterator<String> it = groupNamesInOrder.iterator(); it.hasNext(); ) {
             InterventionGroup aGroup = groups.get(it.next());
             if (aGroup.isEmpty()) {
                 assignSubjectToGroup(aGroup, unassignedSubjects.get(0));
-                //                if (!it.hasNext()) {
-                //                    Collections.reverse(groupNamesInOrder);
-                //                }
                 return;
             }
             if (aGroup.currentGroupSize() < minimumScaledGroupSize) {
@@ -53,9 +53,6 @@ public class AlternatingRandomizer extends Randomizer {
             if (aGroup.currentGroupSize()
                     == minimumScaledGroupSize) { // This group is in least-filled tier; consider adding to it
                 assignSubjectToGroup(aGroup, unassignedSubjects.get(0));
-                //                if (!it.hasNext()) {
-                //                    Collections.reverse(groupNamesInOrder);
-                //                }
                 return;
             }
         } // END for each group (second pass)
