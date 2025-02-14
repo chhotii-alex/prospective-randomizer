@@ -16,6 +16,7 @@ import org.sleepandcognition.prosrand.SubjectDatabase;
 import org.sleepandcognition.prosrand.SubjectFileDatabase;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -83,6 +84,16 @@ public class RandomizerController {
         // Everything possible in log, as that can be useful for troubleshooting
         r.setVerbosity(100);
         randomizers.put(protocolName, r);
+    }
+
+    @DeleteMapping("/{protocolName}/stop")
+    void stopProtocol(@PathVariable String protocolName) {
+        if (randomizers.containsKey(protocolName)) {
+            randomizers.remove(protocolName);
+        } 
+        else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/{protocolName}/subject/{id}")

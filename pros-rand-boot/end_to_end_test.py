@@ -2,6 +2,7 @@ import time
 import requests
 from pathlib import Path
 import random
+import traceback
 
 random.seed(42)
 
@@ -43,17 +44,10 @@ protocols = {
     },
 }
 
-require_restart = True
-if require_restart:
-    reply = input("Please shut down the Spring Boot implemenation; hit Enter when that's done")
-
+def delete_old_data():
     for protocol_name in protocols.keys():
         subject_file_path = homedir / ("subjects_%s.txt" % protocol_name)
         subject_file_path.unlink(missing_ok=True)
-
-    print("Please start the Spring Boot implementation now.")
-    time.sleep(0.25)
-    reply = input("Please hit the Enter key when you see 'Started ProsRandApplication' in the console.")
 
 def make_phony_features(variables):
     data = {}
@@ -245,9 +239,27 @@ def run_test(protocol_name,
         assert "groupName" in s
         assert s["groupName"] in protocol_spec['groupNames']
 
-for protocol_name, protocol_spec in protocols.items():
-    run_test(protocol_name, protocol_spec)
-print()
-print("Success, done!")
+    stop_endpoint = make_url(True, 'stop')
+    r = requests.delete(stop_endpoint)
+    assert r.status_code == 200
+    
+    r = requests.delete(stop_endpoint)
+    assert r.status_code == 404
+
+delete_old_data()
+print("Please start the Spring Boot implementation now.")
+time.sleep(0.25)
+reply = input("Please hit the Enter key when you see 'Started ProsRandApplication' in the console.")
+try:
+    for protocol_name, protocol_spec in protocols.items():
+        run_test(protocol_name, protocol_spec)
+    print()
+    print("Success, done!")
+except Exception as e:
+    print(e)
+    traceback.print_stack()
+finally:
+    delete_old_data()
+
 
     
