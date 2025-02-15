@@ -10,7 +10,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 public class AlternatingRandomizer extends Randomizer {
-    protected ArrayList<String> groupNamesInOrder;
 
     public AlternatingRandomizer(
             String groupListFile,
@@ -20,18 +19,10 @@ public class AlternatingRandomizer extends Randomizer {
             boolean allowRevision)
             throws SAXException, IOException, ParserConfigurationException, InvalidDataException {
         super(groupListFile, variables, db, listening, allowRevision);
-        init();
     }
 
     public AlternatingRandomizer(ProtocolSpec spec, SubjectDatabase db) throws IOException, InvalidDataException {
         super(spec, db);
-        init();
-    }
-
-    private void init() {
-        groupNamesInOrder = new ArrayList<>();
-        groupNamesInOrder.addAll(groups.keySet());
-        Collections.sort(groupNamesInOrder);
     }
 
     @Override

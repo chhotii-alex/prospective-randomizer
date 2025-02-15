@@ -67,8 +67,8 @@ public class BalancingRandomizer extends Randomizer {
     @Override
     protected synchronized void assignAnySubjectAGroup() {
         int minimumScaledGroupSize = Integer.MAX_VALUE;
-        for (Iterator<InterventionGroup> it = groups.values().iterator(); it.hasNext(); ) {
-            InterventionGroup aGroup = it.next();
+        for (Iterator<String> it = groupNamesInOrder.iterator(); it.hasNext(); ) {
+            InterventionGroup aGroup = groups.get(it.next());
             if (aGroup.isEmpty()) {
                 if (verbosity > 0) {
                     System.out.println("Found empty group, will assign to that one");
@@ -107,8 +107,8 @@ public class BalancingRandomizer extends Randomizer {
         double mostNegativeDotProduct = Double.MAX_VALUE;
         InterventionGroup winningGroup = null;
         MultiDimSubject winningSubject = null;
-        for (Iterator<InterventionGroup> it = groups.values().iterator(); it.hasNext(); ) {
-            InterventionGroup aGroup = it.next();
+        for (Iterator<String> it = groupNamesInOrder.iterator(); it.hasNext(); ) {
+            InterventionGroup aGroup = groups.get(it.next());
             if (aGroup.currentGroupSize()
                     == minimumScaledGroupSize) { // This group is in least-filled tier; consider adding to it
                 Map<String, Double> vector = aGroup.getMeanVector();

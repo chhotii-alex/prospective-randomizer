@@ -2,7 +2,7 @@ package org.sleepandcognition.prosrand;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
@@ -19,6 +19,7 @@ public abstract class Randomizer {
     SubjectDatabase database;
     int verbosity;
     boolean allowRevision;
+    protected ArrayList<String> groupNamesInOrder;
 
     public static int RandomizerCommVersion() {
         return 5;
@@ -37,6 +38,7 @@ public abstract class Randomizer {
         groups = InterventionGroup.ReadGroups(groupListFile);
         controllersOffSwitch = listening;
         readSubjects();
+        init();
     }
 
     public Randomizer(ProtocolSpec spec, SubjectDatabase db) throws IOException, InvalidDataException {
@@ -49,6 +51,13 @@ public abstract class Randomizer {
             groups.put(groupName, new InterventionGroup(groupName));
         }
         readSubjects();
+        init();
+    }
+
+    private void init() {
+        groupNamesInOrder = new ArrayList<>();
+        groupNamesInOrder.addAll(groups.keySet());
+        Collections.sort(groupNamesInOrder);
     }
 
     private void readSubjects() throws IOException, InvalidDataException {
