@@ -280,13 +280,4 @@ public abstract class Randomizer {
         }
         return true;
     }
-
-    public synchronized List<InterventionGroupStrings> getGroupsWithStrings() {
-        ArrayList<InterventionGroupStrings> list = new ArrayList<>();
-        for (Iterator<InterventionGroup> e = groups.values().iterator(); e.hasNext(); ) {
-            InterventionGroupStrings g = e.next().makeStringVersion(variables);
-            list.add(g);
-        }
-        return list;
-    }
 }

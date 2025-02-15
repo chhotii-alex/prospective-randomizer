@@ -3,11 +3,12 @@ package org.sleepandcognition.prosrandboot;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
+
 import javax.xml.parsers.ParserConfigurationException;
 import org.sleepandcognition.prosrand.AlternatingRandomizer;
 import org.sleepandcognition.prosrand.BalancingRandomizer;
 import org.sleepandcognition.prosrand.InterventionGroup;
-import org.sleepandcognition.prosrand.InterventionGroupStrings;
 import org.sleepandcognition.prosrand.InvalidDataException;
 import org.sleepandcognition.prosrand.MultiDimSubject;
 import org.sleepandcognition.prosrand.ProtocolSpec;
@@ -51,6 +52,11 @@ public class RandomizerController {
         } else {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/protocols")
+    public Map<String, Randomizer> getProtocols() {
+        return randomizers;
     }
 
     @PostMapping("/{protocolName}/start")
@@ -147,11 +153,6 @@ public class RandomizerController {
     @GetMapping("/{protocolName}/groups")
     List<InterventionGroup> getAllGroups(@PathVariable String protocolName) {
         return randomizerOfName(protocolName).getGroups();
-    }
-
-    @GetMapping("/{protocolName}/groups/strings")
-    List<InterventionGroupStrings> getAllGroupsStringFeatures(@PathVariable String protocolName) {
-        return randomizerOfName(protocolName).getGroupsWithStrings();
     }
 
     @GetMapping("/{protocolName}/variables")
