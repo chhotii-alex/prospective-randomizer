@@ -120,6 +120,11 @@ def get_groups(protocol_name, pid):
     assert r.status_code == 200
     return r.json()
 
+def stop_protocol(protocol_name, pid):
+    url = make_url(protocol_name, pid, ['stop'])
+    r = requests.delete(url)
+    assert r.status_code == 200
+
 def id_gen():
     num = 1
     while True:
@@ -244,6 +249,10 @@ def compare_algorithms(protocol_name, competitors, all_features_by_subject):
     for algorithm, prot_suff in competitors.items():
         evaluate_protocol_result(protocol_name, prot_suff, algorithm, all_features_by_subject)
 
+def stop_protocols(protocol_name, competitors):
+    for _, prot_suff in competitors.items():
+        stop_protocol(protocol_name, prot_suff)
+
 place_interval_range = 10
 
 setup()
@@ -277,6 +286,7 @@ with tqdm(total=perm_count) as pbar:
                             get_group(put_subjects[0], protocol_name, prot_suff)
                         put_subjects.pop(0)
                 compare_algorithms(protocol_name, competitors, all_features_by_subject)
+                stop_protocols(protocol_name, competitors)
                 pbar.update(1)
 
         df = pd.DataFrame(d)
