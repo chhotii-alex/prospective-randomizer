@@ -267,8 +267,8 @@ public abstract class Randomizer {
         return new ArrayList<>(groups.values());
     }
 
-    public synchronized Hashtable<String, String> getVariables() {
-        return variables.getVariables();
+    public synchronized List<VariableSpec> getVariables() {
+        return variables.getVariableSpecs();
     }
 
     public synchronized List<MultiDimSubject> getSubjects() {

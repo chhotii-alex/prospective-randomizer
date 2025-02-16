@@ -11,34 +11,34 @@ homedir = Path(".")
 protocols = {
     "simpletest" : {
         'groupNames': ['C', 'D', 'E'],
-        'variableSpec': {'score': None},
+        'variableSpec': [{'name':'score', 'type':'continuous'}],
         'allowRevision': True,
         'algorithm': 'Balanced',
     },
     "multidim" : {
         'groupNames': ['A', 'B'],
-        'variableSpec': {'weight': None, 'snark':None},
+        'variableSpec': [{'name':'weight', 'type':'continuous'}, {'name':'snark', 'type':'continuous'}],
         'allowRevision': False,
         'algorithm': 'Balanced',
     },
     "withcategorical" : {
         'groupNames': ['C', 'D', 'E'],
-        'variableSpec': {'state': ['Montana', 'Wyoming', 'Colorodo']},
+        'variableSpec': [{'name':'state', 'type':'categorical', 'levels':['Montana', 'Wyoming', 'Colorodo']}],
         'allowRevision': True,
         'algorithm': 'Balanced',
     },
     "alternating" : {
         'groupNames': ['C', 'D', 'E'],
-        'variableSpec': {'state': None},
+        'variableSpec': [{'name':'state', 'type':'continuous'}],
         'allowRevision': True,
         'algorithm': 'Alternating',
     },
     "colliding": {
         'groupNames': ['A', 'B'],
-        'variableSpec': {'package' : ['can', 'jar', 'box'],
-                         'verb': ['can', 'may', 'will'],
-                         'month': ['may', 'september'],
-                         'document': ['will', 'lease', 'divorce']},
+        'variableSpec': [{'name':'package', 'type':'categorical', 'levels':['can', 'jar', 'box']},
+                         {'name':'verb', 'type':'categorical', 'levels':['can', 'may', 'will']},
+                         {'name':'month', 'type':'categorical', 'levels':['may', 'september']},
+                         {'name':'document', 'type':'categorical', 'levels':['will', 'lease', 'divorce']}],
         'allowRevision': True,
         'algorithm': 'Balanced',
     },
@@ -52,11 +52,12 @@ def delete_old_data():
 def make_phony_features(variables):
     data = {}
     for var in variables:
-        choices = variables[var]
-        if choices is None:
-            data[var] = random.uniform(1, 99)
+        name = var['name']
+        if var['type'] == 'categorical':
+            choices = var['levels']
+            data[name] = random.choice(choices)
         else:
-            data[var] = random.choice(choices)
+            data[name] = random.uniform(1, 99)
     return data
 
 def run_test(protocol_name,
@@ -92,7 +93,6 @@ def run_test(protocol_name,
     r = requests.post(make_url(True, 'start'),
                       json=protocol_spec)
     print(protocol_spec)
-    print(r.status_code)
     assert r.status_code == 200
 
     # Requesting start of the exact same protocol again should be ok
@@ -119,8 +119,7 @@ def run_test(protocol_name,
                           "allowRevision": protocol_spec['allowRevision']}
                     )
     assert r.status_code == 400
-    more_vars = {'loft':None}
-    more_vars.update(protocol_spec['variableSpec'])
+    more_vars = [{'name':'loft', 'type':'continuous'}] + protocol_spec['variableSpec']
     r = requests.post(make_url(True, 'start'),
                     json={"groupNames": protocol_spec['groupNames'],
                           "variableSpec": more_vars,
@@ -130,7 +129,6 @@ def run_test(protocol_name,
 
     # Haven't added this subject yet, thus 404:
     r = requests.get(make_url(True, 'subject/s01'))
-    print(r.status_code)
     assert r.status_code == 404
     
     r = requests.post(make_url(True, 'subject/s01'),
@@ -160,7 +158,7 @@ def run_test(protocol_name,
     assert r.status_code == 200
 
     r = requests.post(make_url(True, 'subject/s11/group'),
-                      json=make_phony_features({'gooviness':None})
+                      json=make_phony_features([{'name':'gooviness', 'type':'continuous'}])
                       )
     assert r.status_code == 400
 
@@ -195,8 +193,9 @@ def run_test(protocol_name,
     assert r.status_code == 200
     returned_vars = r.json()
     assert len(protocol_spec['variableSpec']) == len(returned_vars)
-    for g in protocol_spec['variableSpec']:
-        assert g in returned_vars
+    for i, one_var in enumerate(protocol_spec['variableSpec']):
+        assert one_var['name'] == returned_vars[i]['name']
+        assert one_var['type'] == returned_vars[i]['type']
 
     r = requests.get(make_url(True, 'subjects'))
     assert r.status_code == 200
@@ -247,8 +246,8 @@ try:
     print()
     print("Success, done!")
 except Exception as e:
-    print(e)
-    traceback.print_stack()
+    print(f"Exception: {type(e).__name__} - {e}")
+    traceback.print_exc()
 finally:
     delete_old_data()
 

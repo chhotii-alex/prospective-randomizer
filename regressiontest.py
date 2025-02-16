@@ -3,6 +3,8 @@ Use this script to test that any change to the code that should not make any cha
 Before altering code, run this script (requires the Spring Boot implementation is up.) This create test_results.csv.
 Stash that file away. After changing code, re-run this script, and diff the old and new versions of test_results.csv.
 They should be identical.
+
+# TODO: there's a bunch of code duplication between this, simulation.py, and end_to_end.py; DRY
 """
 
 import os
@@ -14,18 +16,16 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 from tqdm import tqdm
+from pprint import pp
 
 random.seed(2008)
 
-def dict_interleave(d1, d2):
-    as_list = [x for xs in zip(d1.items(), d2.items()) for x in xs]
-    return dict(as_list)
-
-def dict_subset(d, n):
-    return dict(list(d.items())[:n])
+def interleave(d1, d2):
+    as_list = zip(d1, d2)
+    return [item for items in as_list for item in items]
 
 groupNames = ['W', 'X', 'Y', 'Z']
-variables = {
+variable_defs = {
     "continuous": {
         "score": None,
         "age": None,
@@ -39,6 +39,14 @@ variables = {
         'student': ['BS', 'MS', 'PhD'],
     },
 }
+variables = {}
+for the_type, varbyname in variable_defs.items():
+    variables[the_type] = []
+    for name, levels in varbyname.items():
+        new_var_spec = {'name': name, 'type': the_type, 'levels': levels}
+        variables[the_type].append(new_var_spec)
+pp(variables, indent=4)
+
 protocols = {}
 for n_groups in range(2, 5):
     protocol_groups = groupNames[:n_groups]
@@ -48,11 +56,11 @@ for n_groups in range(2, 5):
             variable_types += ["both"]
         for variable_type in variable_types:
             if variable_type == 'both':
-                protocol_vars = dict_interleave(*variables.values())
+                protocol_vars = interleave(*variables.values())
             else:
                 protocol_vars = variables[variable_type]
-            all_vars = dict_subset(protocol_vars, 4)
-            protocol_vars = dict_subset(protocol_vars, n_vars)
+            all_vars = protocol_vars[:4]
+            protocol_vars = protocol_vars[:n_vars]
             protocol_name = "%d_%d_%s" % (n_groups, n_vars, variable_type)
             protocols[protocol_name] = {
                 "spec" : {
@@ -71,18 +79,19 @@ def setup():
 def make_phony_features(variables):
     data = {}
     for var in variables:
-        choices = variables[var]
-        if choices is None:
-            data[var] = random.gauss(mu=50, sigma=20) #random.uniform(1, 99)
+        name = var['name']
+        if var['type'] == 'categorical':
+            choices = var['levels']
+            data[name] = random.choice(choices)
         else:
-            data[var] = random.choice(choices)
+            data[name] = random.gauss(mu=50, sigma=20)
     return data
 
 def make_features_for(protocol_name):
     all_features = make_phony_features(protocols[protocol_name]['allVars'])
     features = {}
-    for key in protocols[protocol_name]['spec']['variableSpec'].keys():
-        features[key] = all_features[key]
+    for onevar in protocols[protocol_name]['spec']['variableSpec']:
+        features[onevar['name']] = all_features[onevar['name']]
     return (features, all_features)
 
 def make_url(protocol_name, pid, parts):
@@ -163,23 +172,22 @@ def evaluate_protocol_result(protocol_name, prot_suff, algorithm, all_features_b
             max_group_size = group_size
     assert (max_group_size - min_group_size) <= 1
     for var in protocols[protocol_name]['allVars']:
-        is_used = var in protocols[protocol_name]['spec']['variableSpec']
-        var_options = protocols[protocol_name]['allVars'][var]
-        if var_options is None:
+        is_used = len([v for v in protocols[protocol_name]['spec']['variableSpec'] if v['name'] == var['name']]) > 0
+        if var['type'] == 'continuous':
             continuous = True
         else:
             continuous = False
         means = {}
         for group in groups:
-            feature_values = [all_features_by_subject[s['id']][var] for s in group['subjects']]
+            feature_values = [all_features_by_subject[s['id']][var['name']] for s in group['subjects']]
             if not continuous:
-                feature_values = [np.power(max_subject_count, variables['categorical'][var].index(value)) for value in feature_values]
+                feature_values = [np.power(max_subject_count, var['levels'].index(value)) for value in feature_values]
             means[group['name']] = np.mean(feature_values)
         for groupName in groupNames:
             if groupName not in means:
                 means[groupName] = None
         append_row(algorithm=algorithm, place_interval=place_interval,
-                   var_name=var,
+                   var_name=var['name'],
                    is_used=is_used)
         append_row(**means)
 

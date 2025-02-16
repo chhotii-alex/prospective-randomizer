@@ -15,6 +15,7 @@ import org.sleepandcognition.prosrand.ProtocolSpec;
 import org.sleepandcognition.prosrand.Randomizer;
 import org.sleepandcognition.prosrand.SubjectDatabase;
 import org.sleepandcognition.prosrand.SubjectFileDatabase;
+import org.sleepandcognition.prosrand.VariableSpec;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -156,7 +157,7 @@ public class RandomizerController {
     }
 
     @GetMapping("/{protocolName}/variables")
-    Hashtable<String, String> getVariables(@PathVariable String protocolName) {
+    List<VariableSpec> getVariables(@PathVariable String protocolName) {
         return randomizerOfName(protocolName).getVariables();
     }
 

@@ -11,18 +11,19 @@ from collections import defaultdict
 from greylock import Metacommunity
 from greylock.similarity import SimilarityFromFunction
 from tqdm import tqdm
+from pprint import pp
 
 random.seed(42)
 
-def dict_interleave(d1, d2):
-    as_list = [x for xs in zip(d1.items(), d2.items()) for x in xs]
-    return dict(as_list)
+def interleave(d1, d2):
+    as_list = zip(d1, d2)
+    return [item for items in as_list for item in items]
 
 def dict_subset(d, n):
     return dict(list(d.items())[:n])
 
 groupNames = ['W', 'X', 'Y', 'Z']
-variables = {
+variable_defs = {
     "continuous": {
         "score": None,
         "age": None,
@@ -36,6 +37,13 @@ variables = {
         'student': ['BS', 'MS', 'PhD'],
     },
 }
+variables = {}
+for the_type, varbyname in variable_defs.items():
+    variables[the_type] = []
+    for name, levels in varbyname.items():
+        new_var_spec = {'name': name, 'type': the_type, 'levels': levels}
+        variables[the_type].append(new_var_spec)
+
 protocols = {}
 for n_groups in range(2, 5):
     protocol_groups = groupNames[:n_groups]
@@ -45,11 +53,11 @@ for n_groups in range(2, 5):
             variable_types += ["both"]
         for variable_type in variable_types:
             if variable_type == 'both':
-                protocol_vars = dict_interleave(*variables.values())
+                protocol_vars = interleave(*variables.values())
             else:
                 protocol_vars = variables[variable_type]
-            all_vars = dict_subset(protocol_vars, 4)
-            protocol_vars = dict_subset(protocol_vars, n_vars)
+            all_vars = protocol_vars[:4]
+            protocol_vars = protocol_vars[:n_vars]
             protocol_name = "%d_%d_%s" % (n_groups, n_vars, variable_type)
             protocols[protocol_name] = {
                 "spec" : {
@@ -68,18 +76,19 @@ def setup():
 def make_phony_features(variables):
     data = {}
     for var in variables:
-        choices = variables[var]
-        if choices is None:
-            data[var] = random.gauss(mu=50, sigma=20) #random.uniform(1, 99)
+        name = var['name']
+        if var['type'] == 'categorical':
+            choices = var['levels']
+            data[name] = random.choice(choices)
         else:
-            data[var] = random.choice(choices)
+            data[name] = random.gauss(mu=50, sigma=20)
     return data
 
 def make_features_for(protocol_name):
     all_features = make_phony_features(protocols[protocol_name]['allVars'])
     features = {}
-    for key in protocols[protocol_name]['spec']['variableSpec'].keys():
-        features[key] = all_features[key]
+    for onevar in protocols[protocol_name]['spec']['variableSpec']:
+        features[onevar['name']] = all_features[onevar['name']]
     return (features, all_features)
 
 def make_url(protocol_name, pid, parts):
@@ -143,8 +152,9 @@ max_subject_count = 20
 def make_similarity_function(vars):
     def similarity(s1, s2):
         accum = 0.0
-        for var_name, var_levels in vars.items():
-            if var_levels is None:
+        for variable in vars:
+            var_name = variable['name']
+            if variable['type'] == 'continuous':
                 diff = float(getattr(s1, var_name))-float(getattr(s2, var_name))
                 r = np.exp(-abs(diff)/25)
             else:
@@ -171,8 +181,8 @@ def make_metacommunity(groups, all_features_by_subject, vars):
     for group in groups:
         for subject in group['subjects']:
             s_id = subject['id']
-            for key in vars:
-                d[key].append(all_features_by_subject[s_id][key])
+            for variable in vars:
+                d[variable['name']].append(all_features_by_subject[s_id][variable['name']])
     X = pd.DataFrame(d)
     metacommunity = Metacommunity(abundance,
                                   similarity=SimilarityFromFunction(similarity_function,
@@ -215,21 +225,21 @@ def evaluate_protocol_result(protocol_name, prot_suff, algorithm, all_features_b
                                           protocols[protocol_name]['spec']['variableSpec'],
                                      'metacommunity', 'normalized_rho')
     for var in protocols[protocol_name]['allVars']:
-        is_used = var in protocols[protocol_name]['spec']['variableSpec']
-        var_options = protocols[protocol_name]['allVars'][var]
-        if var_options is None:
+        is_used = len([v for v in protocols[protocol_name]['spec']['variableSpec'] if v['name'] == var['name']]) > 0
+        if var['type'] == 'continuous':
             continuous = True
         else:
             continuous = False
         samples = []
         for group in groups:
-            samples.append([all_features_by_subject[s['id']][var] for s in group['subjects']])
+            samples.append([all_features_by_subject[s['id']][var['name']] for s in group['subjects']])
         if continuous:
             if len(groups) > 2:
                 r = f_oneway(*samples)
             else:
                 r = ttest_ind(*samples)
         else:
+            var_options = var['levels']
             table = np.zeros((len(var_options), len(groups)))
             for j, group_samples in enumerate(samples):
                 for feature_val in group_samples:
@@ -241,7 +251,7 @@ def evaluate_protocol_result(protocol_name, prot_suff, algorithm, all_features_b
         append_row(algorithm=algorithm, n=max_subject_count, place_interval=place_interval,
                    n_vars=len(protocols[protocol_name]['spec']['variableSpec']),
                    n_groups=len(groups),
-                   exp=exp_num, var_name=var,
+                   exp=exp_num, var_name=var['name'],
                    pvalue=r.pvalue, norm_rho=norm_rho, norm_rho_used=norm_rho_used,
                    is_used=is_used)
 

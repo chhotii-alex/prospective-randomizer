@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.List;
+
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
@@ -44,7 +46,7 @@ public class RandomizerServer {
         boolean commandLineMode = false;
         boolean networkMode = false;
         int portNumber = 1996;
-        String variablesSpec = "variables.xml";
+        String variablesSpecFilePath = "variables.xml";
         String groupListFile = "groups.txt";
         String subjectFile = "subjects.txt";
         int verbosity = 0;
@@ -81,7 +83,7 @@ public class RandomizerServer {
                             ++argNum;
                             break;
                         case 'r':
-                            variablesSpec = args[argNum + 1];
+                            variablesSpecFilePath = args[argNum + 1];
                             ++argNum;
                             break;
                         case 'g':
@@ -124,7 +126,8 @@ public class RandomizerServer {
 
         StillGoingFlag listening = new StillGoingFlag();
         SubjectFileDatabase database = new SubjectFileDatabase(subjectFile);
-        VariableSet variables = new VariableSet(variablesSpec);
+        List<VariableSpec> variableSpecs = VariableSpec.getSpecsFromXML(variablesSpecFilePath);
+        VariableSet variables = new VariableSet(variableSpecs);
         Randomizer randomizer;
         CommandInterface commander;
         if (balancing) {
