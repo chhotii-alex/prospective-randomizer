@@ -157,7 +157,7 @@ public class RandomizerController {
 
     @GetMapping("/{protocolName}/variables")
     Hashtable<String, String> getVariables(@PathVariable String protocolName) {
-        return randomizerOfName(protocolName).getVariables().getVariables();
+        return randomizerOfName(protocolName).getVariables();
     }
 
     @GetMapping("/{protocolName}/subjects")

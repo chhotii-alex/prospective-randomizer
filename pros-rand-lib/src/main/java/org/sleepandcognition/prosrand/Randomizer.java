@@ -3,6 +3,7 @@ package org.sleepandcognition.prosrand;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Iterator;
@@ -266,8 +267,8 @@ public abstract class Randomizer {
         return new ArrayList<>(groups.values());
     }
 
-    public synchronized VariableSet getVariables() {
-        return variables;
+    public synchronized Hashtable<String, String> getVariables() {
+        return variables.getVariables();
     }
 
     public synchronized List<MultiDimSubject> getSubjects() {
