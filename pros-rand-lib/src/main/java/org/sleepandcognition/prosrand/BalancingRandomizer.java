@@ -153,4 +153,9 @@ public class BalancingRandomizer extends Randomizer {
         }
         return accum;
     }
+
+    @Override
+    public String getAlgorithm() {
+        return "Balanced";
+    }
 }

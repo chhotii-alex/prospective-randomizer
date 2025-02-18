@@ -55,6 +55,8 @@ public abstract class Randomizer {
         init();
     }
 
+    abstract public String getAlgorithm();
+
     private void init() {
         groupNamesInOrder = new ArrayList<>();
         groupNamesInOrder.addAll(groups.keySet());

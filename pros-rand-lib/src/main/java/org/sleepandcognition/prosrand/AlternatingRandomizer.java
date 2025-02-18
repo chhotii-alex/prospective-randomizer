@@ -48,4 +48,9 @@ public class AlternatingRandomizer extends Randomizer {
             }
         } // END for each group (second pass)
     }
+
+    @Override
+    public String getAlgorithm() {
+        return "Alternating";
+    }
 }
