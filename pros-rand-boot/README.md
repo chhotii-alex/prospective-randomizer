@@ -13,6 +13,9 @@ mvn spring-boot:run -pl pros-rand-boot
 
 Example code that demonstrates use of Prospective Randomizer appears [in this project](https://github.com/chhotii-alex/example-task).
 
+A single-page app implemented in React which allows you to configure and monitor the Prospective Randomizer can be found
+[here](https://github.com/chhotii-alex/randomizer-dashboard).
+
 ## API
 
 This server offers the style of HTTP protocol often (inaccuratedly) referred to as a RESTful API: 
