@@ -1,8 +1,6 @@
 package org.sleepandcognition.prosrand;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 
 import javax.xml.parsers.ParserConfigurationException;

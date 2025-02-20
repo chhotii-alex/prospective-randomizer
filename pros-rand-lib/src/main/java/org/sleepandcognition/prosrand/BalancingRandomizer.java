@@ -33,13 +33,14 @@ public class BalancingRandomizer extends Randomizer {
         return means;
     }
 
+    @Override
     protected synchronized boolean addSubject(MultiDimSubject subject) throws IOException, InvalidDataException {
         if (super.addSubject(subject)) {
             /* Keep track of statistics on all subjects encountered: */
             for (Enumeration<String> vit = subject.baselineCharacteristics.keys(); vit.hasMoreElements(); ) {
                 String key = vit.nextElement();
                 Double value = subject.baselineCharacteristics.get(key);
-                getMeans().encounter(key, value.doubleValue());
+                getMeans().encounter(key, value);
             }
             return true;
         } else {
@@ -76,8 +77,7 @@ public class BalancingRandomizer extends Randomizer {
                 // Find the most normal subject so far
                 double shortestVector = Double.MAX_VALUE;
                 MultiDimSubject winningSubject = null;
-                for (Iterator<MultiDimSubject> subjIt = unassignedSubjects.iterator(); subjIt.hasNext(); ) {
-                    MultiDimSubject subject = subjIt.next();
+                for (MultiDimSubject subject : unassignedSubjects) {
                     double length = nomalizedLength(subject.baselineCharacteristics);
                     if (length < shortestVector) {
                         shortestVector = length;
@@ -115,8 +115,7 @@ public class BalancingRandomizer extends Randomizer {
                 if (verbosity >= 0) {
                     System.out.println(aGroup.sizeString());
                 }
-                for (Iterator<MultiDimSubject> subjIt = unassignedSubjects.iterator(); subjIt.hasNext(); ) {
-                    MultiDimSubject subject = subjIt.next();
+                for (MultiDimSubject subject : unassignedSubjects) {
                     double dotProduct = dotProductForVectors(vector, subject.baselineCharacteristics);
                     if (dotProduct < mostNegativeDotProduct) {
                         mostNegativeDotProduct = dotProduct;
@@ -138,15 +137,14 @@ public class BalancingRandomizer extends Randomizer {
             Map<String, Double> vector, Map<String, Double> baselineCharacteristics) {
         double accum = 0.0;
 
-        for (Iterator<String> vit = baselineCharacteristics.keySet().iterator(); vit.hasNext(); ) {
-            String key = vit.next();
+        for (String key : baselineCharacteristics.keySet()) {
             double mean = getMeans().mean(key);
             double stddev = getMeans().stddev(key);
             double v1 = 0.0;
             double v2 = 0.0;
             if (stddev > 0.0) {
-                v1 = (baselineCharacteristics.get(key).doubleValue() - mean) / stddev;
-                v2 = (vector.get(key).doubleValue() - mean) / stddev;
+                v1 = (baselineCharacteristics.get(key) - mean) / stddev;
+                v2 = (vector.get(key) - mean) / stddev;
             }
             double weight = variables.weightForKey(key);
             accum += weight * v1 * v2;
