@@ -1,7 +1,8 @@
 package org.sleepandcognition.prosrand;
 
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CommandInterface {
     Randomizer randomizer;
@@ -40,17 +41,17 @@ public class CommandInterface {
                 }
             } else if (wordsOnLine[0].equalsIgnoreCase("PUT") || wordsOnLine[0].equalsIgnoreCase("PLACE")) {
                 String subjectID = wordsOnLine[1];
-                Hashtable<String, String> values = new Hashtable<String, String>();
+                Map<String, String> values = new HashMap<>();
                 for (int i = 2; i < wordsOnLine.length; ++i) {
                     String nameValuePair = wordsOnLine[i];
                     String[] tokens = nameValuePair.split("=");
-                    if (tokens.length == 2) {
-                        values.put(tokens[0], tokens[1]);
-                    } else if (tokens.length == 1) {
-                        values.put(tokens[0], "");
-                    } else {
-                        System.err.println("Corrupt PUT line? " + inputLine);
-                        return "?";
+                    switch (tokens.length) {
+                        case 2 -> values.put(tokens[0], tokens[1]);
+                        case 1 -> values.put(tokens[0], "");
+                        default -> {
+                            System.err.println("Corrupt PUT line? " + inputLine);
+                            return "?";
+                        }
                     }
                 }
                 if (wordsOnLine[0].equalsIgnoreCase("PUT")) {
