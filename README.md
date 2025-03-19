@@ -305,7 +305,7 @@ was greater than from Alternating by 0.44 on average (paired t-test = -30.0,
 p = $1.4 \times 10^{-104}$, df=399). The performance of the Balanced algorithm was not inevitably superior in every case&mdash;the p-value for the Alternating randomizer was greater in 12% of the
 simulated runs, because the Alternating algorithm will sometimes yield an ideal grouping by chance. However, the overall dramatic difference is apparent in Figure 1. 
 <figure>
-  <img src='fig1.png' width='350'>
+  <img src='figures/fig1.png' width='350'>
   <figcaption>Figure 1</figcaption>
 </figure>
 
@@ -313,7 +313,7 @@ Drilling down by
 number of groups and type of variable, we see that the same pattern appears across these variations (figure 2).
 
 <figure>
-  <img src='fig2.png' width='350'>
+  <img src='figures/fig2.png' width='350'>
   <figcaption>Figure 2</figcaption>
 </figure>
 
@@ -333,7 +333,7 @@ additional subjects before group assignment improves the algorithm's performance
 magnitude of improvement with each additional increment of placement interval is not as large as the first (linear regression slope = 0.005, contrast with the slope between 0 and 1 = 0.048 above).
 
 <figure>
-  <img src='fig3.png' width='350'>
+  <img src='figures/fig3.png' width='350'>
   <figcaption>Figure 3</figcaption>
 </figure>
 
@@ -348,7 +348,7 @@ We also simulated protocols in which more than one baseline feature was taken in
 (Pearson correlation coefficient = -0.09, $p = 2 \times 10^{-162}$).
 
 <figure>
-  <img src='fig4.png' width='350'>
+  <img src='figures/fig4.png' width='350'>
   <figcaption>Figure 4</figcaption>
 </figure>
 
@@ -373,7 +373,7 @@ values of all 4 of the features generated for each subject. Either 1, 2, 3, or 4
 As figure 5 shows, the more variables submitted to the algorithm, the higher $\bar{R}$ is on average (Pearson correlation coefficient = 0.25, p = 0), indicating greater overall similarity between the groups.
 
 <figure>
-  <img src='fig5.png' width='350'>
+  <img src='figures/fig5.png' width='350'>
   <figcaption>Figure 5</figcaption>
 </figure>
 
